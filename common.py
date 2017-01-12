@@ -27,59 +27,77 @@ def get_games_list():
     finished_watched_game_list = list()
 
     # TODO: убрать кеширование
-    # Кеширование
-    import os
-    if not os.path.exists('gist_games'):
+    USE_CACHE = True
+
+    if USE_CACHE:
+        # Кеширование
+        import os
+        if not os.path.exists('gist_games'):
+            import requests
+            rs = requests.get('https://gist.github.com/gil9red/2f80a34fb601cd685353')
+
+            from bs4 import BeautifulSoup
+            root = BeautifulSoup(rs.content, 'lxml')
+            href = root.select_one('.file-actions > a')['href']
+
+            from urllib.parse import urljoin
+            raw_url = urljoin(rs.url, href)
+            print(raw_url)
+
+            # Чтобы при тестировании, при каждом запуске не парсить, лучше скачать и работать
+            # уже с самим файлом, отрабатывая алгоритм
+            # Сохранение указанного url в файл
+            from urllib.request import urlretrieve
+            urlretrieve(raw_url, 'gist_games')
+
+        with open('gist_games', encoding='utf-8') as f:
+            content_gist = f.read()
+
+    else:
         import requests
         rs = requests.get('https://gist.github.com/gil9red/2f80a34fb601cd685353')
 
         from bs4 import BeautifulSoup
-
         root = BeautifulSoup(rs.content, 'lxml')
         href = root.select_one('.file-actions > a')['href']
 
         from urllib.parse import urljoin
-
         raw_url = urljoin(rs.url, href)
-        print(raw_url)
 
-        # Чтобы при тестировании, при каждом запуске не парсить, лучше скачать и работать
-        # уже с самим файлом, отрабатывая алгоритм
-        # Сохранение указанного url в файл
-        from urllib.request import urlretrieve
-        urlretrieve(raw_url, 'gist_games')
+        rs = requests.get(raw_url)
+        content_gist = rs.text
 
-    with open('gist_games', encoding='utf-8') as f:
-        found_pc = False
+    # Для поиска игр, относящихся только к PC
+    found_pc = False
 
-        # Перебор строк файла
-        for line in f:
-            # Удаление пустых символов справа (пробелы, переводы на следующую строку и т.п.)
-            line = line.rstrip()
+    # Перебор строк файла
+    for line in content_gist.splitlines():
+        # Удаление пустых символов справа (пробелы, переводы на следующую строку и т.п.)
+        line = line.rstrip()
 
-            # Если строка пустая
-            if not line.strip():
-                continue
+        # Если строка пустая
+        if not line.strip():
+            continue
 
-            # Проверка, что первым символом не может быть флаг для игр и что последним символом будет :
-            # Т.е. ищем признак платформы
-            if line[0] not in [' ', '-', '@'] and line.endswith(':'):
-                # Если встретили PC
-                found_pc = line == 'PC:'
-                continue
+        # Проверка, что первым символом не может быть флаг для игр и что последним символом будет :
+        # Т.е. ищем признак платформы
+        if line[0] not in [' ', '-', '@'] and line.endswith(':'):
+            # Если встретили PC
+            found_pc = line == 'PC:'
+            continue
 
-            name = line[2:].rstrip()
-            games = parse_game_name(name)
+        name = line[2:].rstrip()
+        games = parse_game_name(name)
 
-            # Теперь, осталось добавить игру
-            if found_pc:
-                # Пройденные игры
-                if line.startswith('  '):
-                    finished_game_list += games
+        # Теперь, осталось добавить игру
+        if found_pc:
+            # Пройденные игры
+            if line.startswith('  '):
+                finished_game_list += games
 
-                # Просмотренные игры
-                elif line.startswith('@ ') or line.startswith(' @'):
-                    finished_watched_game_list += games
+            # Просмотренные игры
+            elif line.startswith('@ ') or line.startswith(' @'):
+                finished_watched_game_list += games
 
     return finished_game_list, finished_watched_game_list
 

@@ -11,11 +11,7 @@ __author__ = 'ipetrash'
 """
 
 
-from common import (
-    parse_game_name, steam_search_game_price_list, smart_comparing_names,
-    DB_FILE_NAME, FINISHED, FINISHED_WATCHED,
-    create_connect, get_games_list, append_games_to_base, fill_price_of_games, settings
-)
+from common import create_connect, get_games_list, append_games_to_base, fill_price_of_games, settings
 
 # Создание базы и таблицы
 connect = create_connect()

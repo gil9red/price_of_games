@@ -34,7 +34,17 @@ def total_price(games):
 
         # TODO: быстрый вариант решения проблемы, но не надежный
         price = price_title.replace(' pуб.', '').strip()
-        return float(price)
+
+        try:
+            price = float(price)
+        except Exception as e:
+            print('Произошла ошибка, цена не будет участвовать в сумме')
+            print(e)
+            import traceback
+            print(traceback.format_exc())
+            price = 0
+
+        return price
 
     total = sum(get_price(price) for _, price in games if price is not None)
 
@@ -42,7 +52,7 @@ def total_price(games):
     return total if total != int(total) else int(total)
 
 
-from flask import Flask, render_template_string
+from flask import Flask, render_template_string, request
 app = Flask(__name__)
 
 import logging
@@ -53,6 +63,7 @@ logging.basicConfig(level=logging.DEBUG)
 def index():
     from common import FINISHED, FINISHED_WATCHED, create_connect, settings
     connect = create_connect()
+
     try:
         cursor = connect.cursor()
 
@@ -113,6 +124,25 @@ def index():
         .price_is_none {
             background-color: lightgray;
         }
+
+        #top_right_fixed_panel {
+            position: fixed; /* Фиксированное положение */
+            right: 10px; /* Расстояние от правого края окна браузера */
+            top: 10px; /* Расстояние сверху */
+            width: 25%;
+            padding: 10px; /* Поля вокруг текста */
+            background: #ffe; /* Цвет фона */
+            border: 1px solid #333; /* Параметры рамки */
+        }
+
+        #form_error {
+            color: red;
+        }
+
+        input[type="text"] {
+            width: 100%;
+        }
+
     </style>
 </head>
 <body>
@@ -137,6 +167,31 @@ def index():
         </tr>
     <table>
     <br>
+
+    <div onsubmit="return checkForm(this)" id="top_right_fixed_panel">
+        <form method="post" action="/set_price">
+            <b>Установка цены у игры:</b>
+            <p>Название:</p><p><input id="form_name" type="text" name="name"></p>
+            <p>Цена:</p><p><input id="form_price" type="text" name="price"></p>
+            <p><input type="submit" value="Установить цену"></p>
+            <p id="form_error"></p>
+        </form>
+
+        <script type="text/javascript">
+            function checkForm(form) {
+                var form_error = document.getElementById('form_error');
+
+                if (document.getElementById('form_name').value == ""
+                        || document.getElementById('form_price').value == "") {
+                    form_error.innerHTML = "Все поля нужно заполнять!";
+                    return false;
+                }
+                form_error.innerHTML = "";
+
+                return true;
+            };
+        </script>
+    </div>
 
     <table id="finished_game" width="70%" border="1">
         <caption>Пройденные игры {{ finished_game_statistic }}</caption>
@@ -200,6 +255,28 @@ def index():
         total_price_finished_watched_games=total_price_finished_watched_games,
         last_run_date=settings.last_run_date,
     )
+
+
+@app.route("/set_price", methods=['POST'])
+def set_price():
+    """
+    Функция устанавливает цену для указанной игры.
+
+    """
+
+    if request.method == 'POST':
+        print(request.form)
+
+        if 'name' in request.form and 'price' in request.form:
+            name = request.form['name']
+            price = request.form['price']
+            print(name, price)
+
+            from common import set_price_game
+            set_price_game(name, price)
+
+    from flask import redirect
+    return redirect("/")
 
 
 if __name__ == '__main__':

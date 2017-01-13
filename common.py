@@ -16,6 +16,18 @@ def create_connect():
     return sqlite3.connect(DB_FILE_NAME)
 
 
+def set_price_game(game, price):
+    connect = create_connect()
+    try:
+        cursor = connect.cursor()
+        cursor.execute("UPDATE Game SET price = ?, modify_date = date('now') WHERE name = ?", (price, game))
+        connect.commit()
+
+    finally:
+        connect.close()
+
+
+
 def get_games_list():
     """
     Функция возвращает кортеж из двух списков: список пройденных игр и список просмотренных игр
@@ -150,11 +162,11 @@ def fill_price_of_games(connect):
 
     """
 
-    cursor = connect.cursor()
-
     # Перебор игр и указание их цены
     # Перед перебором собираем все игры и удаляем дубликаты (игры могут и просмотренными, и пройденными)
     # заодно список кортежей из одного имени делаем просто списом имен
+
+    cursor = connect.cursor()
     games_list = set(game for (game,) in cursor.execute('SELECT name FROM game where price is null').fetchall())
     for game in games_list:
         game_price = None
@@ -174,8 +186,7 @@ def fill_price_of_games(connect):
 
         print('Нашли игру: {} -> {} : {}\n'.format(game, name, price))
 
-        cursor.execute("UPDATE Game SET price = ?, modify_date = date('now') WHERE name = ?", (price, game))
-        connect.commit()
+        set_price_game(game, price)
 
         import time
         time.sleep(3)

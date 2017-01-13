@@ -131,8 +131,8 @@ def index():
             top: 10px; /* Расстояние сверху */
             width: 25%;
             padding: 10px; /* Поля вокруг текста */
-            background: #ffe; /* Цвет фона */
-            border: 1px solid #333; /* Параметры рамки */
+            background: lightgray; /* Цвет фона */
+            border: 1px solid black; /* Параметры рамки */
         }
 
         #form_error {

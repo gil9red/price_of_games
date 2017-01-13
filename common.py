@@ -8,6 +8,8 @@ DB_FILE_NAME = 'games.sqlite'
 FINISHED = 'Finished'
 FINISHED_WATCHED = 'Finished watched'
 
+BACKUP_GIST = True
+
 
 def create_connect():
     import sqlite3
@@ -66,6 +68,20 @@ def get_games_list():
 
         rs = requests.get(raw_url)
         content_gist = rs.text
+
+    # Скрипт может сохранять скачанные гисты
+    if BACKUP_GIST:
+        import os
+        if not os.path.exists('backup'):
+            os.mkdir('backup')
+
+        from datetime import datetime
+        from datetime import datetime
+        file_name = 'backup/' + str(datetime.today().date()) + '.txt'
+
+        if not os.path.exists(file_name):
+            with open(file_name, 'w', encoding='utf-8') as f:
+                f.write(content_gist)
 
     # Для поиска игр, относящихся только к PC
     found_pc = False

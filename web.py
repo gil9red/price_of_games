@@ -16,10 +16,12 @@ def statistic_string(games):
     """
 
     price_number = len([(name, price) for name, price in games if price is not None])
+    number = len(games)
+
     return '({} / {} ({:.0f}%))'.format(
         price_number,
-        len(games),
-        price_number / len(games) * 100
+        number,
+        (price_number / number * 100) if number > 0 else 0
     )
 
 

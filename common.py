@@ -27,7 +27,6 @@ def set_price_game(game, price):
         connect.close()
 
 
-
 def get_games_list():
     """
     Функция возвращает кортеж из двух списков: список пройденных игр и список просмотренных игр
@@ -41,8 +40,7 @@ def get_games_list():
     finished_watched_game_list = list()
 
     # TODO: убрать кеширование
-    USE_CACHE = True
-
+    USE_CACHE = False
     if USE_CACHE:
         # Кеширование
         import os

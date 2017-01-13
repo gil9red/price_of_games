@@ -94,6 +94,7 @@ def index():
         }
 
         #info_table {
+            width: 40%;
             border: 0px double #333; /* Рамка вокруг таблицы */
             border-collapse: separate; /* Способ отображения границы */
             border-spacing: 0px; /* Расстояние между ячейками */
@@ -115,11 +116,25 @@ def index():
     </style>
 </head>
 <body>
+    Последнее обновление было: {{ last_run_date }}
+    <br><br>
+
     <table id="info_table">
-        <tr><td>Последнее обновление было:</td><td>{{ last_run_date }}</td></tr>
-        <tr><td>Итого по пройденным играм:</td><td>{{ total_price_finished_games }}</td></tr>
-        <tr><td>Итого по просмотренным играм:</td><td>{{ total_price_finished_watched_games }}</td></tr>
-        <tr><td>Общий итог:</td><td>{{ total_price_finished_games + total_price_finished_watched_games }}</td></tr>
+        <tr>
+            <td>Итого по пройденным играм:</td><td>{{ total_price_finished_games }}</td>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td>Пройденных игр:</td><td>{{finished_games|length}}</td>
+        </tr>
+        <tr>
+            <td>Итого по просмотренным играм:</td><td>{{ total_price_finished_watched_games }}</td>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td>Просмотренных игр:</td><td>{{finished_watched_games|length}}</td>
+        </tr>
+        <tr>
+            <td>Общая сумма:</td><td>{{ total_price_finished_games + total_price_finished_watched_games }}</td>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td>Всего игр:</td><td>{{finished_games|length + finished_watched_games|length}}</td>
+        </tr>
     <table>
     <br>
 

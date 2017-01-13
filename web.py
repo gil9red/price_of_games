@@ -93,6 +93,17 @@ def index():
             font-size: 120%;
         }
 
+        #info_table {
+            border: 0px double #333; /* Рамка вокруг таблицы */
+            border-collapse: separate; /* Способ отображения границы */
+            border-spacing: 0px; /* Расстояние между ячейками */
+        }
+
+        #info_table td {
+            padding: 1px; /* Поля вокруг текста */
+            border: 0px; /* Граница вокруг ячеек */
+        }
+
         /* Небольшой отступ внутри ячеек */
         td, th {
             padding: 5px;
@@ -104,7 +115,12 @@ def index():
     </style>
 </head>
 <body>
-    Последнее обновление было: {{ last_run_date }}
+    <table id="info_table">
+        <tr><td>Последнее обновление было:</td><td>{{ last_run_date }}</td></tr>
+        <tr><td>Итого по пройденным играм:</td><td>{{ total_price_finished_games }}</td></tr>
+        <tr><td>Итого по просмотренным играм:</td><td>{{ total_price_finished_watched_games }}</td></tr>
+        <tr><td>Общий итог:</td><td>{{ total_price_finished_games + total_price_finished_watched_games }}</td></tr>
+    <table>
     <br>
 
     <table id="finished_game" width="70%" border="1">

@@ -61,39 +61,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 
-# TODO: добавить форму переименования игры. Если игра будет изменена гистах, то ее
-# название нужно будет изменить и в базе скрипта. Второй способ очищения базы и
-# повторный поиск всех игр кажется неудобным
-
-@app.route("/")
-def index():
-    from common import FINISHED, FINISHED_WATCHED, create_connect, settings
-    connect = create_connect()
-
-    try:
-        cursor = connect.cursor()
-
-        get_game_sql = '''
-            SELECT name, price
-            FROM game
-            WHERE kind = ?
-            ORDER BY name
-        '''
-        finished_games = cursor.execute(get_game_sql, (FINISHED,)).fetchall()
-        finished_watched_games = cursor.execute(get_game_sql, (FINISHED_WATCHED,)).fetchall()
-
-    finally:
-        connect.close()
-
-    finished_game_statistic = statistic_string(finished_games)
-    finished_watched_game_statistic = statistic_string(finished_watched_games)
-
-    total_price_finished_games = total_price(finished_games)
-    total_price_finished_watched_games = total_price(finished_watched_games)
-
-    headers = ['Название', 'Цена']
-
-    return render_template_string('''\
+INDEX_HTML_TEMPLATE = '''\
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -252,7 +220,43 @@ def index():
     </script>
 </body>
 </html>
-''',
+'''
+
+
+# TODO: добавить форму переименования игры. Если игра будет изменена гистах, то ее
+# название нужно будет изменить и в базе скрипта. Второй способ очищения базы и
+# повторный поиск всех игр кажется неудобным
+
+@app.route("/")
+def index():
+    from common import FINISHED, FINISHED_WATCHED, create_connect, settings
+    connect = create_connect()
+
+    try:
+        cursor = connect.cursor()
+
+        get_game_sql = '''
+            SELECT name, price
+            FROM game
+            WHERE kind = ?
+            ORDER BY name
+        '''
+        finished_games = cursor.execute(get_game_sql, (FINISHED,)).fetchall()
+        finished_watched_games = cursor.execute(get_game_sql, (FINISHED_WATCHED,)).fetchall()
+
+    finally:
+        connect.close()
+
+    finished_game_statistic = statistic_string(finished_games)
+    finished_watched_game_statistic = statistic_string(finished_watched_games)
+
+    total_price_finished_games = total_price(finished_games)
+    total_price_finished_watched_games = total_price(finished_watched_games)
+
+    headers = ['Название', 'Цена']
+
+    return render_template_string(
+        INDEX_HTML_TEMPLATE,
         headers=headers,
         finished_games=finished_games, finished_watched_games=finished_watched_games,
         finished_game_statistic=finished_game_statistic,

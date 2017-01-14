@@ -31,6 +31,12 @@ def rename_game(old_name, new_name):
     connect = create_connect()
     try:
         cursor = connect.cursor()
+
+        has = cursor.execute("SELECT 1 FROM Game WHERE name = ?", (new_name,)).fetchone()
+        if has:
+            print('Нельзя переименовать "{}", т.к. имя "{}" уже занято'.format(old_name, new_name))
+            return
+
         cursor.execute("UPDATE Game SET name = ? WHERE name = ?", (new_name, old_name))
         connect.commit()
 

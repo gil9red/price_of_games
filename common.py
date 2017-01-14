@@ -201,7 +201,7 @@ def fill_price_of_games(connect):
             print('Не получилось найти цену игры {}, price is {}'.format(game, game_price))
             continue
 
-        print('Нашли игру: {} -> {} : {}\n'.format(game, name, price))
+        print('Нашли игру: {} -> {} : {}'.format(game, name, price))
 
         set_price_game(game, price)
 

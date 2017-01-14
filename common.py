@@ -94,45 +94,18 @@ def get_games_list():
     # Просмотренные игры
     finished_watched_game_list = list()
 
-    # TODO: убрать кеширование
-    USE_CACHE = False
-    if USE_CACHE:
-        # Кеширование
-        import os
-        if not os.path.exists('gist_games'):
-            import requests
-            rs = requests.get('https://gist.github.com/gil9red/2f80a34fb601cd685353')
+    import requests
+    rs = requests.get('https://gist.github.com/gil9red/2f80a34fb601cd685353')
 
-            from bs4 import BeautifulSoup
-            root = BeautifulSoup(rs.content, 'lxml')
-            href = root.select_one('.file-actions > a')['href']
+    from bs4 import BeautifulSoup
+    root = BeautifulSoup(rs.content, 'lxml')
+    href = root.select_one('.file-actions > a')['href']
 
-            from urllib.parse import urljoin
-            raw_url = urljoin(rs.url, href)
-            print(raw_url)
+    from urllib.parse import urljoin
+    raw_url = urljoin(rs.url, href)
 
-            # Чтобы при тестировании, при каждом запуске не парсить, лучше скачать и работать
-            # уже с самим файлом, отрабатывая алгоритм
-            # Сохранение указанного url в файл
-            from urllib.request import urlretrieve
-            urlretrieve(raw_url, 'gist_games')
-
-        with open('gist_games', encoding='utf-8') as f:
-            content_gist = f.read()
-
-    else:
-        import requests
-        rs = requests.get('https://gist.github.com/gil9red/2f80a34fb601cd685353')
-
-        from bs4 import BeautifulSoup
-        root = BeautifulSoup(rs.content, 'lxml')
-        href = root.select_one('.file-actions > a')['href']
-
-        from urllib.parse import urljoin
-        raw_url = urljoin(rs.url, href)
-
-        rs = requests.get(raw_url)
-        content_gist = rs.text
+    rs = requests.get(raw_url)
+    content_gist = rs.text
 
     # Скрипт может сохранять скачанные гисты
     if BACKUP_GIST:

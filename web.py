@@ -61,6 +61,10 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 
+# TODO: добавить форму переименования игры. Если игра будет изменена гистах, то ее
+# название нужно будет изменить и в базе скрипта. Второй способ очищения базы и
+# повторный поиск всех игр кажется неудобным
+
 @app.route("/")
 def index():
     from common import FINISHED, FINISHED_WATCHED, create_connect, settings

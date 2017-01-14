@@ -27,6 +27,17 @@ def set_price_game(game, price):
         connect.close()
 
 
+def set_check_game_by_steam(game, check=1):
+    connect = create_connect()
+    try:
+        cursor = connect.cursor()
+        cursor.execute("UPDATE Game SET check_steam = ? WHERE name = ?", (check, game))
+        connect.commit()
+
+    finally:
+        connect.close()
+
+
 def get_games_list():
     """
     Функция возвращает кортеж из двух списков: список пройденных игр и список просмотренных игр
@@ -137,7 +148,7 @@ def append_games_to_base(connect, finished_game_list, finished_watched_game_list
     cursor = connect.cursor()
 
     def insert_game(name, kind):
-        cursor.execute("INSERT OR IGNORE INTO Game VALUES (?,NULL,NULL,?)", (name, kind))
+        cursor.execute("INSERT OR IGNORE INTO Game VALUES (?,NULL,NULL,?,0)", (name, kind))
 
     # Добавлени в базу пройденных игр
     for name in finished_game_list:
@@ -164,13 +175,21 @@ def fill_price_of_games(connect):
     # Перед перебором собираем все игры и удаляем дубликаты (игры могут и просмотренными, и пройденными)
     # заодно список кортежей из одного имени делаем просто списом имен
 
+    sql_text = 'SELECT name FROM game where price is null and check_steam = 0'
+
     cursor = connect.cursor()
-    games_list = set(game for (game,) in cursor.execute('SELECT name FROM game where price is null').fetchall())
+    games_list = set(game for (game,) in cursor.execute(sql_text).fetchall())
+    print("Нужно найти цену {} играм".format(len(games_list)))
+
     for game in games_list:
         game_price = None
 
         # Поищем игру и ее цену
         game_price_list = steam_search_game_price_list(game)
+
+        # Отметим что игра искалась в стиме
+        set_check_game_by_steam(game)
+
         for name, price in game_price_list:
             # Если нашли игру, запоминаем цену и прерываем сравнение с другими найденными играми
             if smart_comparing_names(game, name):

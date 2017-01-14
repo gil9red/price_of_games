@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS Game (
     price TEXT,
     modify_date TIMESTAMP,
     kind TEXT,
+    check_steam BOOLEAN,
 
     CONSTRAINT game_pk PRIMARY KEY (name, kind)
 );

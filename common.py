@@ -70,6 +70,18 @@ def get_duplicates():
     return list(filter(lambda item: len(item[1]) > 1, name_kind_by_id_dict.items()))
 
 
+def db_create_backup():
+    import os
+    if not os.path.exists('backup'):
+        os.mkdir('backup')
+
+    from datetime import datetime
+    file_name = 'backup/' + str(datetime.today().date()) + '.sqlite'
+
+    import shutil
+    shutil.copy(DB_FILE_NAME, file_name)
+
+
 def get_games_list():
     """
     Функция возвращает кортеж из двух списков: список пройденных игр и список просмотренных игр
@@ -128,7 +140,6 @@ def get_games_list():
         if not os.path.exists('backup'):
             os.mkdir('backup')
 
-        from datetime import datetime
         from datetime import datetime
         file_name = 'backup/' + str(datetime.today().date()) + '.txt'
 

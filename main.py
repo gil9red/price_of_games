@@ -11,7 +11,7 @@ __author__ = 'ipetrash'
 """
 
 
-from common import create_connect, get_games_list, append_games_to_base, fill_price_of_games, settings
+from common import create_connect, get_games_list, append_games_to_base, fill_price_of_games, settings, db_create_backup
 
 # Создание базы и таблицы
 connect = create_connect()
@@ -45,6 +45,9 @@ while True:
 
     # Заполнение цен игр
     fill_price_of_games(connect)
+
+    # Создание дубликата базы
+    db_create_backup()
 
     # Every 3 days
     import time

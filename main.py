@@ -17,16 +17,15 @@ from common import create_connect, get_games_list, append_games_to_base, fill_pr
 connect = create_connect()
 cursor = connect.cursor()
 
-# Имя игры и ее вид должны быть уникальными
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS Game (
-    name TEXT,
-    price TEXT,
-    modify_date TIMESTAMP,
-    kind TEXT,
-    check_steam BOOLEAN,
+    id INTEGER PRIMARY KEY,
 
-    CONSTRAINT game_pk PRIMARY KEY (name, kind)
+    name TEXT,
+    price TEXT DEFAULT NULL,
+    modify_date TIMESTAMP DEFAULT NULL,
+    kind TEXT,
+    check_steam BOOLEAN DEFAULT 0
 );
 ''')
 

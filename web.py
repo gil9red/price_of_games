@@ -109,7 +109,7 @@ INDEX_HTML_TEMPLATE = '''\
             border: 1px solid black; /* Параметры рамки */
         }
 
-        #form_error {
+        #form_set_price_error, #form_rename_game_error {
             color: red;
         }
 
@@ -142,24 +142,52 @@ INDEX_HTML_TEMPLATE = '''\
     <table>
     <br>
 
-    <div onsubmit="return checkForm(this)" id="top_right_fixed_panel">
-        <form method="post" action="/set_price">
+    <div id="top_right_fixed_panel">
+        <form onsubmit="return checkSetPriceForm(this)" method="post" action="/set_price">
             <b>Установка цены у игры:</b>
-            <p>Название:</p><p><input id="form_name" type="text" name="name"></p>
-            <p>Цена:</p><p><input id="form_price" type="text" name="price"></p>
+            <p>Название:<input id="form_name" type="text" name="name"></p>
+            <p>Цена:<input id="form_price" type="text" name="price"></p>
             <p><input type="submit" value="Установить цену"></p>
-            <p id="form_error"></p>
+            <p id="form_set_price_error"></p>
+        </form>
+
+        <hr>
+        <form onsubmit="return checkRenameGameForm(this)" method="post" action="/rename_game">
+            <b>Изменение названия игры:</b>
+            <p>Старое название:<input id="form_old_name" type="text" name="old_name"></p>
+            <p>Новое название:<input id="form_new_name" type="text" name="new_name"></p>
+            <p><input type="submit" value="Изменить название"></p>
+            <p id="form_rename_game_error"></p>
         </form>
 
         <script type="text/javascript">
-            function checkForm(form) {
-                var form_error = document.getElementById('form_error');
+            function checkSetPriceForm(form) {
+                var form_error = document.getElementById('form_set_price_error');
 
                 if (document.getElementById('form_name').value == ""
                         || document.getElementById('form_price').value == "") {
                     form_error.innerHTML = "Все поля нужно заполнять!";
                     return false;
                 }
+                form_error.innerHTML = "";
+
+                return true;
+            };
+
+            function checkRenameGameForm(form) {
+                var form_error = document.getElementById('form_rename_game_error');
+                var old_name = document.getElementById('form_old_name').value;
+                var new_name = document.getElementById('form_new_name').value;
+
+                if (old_name == "" || new_name == "") {
+                    form_error.innerHTML = "Все поля нужно заполнять!";
+                    return false;
+
+                } else if (old_name == new_name) {
+                    form_error.innerHTML = "Новое имя не должно совпадать со старым!";
+                    return false;
+                }
+
                 form_error.innerHTML = "";
 
                 return true;
@@ -284,6 +312,29 @@ def set_price():
 
             from common import set_price_game
             set_price_game(name, price)
+
+    from flask import redirect
+    return redirect("/")
+
+
+@app.route("/rename_game", methods=['POST'])
+def rename_game():
+    """
+    Функция изменяет название игры.
+    Используется после изменения названия игры в гистах.
+
+    """
+
+    if request.method == 'POST':
+        print(request.form)
+
+        if 'old_name' in request.form and 'new_name' in request.form:
+            old_name = request.form['old_name']
+            new_name = request.form['new_name']
+            print(old_name, new_name)
+
+            from common import rename_game
+            rename_game(old_name, new_name)
 
     from flask import redirect
     return redirect("/")

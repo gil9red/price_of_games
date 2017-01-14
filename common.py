@@ -27,6 +27,17 @@ def set_price_game(game, price):
         connect.close()
 
 
+def rename_game(old_name, new_name):
+    connect = create_connect()
+    try:
+        cursor = connect.cursor()
+        cursor.execute("UPDATE Game SET name = ? WHERE name = ?", (new_name, old_name))
+        connect.commit()
+
+    finally:
+        connect.close()
+
+
 def set_check_game_by_steam(game, check=1):
     connect = create_connect()
     try:
@@ -148,7 +159,12 @@ def append_games_to_base(connect, finished_game_list, finished_watched_game_list
     cursor = connect.cursor()
 
     def insert_game(name, kind):
-        cursor.execute("INSERT OR IGNORE INTO Game VALUES (?,NULL,NULL,?,0)", (name, kind))
+        # Для отсеивания дубликатов
+        has = cursor.execute("SELECT 1 FROM Game WHERE name = ? and kind = ?", (name, kind)).fetchone()
+        if has:
+            return
+
+        cursor.execute("INSERT INTO Game (name, kind) VALUES (?,?)", (name, kind))
 
     # Добавлени в базу пройденных игр
     for name in finished_game_list:

@@ -31,11 +31,8 @@ def total_price(games):
 
     """
 
-    def get_price(price_title):
+    def get_price(price):
         """Функция удаляет из получаемое строки все символы кроме цифровых и точки."""
-
-        # TODO: быстрый вариант решения проблемы, но не надежный
-        price = price_title.replace(' pуб.', '').strip()
 
         try:
             price = float(price)
@@ -116,7 +113,6 @@ INDEX_HTML_TEMPLATE = '''\
         input[type="text"] {
             width: 100%;
         }
-
     </style>
 </head>
 <body>
@@ -129,17 +125,17 @@ INDEX_HTML_TEMPLATE = '''\
 
     <table id="info_table">
         <tr>
-            <td>Итого по пройденным играм:</td><td>{{ total_price_finished_games }}</td>
+            <td>Итого по пройденным играм:</td><td>{{ total_price_finished_games }} руб.</td>
             <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
             <td>Пройденных игр:</td><td>{{finished_games|length}}</td>
         </tr>
         <tr>
-            <td>Итого по просмотренным играм:</td><td>{{ total_price_finished_watched_games }}</td>
+            <td>Итого по просмотренным играм:</td><td>{{ total_price_finished_watched_games }} руб.</td>
             <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
             <td>Просмотренных игр:</td><td>{{finished_watched_games|length}}</td>
         </tr>
         <tr>
-            <td>Общая сумма:</td><td>{{ total_price_finished_games + total_price_finished_watched_games }}</td>
+            <td>Общая сумма:</td><td>{{ total_price_finished_games + total_price_finished_watched_games }} руб.</td>
             <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
             <td>Всего игр:</td><td>{{finished_games|length + finished_watched_games|length}}</td>
         </tr>
@@ -281,7 +277,7 @@ def index():
 
     return render_template_string(
         INDEX_HTML_TEMPLATE,
-        headers=['Название', 'Цена'],
+        headers=['Название', 'Цена (руб.)'],
         finished_games=finished_games, finished_watched_games=finished_watched_games,
         finished_game_statistic=statistic_string(finished_games),
         finished_watched_game_statistic=statistic_string(finished_watched_games),

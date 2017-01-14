@@ -338,7 +338,13 @@ def steam_search_game_price_list(name):
             import re
             match = re.search(r'\d', price)
             if not match:
-                price = 0
+                price = '0'
+            else:
+                # Только значение цены
+                if 'pуб' not in price:
+                    print('АХТУНГ! Неизвестный формат цены: "{}".'.format(price))
+
+                price = price.replace(' pуб.', '').strip()
 
         game_price_list.append((name, price))
 

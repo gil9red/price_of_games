@@ -49,6 +49,21 @@ def set_check_game_by_steam(game, check=1):
         connect.close()
 
 
+def get_duplicates():
+    from collections import defaultdict
+    name_kind_by_id_dict = defaultdict(list)
+
+    connect = create_connect()
+    try:
+        for id_, name, kind in connect.cursor().execute('SELECT id, name, kind FROM game').fetchall():
+            name_kind_by_id_dict[(name, kind)].append(id_)
+
+    finally:
+        connect.close()
+
+    return list(filter(lambda item: len(item[1]) > 1, name_kind_by_id_dict.items()))
+
+
 def get_games_list():
     """
     Функция возвращает кортеж из двух списков: список пройденных игр и список просмотренных игр
@@ -176,6 +191,15 @@ def append_games_to_base(connect, finished_game_list, finished_watched_game_list
 
     # Сохранение изменений в базе
     connect.commit()
+
+    # Вряд ли такое произойдет...
+    duplicates = get_duplicates()
+    if duplicates:
+        print("АХТУНГ! Найдены дубликаты:")
+        for (name, kind), id_list in duplicates:
+            print('    {} / {} c id {}'.format(name, kind, id_list))
+
+        print()
 
 
 def fill_price_of_games(connect):

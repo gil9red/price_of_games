@@ -120,6 +120,10 @@ INDEX_HTML_TEMPLATE = '''\
     </style>
 </head>
 <body>
+    {% if has_duplicates %}
+         <p><font size="20" color="red">АХТУНГ! Найдены дубликаты!</font></p>
+    {% endif %}
+
     Последнее обновление было: {{ last_run_date }}
     <br><br>
 
@@ -257,7 +261,7 @@ INDEX_HTML_TEMPLATE = '''\
 
 @app.route("/")
 def index():
-    from common import FINISHED, FINISHED_WATCHED, create_connect, settings
+    from common import FINISHED, FINISHED_WATCHED, create_connect, settings, get_duplicates
     connect = create_connect()
 
     try:
@@ -275,23 +279,16 @@ def index():
     finally:
         connect.close()
 
-    finished_game_statistic = statistic_string(finished_games)
-    finished_watched_game_statistic = statistic_string(finished_watched_games)
-
-    total_price_finished_games = total_price(finished_games)
-    total_price_finished_watched_games = total_price(finished_watched_games)
-
-    headers = ['Название', 'Цена']
-
     return render_template_string(
         INDEX_HTML_TEMPLATE,
-        headers=headers,
+        headers=['Название', 'Цена'],
         finished_games=finished_games, finished_watched_games=finished_watched_games,
-        finished_game_statistic=finished_game_statistic,
-        finished_watched_game_statistic=finished_watched_game_statistic,
-        total_price_finished_games=total_price_finished_games,
-        total_price_finished_watched_games=total_price_finished_watched_games,
+        finished_game_statistic=statistic_string(finished_games),
+        finished_watched_game_statistic=statistic_string(finished_watched_games),
+        total_price_finished_games=total_price(finished_games),
+        total_price_finished_watched_games=total_price(finished_watched_games),
         last_run_date=settings.last_run_date,
+        has_duplicates=bool(get_duplicates()),
     )
 
 

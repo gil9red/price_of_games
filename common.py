@@ -214,6 +214,7 @@ def append_games_to_base(connect, finished_game_list, finished_watched_game_list
         if has:
             return
 
+        print('Добавляю новую игру "{}" ({})'.format(name, kind))
         cursor.execute("INSERT INTO Game (name, kind) VALUES (?,?)", (name, kind))
 
     # Добавлени в базу пройденных игр

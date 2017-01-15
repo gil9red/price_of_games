@@ -18,18 +18,42 @@ connect = create_connect()
 cursor = connect.cursor()
 
 cursor.execute('''
-CREATE TABLE IF NOT EXISTS Game (
+CREATE TABLE IF NOT EXISTS Game2 (
     id INTEGER PRIMARY KEY,
 
-    name TEXT,
+    name TEXT NOT NULL,
     price TEXT DEFAULT NULL,
     modify_date TIMESTAMP DEFAULT NULL,
-    kind TEXT,
-    check_steam BOOLEAN DEFAULT 0
+    kind TEXT NOT NULL,
+    check_steam BOOLEAN NOT NULL DEFAULT 0
 );
 ''')
 
 connect.commit()
+
+# NOTE: когда нужно в таблице подправить схему:
+# cursor.executescript('''
+# DROP TABLE Game2;
+#
+# CREATE TABLE IF NOT EXISTS Game2 (
+#     id INTEGER PRIMARY KEY,
+#
+#     name TEXT NOT NULL,
+#     price TEXT DEFAULT NULL,
+#     modify_date TIMESTAMP DEFAULT NULL,
+#     kind TEXT NOT NULL,
+#     check_steam BOOLEAN NOT NULL DEFAULT 0
+# );
+#
+# INSERT INTO Game2 SELECT * FROM Game;
+#
+# DROP TABLE Game;
+# ALTER TABLE Game2 RENAME TO Game;
+#
+# ''')
+#
+# connect.commit()
+
 
 while True:
     # Перед выполнением, запоминаем дату и время, чтобы иметь потом представление когда

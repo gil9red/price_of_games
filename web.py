@@ -106,7 +106,7 @@ INDEX_HTML_TEMPLATE = '''\
             border: 1px solid black; /* Параметры рамки */
         }
 
-        #form_set_price_error, #form_rename_game_error {
+        #form_set_price_error, #form_rename_game_error, #form_check_price_error  {
             color: red;
         }
 
@@ -160,6 +160,14 @@ INDEX_HTML_TEMPLATE = '''\
             <p id="form_rename_game_error"></p>
         </form>
 
+        <hr>
+        <form onsubmit="return checkCheckPriceForm(this)" method="post" action="/check_price">
+            <b>Вызов проверки цены у игры:</b>
+            <p>Название игры:<input id="form_check_price" type="text" name="name"></p>
+            <p><input type="submit" value="Проверить цену"></p>
+            <p id="form_check_price_error"></p>
+        </form>
+
         <script type="text/javascript">
             function checkSetPriceForm(form) {
                 var form_error = document.getElementById('form_set_price_error');
@@ -192,6 +200,21 @@ INDEX_HTML_TEMPLATE = '''\
 
                 return true;
             };
+
+            function checkCheckPriceForm(form) {
+                var form_error = document.getElementById('form_check_price_error');
+                var name = document.getElementById('form_check_price').value;
+
+                if (name == "") {
+                    form_error.innerHTML = "Все поля нужно заполнять!";
+                    return false;
+                }
+
+                form_error.innerHTML = "";
+
+                return true;
+            };
+
         </script>
     </div>
 
@@ -324,6 +347,27 @@ def rename_game():
 
             from common import rename_game
             rename_game(old_name, new_name)
+
+    from flask import redirect
+    return redirect("/")
+
+
+@app.route("/check_price", methods=['POST'])
+def check_price():
+    """
+    Функция запускает проверку цены у указанной игры.
+
+    """
+
+    if request.method == 'POST':
+        print(request.form)
+
+        if 'name' in request.form:
+            name = request.form['name']
+            print(name)
+
+            from common import check_and_fill_price_of_game
+            check_and_fill_price_of_game(name)
 
     from flask import redirect
     return redirect("/")

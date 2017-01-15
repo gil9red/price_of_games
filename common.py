@@ -54,6 +54,9 @@ def rename_game(old_name, new_name):
         cursor.execute("UPDATE Game SET name = ? WHERE name = ?", (new_name, old_name))
         connect.commit()
 
+        # Попытаемся после переименовани игры сразу найти ее цену
+        check_and_fill_price_of_game(new_name)
+
     finally:
         connect.close()
 
@@ -206,6 +209,42 @@ def append_games_to_base(connect, finished_game_list, finished_watched_game_list
         print()
 
 
+def check_and_fill_price_of_game(game):
+    """
+    Функция ищет цену игры и при нахождении ее ставит ей цену.
+
+    """
+
+    game = game.strip()
+
+    if not game:
+        print('Не указано game ( = "{}")'.format(game))
+        return
+
+    game_price = None
+
+    # Поищем игру и ее цену
+    game_price_list = steam_search_game_price_list(game)
+
+    # Отметим что игра искалась в стиме
+    set_check_game_by_steam(game)
+
+    for name, price in game_price_list:
+        # Если нашли игру, запоминаем цену и прерываем сравнение с другими найденными играми
+        if smart_comparing_names(game, name):
+            game_price = price
+            break
+
+    if game_price == 0 or game_price is None:
+        # TODO: заполнять вручную или искать на других сайтах цену
+        print('Не получилось найти цену игры {}, price is {}'.format(game, game_price))
+        return
+
+    print('Нашли игру: {} -> {} : {}'.format(game, name, price))
+
+    set_price_game(game, price)
+
+
 def fill_price_of_games(connect):
     """
     Функция проходит по играм в базе без указанной цены, пытается найти цены и если удачно, обновляет значение.
@@ -226,28 +265,7 @@ def fill_price_of_games(connect):
     print("Нужно найти цену {} играм".format(len(games_list)))
 
     for game in games_list:
-        game_price = None
-
-        # Поищем игру и ее цену
-        game_price_list = steam_search_game_price_list(game)
-
-        # Отметим что игра искалась в стиме
-        set_check_game_by_steam(game)
-
-        for name, price in game_price_list:
-            # Если нашли игру, запоминаем цену и прерываем сравнение с другими найденными играми
-            if smart_comparing_names(game, name):
-                game_price = price
-                break
-
-        if game_price == 0 or game_price is None:
-            # TODO: заполнять вручную или искать на других сайтах цену
-            print('Не получилось найти цену игры {}, price is {}'.format(game, game_price))
-            continue
-
-        print('Нашли игру: {} -> {} : {}'.format(game, name, price))
-
-        set_price_game(game, price)
+        check_and_fill_price_of_game(game)
 
         import time
         time.sleep(3)

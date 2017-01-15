@@ -17,6 +17,13 @@ def create_connect():
 
 
 def set_price_game(game, price):
+    game = game.strip()
+    price = price.strip()
+
+    if not game or not price:
+        print('Не указано game ( = "{}") или price ( = "{}")'.format(game, price))
+        return
+
     connect = create_connect()
     try:
         cursor = connect.cursor()
@@ -28,6 +35,13 @@ def set_price_game(game, price):
 
 
 def rename_game(old_name, new_name):
+    old_name = old_name.strip()
+    new_name = new_name.strip()
+
+    if not old_name or not new_name:
+        print('Не указано old_name ( = "{}") или new_name ( = "{}")'.format(old_name, new_name))
+        return
+
     connect = create_connect()
     try:
         cursor = connect.cursor()

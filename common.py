@@ -89,6 +89,32 @@ def get_duplicates():
     return list(filter(lambda item: len(item[1]) > 1, name_kind_by_id_dict.items()))
 
 
+# TODO: тут нехватат статистики: сколько было проверено игр, сколько нашли, какие это игры и их цена
+def check_price_all_non_price_games():
+    """
+    Принудительная проверка цены у игр без цены. То, что цены игр уже проверялись для этой функции
+    значение не имеет.
+
+    """
+
+    connect = create_connect()
+    try:
+        games = connect.cursor().execute('SELECT name FROM game WHERE price IS NULL').fetchall()
+
+        # Удаление дубликатов (игры могут повторяться для категорий пройденных и просмотренных)
+        games = {name for (name,) in games}
+        print('Игр без цены: {}'.format(len(games)))
+
+        for name in games:
+            check_and_fill_price_of_game(name)
+
+            import time
+            time.sleep(3)
+
+    finally:
+        connect.close()
+
+
 def db_create_backup():
     import os
     if not os.path.exists('backup'):
@@ -326,7 +352,10 @@ def steam_search_game_price_list(name):
     """
 
     # category1 = 998 (Game)
-    url = 'http://store.steampowered.com/search/?category1=998&os=win&supportedlang=english&term=' + name
+    # url = 'http://store.steampowered.com/search/?category1=998&os=win&supportedlang=english&term=' + name
+    #
+    # Дополнения с категорией Game не ищутся, например: "Pillars of Eternity: The White March Part I"
+    url = 'http://store.steampowered.com/search/?term=' + name
 
     game_price_list = list()
 

@@ -6,8 +6,6 @@ __author__ = 'ipetrash'
 
 # TODO: фильтрация: возможность показывать игры с ценой или без
 # TODO: добавить фильтр, который будет скрывать игры, не совпадающие с поиском
-# TODO: кнопка принудительного поиск цен у игр, с отсутствующей ценой (т.к. у таких игр может стоять
-# флаг, который говорит что они были проверены, скрипт их не проверит и такая кнопка в этом случае будет нужна)
 
 # NOTE: вычисление такого можно было перенести на клиента и описать через javascript
 # но т.к. данных мало и пользоваться ими будут очень редко, можно на серверной стороне
@@ -171,6 +169,12 @@ INDEX_HTML_TEMPLATE = '''\
             <p>Название игры:<input id="form_check_price" type="text" name="name"></p>
             <p><input type="submit" value="Проверить цену"></p>
             <p id="form_check_price_error"></p>
+        </form>
+
+        <hr>
+        <form action="/check_price_all_non_price_games">
+            <b>Вызов проверки цены у всех игры без цены:</b>
+            <p><input type="submit" value="Проверить цены всех игр"></p>
         </form>
 
         <script type="text/javascript">
@@ -373,6 +377,20 @@ def check_price():
 
             from common import check_and_fill_price_of_game
             check_and_fill_price_of_game(name)
+
+    from flask import redirect
+    return redirect("/")
+
+
+@app.route("/check_price_all_non_price_games")
+def check_price_all_non_price_games():
+    """
+    Функция принудительной проверки цен всех игр для которых не получилось найти цену.
+
+    """
+
+    from common import check_price_all_non_price_games
+    check_price_all_non_price_games()
 
     from flask import redirect
     return redirect("/")

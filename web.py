@@ -173,7 +173,7 @@ INDEX_HTML_TEMPLATE = '''\
 
         <hr>
         <form action="/check_price_all_non_price_games">
-            <b>Вызов проверки цены у всех игры без цены:</b>
+            <b>Вызов проверки цены у всех игр без цены:</b>
             <p><input type="submit" value="Проверить цены всех игр"></p>
         </form>
 

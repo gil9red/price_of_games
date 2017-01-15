@@ -62,6 +62,8 @@ def rename_game(old_name, new_name):
 
 
 def set_check_game_by_steam(game, check=1):
+    game = game.strip()
+
     connect = create_connect()
     try:
         cursor = connect.cursor()

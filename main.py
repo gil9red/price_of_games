@@ -18,7 +18,7 @@ connect = create_connect()
 cursor = connect.cursor()
 
 cursor.execute('''
-CREATE TABLE IF NOT EXISTS Game2 (
+CREATE TABLE IF NOT EXISTS Game (
     id INTEGER PRIMARY KEY,
 
     name TEXT NOT NULL,

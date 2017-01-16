@@ -5,7 +5,7 @@ __author__ = 'ipetrash'
 
 
 # TODO: фильтрация: возможность показывать игры с ценой или без
-# TODO: добавить фильтр, который будет скрывать игры, не совпадающие с поиском
+
 
 # NOTE: вычисление такого можно было перенести на клиента и описать через javascript
 # но т.к. данных мало и пользоваться ими будут очень редко, можно на серверной стороне
@@ -113,9 +113,26 @@ INDEX_HTML_TEMPLATE = '''\
             color: red;
         }
 
-        input[type="text"] {
+        #top_right_fixed_panel input[type="text"] {
             width: 100%;
         }
+
+        .input_search {
+            width: 70%;
+            font-size: 16px; /* Increase font-size */
+        }
+
+        .table_caption {
+            width: 70%;
+            font-size: 150%; /* Размер шрифта в процентах */
+            text-align: center;
+        }
+
+        /* Для добавления отступов между заголовком таблицы, input поиска и самой таблицы */
+        .block_caption_search > div {
+            margin-bottom: 7px;
+        }
+
     </style>
 </head>
 <body>
@@ -227,8 +244,13 @@ INDEX_HTML_TEMPLATE = '''\
         </script>
     </div>
 
+    <div class="block_caption_search">
+        <div class="table_caption">Пройденные игры {{ finished_game_statistic }}</div>
+        <div>
+            <input type="text" id="input_finished_game" class="input_search" onkeyup="on_search_text_change('input_finished_game', 'finished_game')" placeholder="Поиск игр...">
+        </div>
+    </div>
     <table id="finished_game" width="70%" border="1">
-        <caption>Пройденные игры {{ finished_game_statistic }}</caption>
         <tr>
         {% for header in headers %}
             <th>{{ header }}</th>
@@ -243,8 +265,13 @@ INDEX_HTML_TEMPLATE = '''\
     </table>
     <br><br><br>
 
+    <div class="block_caption_search">
+        <div class="table_caption">Просмотренные игры {{ finished_watched_game_statistic }}</div>
+        <div>
+            <input type="text" id="input_finished_watched_game" class="input_search" onkeyup="on_search_text_change('input_finished_watched_game', 'finished_watched_game')" placeholder="Поиск игр...">
+        </div>
+    </div>
     <table id="finished_watched_game" width="70%" border="1">
-        <caption>Просмотренные игры {{ finished_watched_game_statistic }}</caption>
         <tr>
         {% for header in headers %}
             <th>{{ header }}</th>
@@ -259,6 +286,33 @@ INDEX_HTML_TEMPLATE = '''\
     </table>
 
     <script>
+        // Функция для фильтрации строк указанной таблицы
+        function on_search_text_change(input_id, table_id) {
+            var filter_text = document.getElementById(input_id).value.toLowerCase();
+            var table = document.getElementById(table_id);
+            var tr_list = table.getElementsByTagName("tr");
+
+            // Перебор строк таблицы
+            for (var i = 0; i < tr_list.length; i++) {
+                var tr = tr_list[i];
+
+                // Перебор ячеек таблицы
+                var td_list = tr.getElementsByTagName("td");
+                for (var j = 0; j < td_list.length; j++) {
+                    var value = td_list[j].innerHTML.toLowerCase();
+
+                    // Если нашли, то делаем строку видимой и прерываем перебор ячеек
+                    if (value.indexOf(filter_text) != -1) {
+                        tr.style.display = "";
+                        break;
+
+                    } else {
+                        tr.style.display = "none";
+                    }
+                }
+            }
+        }
+
         // Функция выделяет те игры, в которых еще не указана цена
         function fill_background_game_with_empty_price(table_id) {
             var rows = document.getElementById(table_id).rows;
@@ -277,6 +331,11 @@ INDEX_HTML_TEMPLATE = '''\
 
         fill_background_game_with_empty_price("finished_game");
         fill_background_game_with_empty_price("finished_watched_game");
+
+        // Если в input'ах уже что-то будет, таблицы нужно будет показать отфильтрованными
+        on_search_text_change('input_finished_game', 'finished_game');
+        on_search_text_change('input_finished_watched_game', 'finished_watched_game');
+
     </script>
 </body>
 </html>

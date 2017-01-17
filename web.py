@@ -247,7 +247,7 @@ INDEX_HTML_TEMPLATE = '''\
     <div class="block_caption_search">
         <div class="table_caption">Пройденные игры {{ finished_game_statistic }}</div>
         <div>
-            <input type="text" id="input_finished_game" class="input_search" onkeyup="on_search_text_change('input_finished_game', 'finished_game')" placeholder="Поиск игр...">
+            <input type="text" id="input_finished_game" class="input_search" onkeyup="filter_table('input_finished_game', 'finished_game')" placeholder="Поиск игр...">
         </div>
     </div>
     <table id="finished_game" width="70%" border="1">
@@ -258,7 +258,17 @@ INDEX_HTML_TEMPLATE = '''\
         </tr>
 
         {% for name, price in finished_games %}
-            <tr><td>{{ name }}</td><td>{{ price }}</td></tr>
+            {% if price %}
+                <tr>
+                    <td>{{ name }}</td>
+                    <td>{{ price }}</td>
+                </tr>
+            {% else %}
+                <tr class="price_is_none">
+                    <td>{{ name }}</td>
+                    <td>{{ UNKNOWN_PRICE_TITLE }}</td>
+                </tr>
+            {% endif %}
         {% endfor %}
 
         <tr><td align="right">Итого:</td><td>{{ total_price_finished_games }}</td></tr>
@@ -268,7 +278,7 @@ INDEX_HTML_TEMPLATE = '''\
     <div class="block_caption_search">
         <div class="table_caption">Просмотренные игры {{ finished_watched_game_statistic }}</div>
         <div>
-            <input type="text" id="input_finished_watched_game" class="input_search" onkeyup="on_search_text_change('input_finished_watched_game', 'finished_watched_game')" placeholder="Поиск игр...">
+            <input type="text" id="input_finished_watched_game" class="input_search" onkeyup="filter_table('input_finished_watched_game', 'finished_watched_game')" placeholder="Поиск игр...">
         </div>
     </div>
     <table id="finished_watched_game" width="70%" border="1">
@@ -279,7 +289,17 @@ INDEX_HTML_TEMPLATE = '''\
         </tr>
 
         {% for name, price in finished_watched_games %}
-            <tr><td>{{ name }}</td><td>{{ price }}</td></tr>
+            {% if price %}
+                <tr>
+                    <td>{{ name }}</td>
+                    <td>{{ price }}</td>
+                </tr>
+            {% else %}
+                <tr class="price_is_none">
+                    <td>{{ name }}</td>
+                    <td>{{ UNKNOWN_PRICE_TITLE }}</td>
+                </tr>
+            {% endif %}
         {% endfor %}
 
         <tr><td align="right">Итого:</td><td>{{ total_price_finished_watched_games }}</td></tr>
@@ -287,7 +307,7 @@ INDEX_HTML_TEMPLATE = '''\
 
     <script>
         // Функция для фильтрации строк указанной таблицы
-        function on_search_text_change(input_id, table_id) {
+        function filter_table(input_id, table_id) {
             var filter_text = document.getElementById(input_id).value.toLowerCase();
             var table = document.getElementById(table_id);
             var tr_list = table.getElementsByTagName("tr");
@@ -313,28 +333,9 @@ INDEX_HTML_TEMPLATE = '''\
             }
         }
 
-        // Функция выделяет те игры, в которых еще не указана цена
-        function fill_background_game_with_empty_price(table_id) {
-            var rows = document.getElementById(table_id).rows;
-
-            // Пропускаем первую строку, т.к. это заголовок
-            for (var i = 1; i < rows.length; i++) {
-                var name = rows[i].cells[0];
-                var price = rows[i].cells[1];
-
-                if (price.innerHTML == "None") {
-                    name.className += " price_is_none";
-                    price.className += " price_is_none";
-                }
-            }
-        }
-
-        fill_background_game_with_empty_price("finished_game");
-        fill_background_game_with_empty_price("finished_watched_game");
-
         // Если в input'ах уже что-то будет, таблицы нужно будет показать отфильтрованными
-        on_search_text_change('input_finished_game', 'finished_game');
-        on_search_text_change('input_finished_watched_game', 'finished_watched_game');
+        filter_table('input_finished_game', 'finished_game');
+        filter_table('input_finished_watched_game', 'finished_watched_game');
 
     </script>
 </body>
@@ -372,6 +373,7 @@ def index():
         total_price_finished_watched_games=total_price(finished_watched_games),
         last_run_date=settings.last_run_date,
         has_duplicates=bool(get_duplicates()),
+        UNKNOWN_PRICE_TITLE='Неизвестная цена',
     )
 
 

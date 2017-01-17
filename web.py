@@ -4,7 +4,6 @@
 __author__ = 'ipetrash'
 
 
-# TODO: фильтрация: возможность показывать игры с ценой или без
 # TODO: кнопки перемещения к таблицам (пусть на панели справа будут)
 # TODO: кнопки перемещения к началу и концу страницы (пусть на панели справа будут)
 
@@ -246,6 +245,13 @@ INDEX_HTML_TEMPLATE = '''\
         </script>
     </div>
 
+    <button onclick="show_all_games()">Показывать все игры</button>
+    <br>
+    <button onclick="show_games_with_price()">Показывать игры с ценой</button>
+    <br>
+    <button onclick="show_games_without_price()">Показывать игры без цены</button>
+    <br>
+
     <div class="block_caption_search">
         <div class="table_caption">Пройденные игры {{ finished_game_statistic }}</div>
         <div>
@@ -253,6 +259,11 @@ INDEX_HTML_TEMPLATE = '''\
         </div>
     </div>
     <table id="finished_game" width="70%" border="1">
+        <colgroup>
+           <col span="1" style="width: 80%;">
+           <col span="1" style="width: 20%;">
+        </colgroup>
+
         <tr>
         {% for header in headers %}
             <th>{{ header }}</th>
@@ -261,12 +272,12 @@ INDEX_HTML_TEMPLATE = '''\
 
         {% for name, price in finished_games %}
             {% if price %}
-                <tr>
+                <tr class="game_row">
                     <td>{{ name }}</td>
                     <td>{{ price }}</td>
                 </tr>
             {% else %}
-                <tr class="price_is_none">
+                <tr class="game_row price_is_none">
                     <td>{{ name }}</td>
                     <td>{{ UNKNOWN_PRICE_TITLE }}</td>
                 </tr>
@@ -284,6 +295,11 @@ INDEX_HTML_TEMPLATE = '''\
         </div>
     </div>
     <table id="finished_watched_game" width="70%" border="1">
+        <colgroup>
+           <col span="1" style="width: 80%;">
+           <col span="1" style="width: 20%;">
+        </colgroup>
+
         <tr>
         {% for header in headers %}
             <th>{{ header }}</th>
@@ -292,12 +308,12 @@ INDEX_HTML_TEMPLATE = '''\
 
         {% for name, price in finished_watched_games %}
             {% if price %}
-                <tr>
+                <tr class="game_row">
                     <td>{{ name }}</td>
                     <td>{{ price }}</td>
                 </tr>
             {% else %}
-                <tr class="price_is_none">
+                <tr class="game_row price_is_none">
                     <td>{{ name }}</td>
                     <td>{{ UNKNOWN_PRICE_TITLE }}</td>
                 </tr>
@@ -308,6 +324,48 @@ INDEX_HTML_TEMPLATE = '''\
     </table>
 
     <script>
+        function show_all_games() {
+            var tr_list = document.getElementsByClassName('game_row');
+
+            // Перебор строк таблицы
+            for (var i = 0; i < tr_list.length; i++) {
+                var tr = tr_list[i];
+                tr.style.display = "";
+            }
+        }
+
+        function show_games_with_price() {
+            var tr_list = document.getElementsByClassName('game_row');
+
+            // Перебор строк таблицы
+            for (var i = 0; i < tr_list.length; i++) {
+                var tr = tr_list[i];
+
+                // Если цена не указана и хотим видить игры с ценой
+                if (tr.classList.contains("price_is_none")) {
+                    tr.style.display = "none";
+                } else {
+                    tr.style.display = "";
+                }
+            }
+        }
+
+        function show_games_without_price() {
+            var tr_list = document.getElementsByClassName('game_row');
+
+            // Перебор строк таблицы
+            for (var i = 0; i < tr_list.length; i++) {
+                var tr = tr_list[i];
+
+                // Если цена указана и хотим видить игры без ценой
+                if (!tr.classList.contains("price_is_none")) {
+                    tr.style.display = "none";
+                } else {
+                    tr.style.display = "";
+                }
+            }
+        }
+
         // Функция для фильтрации строк указанной таблицы
         function filter_table(input_id, table_id) {
             var filter_text = document.getElementById(input_id).value.toLowerCase();

@@ -245,12 +245,11 @@ INDEX_HTML_TEMPLATE = '''\
         </script>
     </div>
 
-    <button onclick="show_all_games()">Показывать все игры</button>
-    <br>
-    <button onclick="show_games_with_price()">Показывать игры с ценой</button>
-    <br>
-    <button onclick="show_games_without_price()">Показывать игры без цены</button>
-    <br>
+    <div style="width:300px">
+        <button style="width:100%" onclick="show_all_games()">Показывать все игры</button>
+        <button style="width:100%" onclick="show_games_with_price()">Показывать игры с ценой</button>
+        <button style="width:100%" onclick="show_games_without_price()">Показывать игры без цены</button>
+    </div>
 
     <div class="block_caption_search">
         <div class="table_caption">Пройденные игры {{ finished_game_statistic }}</div>

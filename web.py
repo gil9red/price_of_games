@@ -8,8 +8,6 @@ __author__ = 'ipetrash'
 # TODO: кнопки перемещения к началу и концу страницы (пусть на панели справа будут)
 # TODO: правильно отобюражать сумму с копейками
 # TODO: после клика на кнопки показа игр применять фильтр
-# TODO: кнопки показа игр сделать checkable, и при клике на одну кнопку снимать выделение с других (а
-# может кнопки сделать radio? это ведь подходит...)
 # TODO: окно фильтра выровнять в ширину таблицы
 # TODO: окну фильтра добавить кнопку очищения его
 
@@ -251,11 +249,11 @@ INDEX_HTML_TEMPLATE = '''\
         </script>
     </div>
 
-    <div style="width:300px">
-        <button style="width:100%" onclick="show_all_games()">Показывать все игры</button>
-        <button style="width:100%" onclick="show_games_with_price()">Показывать игры с ценой</button>
-        <button style="width:100%" onclick="show_games_without_price()">Показывать игры без цены</button>
-    </div>
+    <form>
+        <input name="radio_show_game" type="radio" onclick="show_all_games()" checked> Показывать все игры</input><br>
+        <input name="radio_show_game" type="radio" onclick="show_games_with_price()"> Показывать игры с ценой</input><br>
+        <input name="radio_show_game" type="radio" onclick="show_games_without_price()"> Показывать игры без цены</input>
+    </form>
 
     <div class="block_caption_search">
         <div class="table_caption">Пройденные игры {{ finished_game_statistic }}</div>

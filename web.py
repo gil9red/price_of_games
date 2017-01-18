@@ -4,7 +4,6 @@
 __author__ = 'ipetrash'
 
 
-# TODO: кнопки перемещения к таблицам (пусть на панели справа будут)
 # TODO: кнопки перемещения к началу и концу страницы (пусть на панели справа будут)
 # TODO: после клика на кнопки показа игр применять фильтр
 # TODO: окно фильтра выровнять в ширину таблицы
@@ -211,6 +210,11 @@ INDEX_HTML_TEMPLATE = '''\
             <p><input type="submit" value="Проверить цены всех игр"></p>
         </form>
 
+        <hr>
+            <button onclick="document.location.href='#finished_game_caption_table'">Перейти к таблице пройденных игр</>
+            <button onclick="document.location.href='#finished_watched_game_caption_table'">Перейти к таблице просмотренных игр</>
+        </hr>
+
         <script type="text/javascript">
             function checkSetPriceForm(form) {
                 var form_error = document.getElementById('form_set_price_error');
@@ -267,7 +271,7 @@ INDEX_HTML_TEMPLATE = '''\
         <input name="radio_show_game" type="radio" onclick="show_games_without_price()"> Показывать игры без цены</input>
     </form>
 
-    <div class="block_caption_search">
+    <div id="finished_game_caption_table" class="block_caption_search">
         <div class="table_caption">Пройденные игры {{ finished_game_statistic }}</div>
         <div>
             <input type="text" id="input_finished_game" class="input_search" onkeyup="filter_table('input_finished_game', 'finished_game')" placeholder="Поиск игр...">
@@ -303,7 +307,7 @@ INDEX_HTML_TEMPLATE = '''\
     </table>
     <br><br><br>
 
-    <div class="block_caption_search">
+    <div id="finished_watched_game_caption_table" class="block_caption_search">
         <div class="table_caption">Просмотренные игры {{ finished_watched_game_statistic }}</div>
         <div>
             <input type="text" id="input_finished_watched_game" class="input_search" onkeyup="filter_table('input_finished_watched_game', 'finished_watched_game')" placeholder="Поиск игр...">

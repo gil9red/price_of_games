@@ -6,7 +6,6 @@ __author__ = 'ipetrash'
 
 # TODO: кнопки перемещения к таблицам (пусть на панели справа будут)
 # TODO: кнопки перемещения к началу и концу страницы (пусть на панели справа будут)
-# TODO: правильно отобюражать сумму с копейками
 # TODO: после клика на кнопки показа игр применять фильтр
 # TODO: окно фильтра выровнять в ширину таблицы
 # TODO: окну фильтра добавить кнопку очищения его
@@ -64,6 +63,19 @@ app = Flask(__name__)
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
+
+
+def round_price(value):
+    try:
+        # Попытка избавиться от нуля справа, например: 50087.0 -> 50087
+        if int(value) == value:
+            return int(value)
+        else:
+            return '{:.2f}'.format(value)
+    except:
+        return '{:.2f}'.format(value)
+
+app.jinja_env.globals.update(round_price=round_price)
 
 
 INDEX_HTML_TEMPLATE = '''\
@@ -150,17 +162,17 @@ INDEX_HTML_TEMPLATE = '''\
 
     <table id="info_table">
         <tr>
-            <td>Итого по пройденным играм:</td><td>{{ total_price_finished_games }} руб.</td>
+            <td>Итого по пройденным играм:</td><td>{{ round_price(total_price_finished_games) }} руб.</td>
             <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
             <td>Пройденных игр:</td><td>{{finished_games|length}}</td>
         </tr>
         <tr>
-            <td>Итого по просмотренным играм:</td><td>{{ total_price_finished_watched_games }} руб.</td>
+            <td>Итого по просмотренным играм:</td><td>{{ round_price(total_price_finished_watched_games) }} руб.</td>
             <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
             <td>Просмотренных игр:</td><td>{{finished_watched_games|length}}</td>
         </tr>
         <tr>
-            <td>Общая сумма:</td><td>{{ total_price_finished_games + total_price_finished_watched_games }} руб.</td>
+            <td>Общая сумма:</td><td>{{ round_price(total_price_finished_games + total_price_finished_watched_games) }} руб.</td>
             <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
             <td>Всего игр:</td><td>{{finished_games|length + finished_watched_games|length}}</td>
         </tr>

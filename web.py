@@ -4,7 +4,6 @@
 __author__ = 'ipetrash'
 
 
-# TODO: кнопки перемещения к началу и концу страницы (пусть на панели справа будут)
 # TODO: после клика на кнопки показа игр применять фильтр
 # TODO: окно фильтра выровнять в ширину таблицы
 # TODO: окну фильтра добавить кнопку очищения его
@@ -149,9 +148,67 @@ INDEX_HTML_TEMPLATE = '''\
             margin-bottom: 7px;
         }
 
+        #back-top {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+        }
+        #back-top a {
+            width: 100px;
+            color: black;
+            display: block;
+            background-color: lightgray;
+            text-align: center;
+            font: 20px/100% Arial, Helvetica, sans-serif;
+            text-decoration: none;
+            -webkit-transition: 1s;
+            -moz-transition: 1s;
+            transition: 1s;
+            line-height: 30px;
+            -webkit-border-radius: 10px;
+            border-radius: 10px;
+        }
+        #back-top a:hover {
+            background-color: gray;
+        }
+
     </style>
 </head>
-<body>
+
+<body id="top">
+    <p id="back-top">
+        <a href="#top"><span></span>Наверх</a>
+    </p>
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js"></script>
+    <script>
+    $(document).ready(function(){
+        // hide #back-top first
+        $("#back-top").hide();
+
+        // fade in #back-top
+        $(function () {
+            $(window).scroll(function () {
+                if ($(this).scrollTop() > 100) {
+                    $('#back-top').fadeIn();
+                } else {
+                    $('#back-top').fadeOut();
+                }
+            });
+
+            // scroll body to 0px on click
+            $('#back-top a').click(function () {
+                $('body,html').animate({
+                    scrollTop: 0
+                }, 800);
+                return false;
+            });
+        });
+
+    });
+    </script>
+
+
     {% if has_duplicates %}
          <p><font size="20" color="red">АХТУНГ! Найдены дубликаты!</font></p>
     {% endif %}

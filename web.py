@@ -382,9 +382,9 @@ INDEX_HTML_TEMPLATE = '''\
                 for (var j = 0; j < td_list.length; j++) {
                     var value = td_list[j].innerHTML.toLowerCase();
 
-                    // Если строка фильтра пустая или нашли строку фильтра, то делаем строку видимой
-                    // и прерываем перебор ячеек
-                    if (filter_text == "" || value.indexOf(filter_text) != -1) {
+                    // Если нашли строку фильтра, то делаем строку видимой и прерываем перебор ячеек
+                    // (если строка фильтра пустая, то поиск вернет 0 индекс, что говорит, что строка нашлась)
+                    if (value.indexOf(filter_text) != -1) {
                         tr.style.display = "";
                         break;
 

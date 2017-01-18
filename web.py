@@ -5,6 +5,8 @@ __author__ = 'ipetrash'
 
 
 # TODO: после клика на кнопки показа игр применять фильтр
+# объединить фильтр через поиск и через radiobutton в одну функцию
+
 # TODO: окно фильтра выровнять в ширину таблицы
 # TODO: окну фильтра добавить кнопку очищения его
 
@@ -323,9 +325,9 @@ INDEX_HTML_TEMPLATE = '''\
     </div>
 
     <form>
-        <input name="radio_show_game" type="radio" onclick="show_all_games()" checked> Показывать все игры</input><br>
-        <input name="radio_show_game" type="radio" onclick="show_games_with_price()"> Показывать игры с ценой</input><br>
-        <input name="radio_show_game" type="radio" onclick="show_games_without_price()"> Показывать игры без цены</input>
+        <input id="radio_show_all_games" name="radio_show_game" type="radio" onclick="show_all_games()" checked> Показывать все игры</input><br>
+        <input id="radio_show_games_with_price" name="radio_show_game" type="radio" onclick="show_games_with_price()"> Показывать игры с ценой</input><br>
+        <input id="radio_show_games_without_price" name="radio_show_game" type="radio" onclick="show_games_without_price()"> Показывать игры без цены</input>
     </form>
 
     <div id="finished_game_caption_table" class="block_caption_search">
@@ -360,7 +362,7 @@ INDEX_HTML_TEMPLATE = '''\
             {% endif %}
         {% endfor %}
 
-        <tr><td align="right">Итого:</td><td>{{ total_price_finished_games }}</td></tr>
+        <tr><td align="right">Итого:</td><td>{{ round_price(total_price_finished_games) }}</td></tr>
     </table>
     <br><br><br>
 
@@ -396,7 +398,7 @@ INDEX_HTML_TEMPLATE = '''\
             {% endif %}
         {% endfor %}
 
-        <tr><td align="right">Итого:</td><td>{{ total_price_finished_watched_games }}</td></tr>
+        <tr><td align="right">Итого:</td><td>{{ round_price(total_price_finished_watched_games) }}</td></tr>
     </table>
 
     <script>

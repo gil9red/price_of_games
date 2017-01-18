@@ -82,7 +82,7 @@ INDEX_HTML_TEMPLATE = '''\
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type'/>
     <title>Список игр</title>
 
     <style type="text/css">

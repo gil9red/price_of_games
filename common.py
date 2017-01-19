@@ -258,11 +258,20 @@ def check_and_fill_price_of_game(game):
     # Отметим что игра искалась в стиме
     set_check_game_by_steam(game)
 
+    # Сначала пытаемся найти игру по полному совпадению
     for name, price in game_price_list:
-        # Если нашли игру, запоминаем цену и прерываем сравнение с другими найденными играми
-        if smart_comparing_names(game, name):
+        if game == name:
             game_price = price
             break
+
+    # Если по полному совпадению на нашли, пытаемся найти предварительно очищая названия игр
+    # от лишних символов
+    if game_price is None:
+        for name, price in game_price_list:
+            # Если нашли игру, запоминаем цену и прерываем сравнение с другими найденными играми
+            if smart_comparing_names(game, name):
+                game_price = price
+                break
 
     if game_price == 0 or game_price is None:
         # TODO: заполнять вручную или искать на других сайтах цену

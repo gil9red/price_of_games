@@ -73,6 +73,6 @@ while True:
     # Создание дубликата базы
     db_create_backup()
 
-    # Every 3 days
+    # Every 1 days
     import time
-    time.sleep(60 * 60 * 24 * 3)
+    time.sleep(60 * 60 * 24)

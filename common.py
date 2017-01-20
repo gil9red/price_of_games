@@ -9,6 +9,15 @@ FINISHED = 'Finished'
 FINISHED_WATCHED = 'Finished watched'
 
 BACKUP_GIST = True
+BACKUP_DIR_LIST = [
+    'backup'
+]
+
+import os
+
+for path in BACKUP_DIR_LIST:
+    if not os.path.exists(path):
+        os.mkdir(path)
 
 
 def create_connect():
@@ -116,15 +125,14 @@ def check_price_all_non_price_games():
 
 
 def db_create_backup():
-    import os
-    if not os.path.exists('backup'):
-        os.mkdir('backup')
+    for path in BACKUP_DIR_LIST:
+        from datetime import datetime
+        file_name = str(datetime.today().date()) + '.sqlite'
+        file_name = os.path.join(path, file_name)
 
-    from datetime import datetime
-    file_name = 'backup/' + str(datetime.today().date()) + '.sqlite'
-
-    import shutil
-    shutil.copy(DB_FILE_NAME, file_name)
+        if not os.path.exists(file_name):
+            import shutil
+            shutil.copy(DB_FILE_NAME, file_name)
 
 
 def get_games_list():
@@ -154,16 +162,14 @@ def get_games_list():
 
     # Скрипт может сохранять скачанные гисты
     if BACKUP_GIST:
-        import os
-        if not os.path.exists('backup'):
-            os.mkdir('backup')
+        for path in BACKUP_DIR_LIST:
+            from datetime import datetime
+            file_name = str(datetime.today().date()) + '.txt'
+            file_name = os.path.join(path, file_name)
 
-        from datetime import datetime
-        file_name = 'backup/' + str(datetime.today().date()) + '.txt'
-
-        if not os.path.exists(file_name):
-            with open(file_name, 'w', encoding='utf-8') as f:
-                f.write(content_gist)
+            if not os.path.exists(file_name):
+                with open(file_name, 'w', encoding='utf-8') as f:
+                    f.write(content_gist)
 
     # Для поиска игр, относящихся только к PC
     found_pc = False

@@ -230,29 +230,26 @@ INDEX_HTML_TEMPLATE = '''\
     <br>
 
     <div id="top_right_fixed_panel">
-        <form onsubmit="return checkSetPriceForm(this)" method="post" action="/set_price">
+        <form method="post" action="/set_price">
             <b>Установка цены у игры:</b>
-            <p>Название:<input id="form_name" type="text" name="name"></p>
-            <p>Цена:<input id="form_price" type="text" name="price"></p>
+            <p>Название:<input id="form_name" type="text" name="name" required></p>
+            <p>Цена:<input id="form_price" type="text" name="price" required></p>
             <p><input type="submit" value="Установить цену"></p>
-            <p id="form_set_price_error"></p>
         </form>
 
         <hr>
-        <form onsubmit="return checkRenameGameForm(this)" method="post" action="/rename_game">
+        <form method="post" action="/rename_game">
             <b>Изменение названия игры:</b>
-            <p>Старое название:<input id="form_old_name" type="text" name="old_name"></p>
-            <p>Новое название:<input id="form_new_name" type="text" name="new_name"></p>
+            <p>Старое название:<input id="form_old_name" type="text" name="old_name" required></p>
+            <p>Новое название:<input id="form_new_name" type="text" name="new_name" required></p>
             <p><input type="submit" value="Изменить название"></p>
-            <p id="form_rename_game_error"></p>
         </form>
 
         <hr>
-        <form onsubmit="return checkCheckPriceForm(this)" method="post" action="/check_price">
+        <form method="post" action="/check_price">
             <b>Вызов проверки цены у игры:</b>
-            <p>Название игры:<input id="form_check_price" type="text" name="name"></p>
+            <p>Название игры:<input id="form_check_price" type="text" name="name" required></p>
             <p><input type="submit" value="Проверить цену"></p>
-            <p id="form_check_price_error"></p>
         </form>
 
         <hr>
@@ -265,55 +262,6 @@ INDEX_HTML_TEMPLATE = '''\
             <button onclick="document.location.href='#finished_game_caption_table'">Перейти к таблице пройденных игр</>
             <button onclick="document.location.href='#finished_watched_game_caption_table'">Перейти к таблице просмотренных игр</>
         </hr>
-
-        <script type="text/javascript">
-            function checkSetPriceForm(form) {
-                var form_error = document.getElementById('form_set_price_error');
-
-                if (document.getElementById('form_name').value == ""
-                        || document.getElementById('form_price').value == "") {
-                    form_error.innerHTML = "Все поля нужно заполнять!";
-                    return false;
-                }
-                form_error.innerHTML = "";
-
-                return true;
-            };
-
-            function checkRenameGameForm(form) {
-                var form_error = document.getElementById('form_rename_game_error');
-                var old_name = document.getElementById('form_old_name').value;
-                var new_name = document.getElementById('form_new_name').value;
-
-                if (old_name == "" || new_name == "") {
-                    form_error.innerHTML = "Все поля нужно заполнять!";
-                    return false;
-
-                } else if (old_name == new_name) {
-                    form_error.innerHTML = "Новое имя не должно совпадать со старым!";
-                    return false;
-                }
-
-                form_error.innerHTML = "";
-
-                return true;
-            };
-
-            function checkCheckPriceForm(form) {
-                var form_error = document.getElementById('form_check_price_error');
-                var name = document.getElementById('form_check_price').value;
-
-                if (name == "") {
-                    form_error.innerHTML = "Все поля нужно заполнять!";
-                    return false;
-                }
-
-                form_error.innerHTML = "";
-
-                return true;
-            };
-
-        </script>
     </div>
 
     <form>

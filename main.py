@@ -59,7 +59,8 @@ while True:
     # Перед выполнением, запоминаем дату и время, чтобы иметь потом представление когда
     # в последний раз выполнялось заполнение списка
     from datetime import datetime
-    settings.last_run_date = datetime.today()
+    today = datetime.today()
+    settings.last_run_date = today
 
     finished_game_list, finished_watched_game_list = get_games_list()
     print("Пройденных игр {}, просмотренных игр: {}".format(len(finished_game_list), len(finished_watched_game_list)))
@@ -74,5 +75,10 @@ while True:
     db_create_backup()
 
     # Every 1 days
-    import time
-    time.sleep(60 * 60 * 24)
+    from datetime import timedelta
+    while today <= today + timedelta(days=1):
+        # Delay 15 minutes
+        import time
+        time.sleep(15 * 60)
+
+        today = datetime.today()

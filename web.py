@@ -512,7 +512,7 @@ def index():
         total_price_finished_watched_games=total_price(finished_watched_games),
         last_run_date=settings.last_run_date,
         has_duplicates=bool(get_duplicates()),
-        UNKNOWN_PRICE_TITLE='Неизвестная цена',
+        UNKNOWN_PRICE_TITLE='Цена не задана',
     )
 
 

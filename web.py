@@ -4,17 +4,10 @@
 __author__ = 'ipetrash'
 
 
-# TODO: после клика на кнопки показа игр применять фильтр
-# объединить фильтр через поиск и через radiobutton в одну функцию
-
 # TODO: окно фильтра выровнять в ширину таблицы
 # TODO: окну фильтра добавить кнопку очищения его
 
 
-# NOTE: вычисление такого можно было перенести на клиента и описать через javascript
-# но т.к. данных мало и пользоваться ими будут очень редко, можно на серверной стороне
-# их считать.
-# Это будет касаться и подсчета сумм.
 def statistic_string(games):
     """
     Функция возвращает строку с статистикой: сколько всего игр, сколько имеют цены, и процент.
@@ -325,15 +318,15 @@ INDEX_HTML_TEMPLATE = '''\
     </div>
 
     <form>
-        <input id="radio_show_all_games" name="radio_show_game" type="radio" onclick="show_all_games()" checked> Показывать все игры</input><br>
-        <input id="radio_show_games_with_price" name="radio_show_game" type="radio" onclick="show_games_with_price()"> Показывать игры с ценой</input><br>
-        <input id="radio_show_games_without_price" name="radio_show_game" type="radio" onclick="show_games_without_price()"> Показывать игры без цены</input>
+        <input id="radio_show_all_games" name="radio_show_game" type="radio" onclick="common_filter()" checked> Показывать все игры</input><br>
+        <input id="radio_show_games_with_price" name="radio_show_game" type="radio" onclick="common_filter()"> Показывать игры с ценой</input><br>
+        <input id="radio_show_games_without_price" name="radio_show_game" type="radio" onclick="common_filter()"> Показывать игры без цены</input>
     </form>
 
     <div id="finished_game_caption_table" class="block_caption_search">
         <div class="table_caption">Пройденные игры {{ finished_game_statistic }}</div>
         <div>
-            <input type="text" id="input_finished_game" class="input_search" onkeyup="filter_table('input_finished_game', 'finished_game')" placeholder="Поиск игр...">
+            <input type="text" id="input_finished_game" class="input_search" onkeyup="common_filter()" placeholder="Поиск игр...">
         </div>
     </div>
     <table id="finished_game" width="70%" border="1">
@@ -369,7 +362,7 @@ INDEX_HTML_TEMPLATE = '''\
     <div id="finished_watched_game_caption_table" class="block_caption_search">
         <div class="table_caption">Просмотренные игры {{ finished_watched_game_statistic }}</div>
         <div>
-            <input type="text" id="input_finished_watched_game" class="input_search" onkeyup="filter_table('input_finished_watched_game', 'finished_watched_game')" placeholder="Поиск игр...">
+            <input type="text" id="input_finished_watched_game" class="input_search" onkeyup="common_filter()" placeholder="Поиск игр...">
         </div>
     </div>
     <table id="finished_watched_game" width="70%" border="1">
@@ -402,79 +395,98 @@ INDEX_HTML_TEMPLATE = '''\
     </table>
 
     <script>
-        function show_all_games() {
-            var tr_list = document.getElementsByClassName('game_row');
+        // Функция перебирает строки таблицы оценивает их, и если они не подходит прячет, иначе добавляет в список.
+        // Цель -- фильтр таблицы и заполнение списка строками, оставшимися видимыми после фильтра
+        function fill_list_from_rows(rows, list) {
+            var is_radio_show_all_games_checked = document.getElementById('radio_show_all_games').checked;
+            var is_radio_show_games_with_price_checked = document.getElementById('radio_show_games_with_price').checked;
+            var is_radio_show_games_without_price_checked = document.getElementById('radio_show_games_without_price').checked;
 
-            // Перебор строк таблицы
-            for (var i = 0; i < tr_list.length; i++) {
-                var tr = tr_list[i];
-                tr.style.display = "";
-            }
-        }
+            for (var i = 0; i < rows.length; i++) {
+                var tr = rows[i];
 
-        function show_games_with_price() {
-            var tr_list = document.getElementsByClassName('game_row');
+                if (is_radio_show_all_games_checked) {
+                    list.push(tr);
 
-            // Перебор строк таблицы
-            for (var i = 0; i < tr_list.length; i++) {
-                var tr = tr_list[i];
-
-                // Если цена не указана и хотим видить игры с ценой
-                if (tr.classList.contains("price_is_none")) {
-                    tr.style.display = "none";
-                } else {
-                    tr.style.display = "";
-                }
-            }
-        }
-
-        function show_games_without_price() {
-            var tr_list = document.getElementsByClassName('game_row');
-
-            // Перебор строк таблицы
-            for (var i = 0; i < tr_list.length; i++) {
-                var tr = tr_list[i];
-
-                // Если цена указана и хотим видить игры без ценой
-                if (!tr.classList.contains("price_is_none")) {
-                    tr.style.display = "none";
-                } else {
-                    tr.style.display = "";
-                }
-            }
-        }
-
-        // Функция для фильтрации строк указанной таблицы
-        function filter_table(input_id, table_id) {
-            var filter_text = document.getElementById(input_id).value.toLowerCase();
-            var table = document.getElementById(table_id);
-            var tr_list = table.getElementsByTagName("tr");
-
-            // Перебор строк таблицы
-            for (var i = 0; i < tr_list.length; i++) {
-                var tr = tr_list[i];
-
-                // Перебор ячеек таблицы
-                var td_list = tr.getElementsByTagName("td");
-                for (var j = 0; j < td_list.length; j++) {
-                    var value = td_list[j].innerHTML.toLowerCase();
-
-                    // Если нашли строку фильтра, то делаем строку видимой и прерываем перебор ячеек
-                    // (если строка фильтра пустая, то поиск вернет 0 индекс, что говорит, что строка нашлась)
-                    if (value.indexOf(filter_text) != -1) {
-                        tr.style.display = "";
-                        break;
-
-                    } else {
+                } else if (is_radio_show_games_with_price_checked) {
+                    // Если цена не указана и хотим видить игры с ценой
+                    if (tr.classList.contains("price_is_none")) {
                         tr.style.display = "none";
+                    } else {
+                        list.push(tr);
+                    }
+
+                } else if (is_radio_show_games_without_price_checked) {
+                    // Если цена указана и хотим видить игры без ценой
+                    if (!tr.classList.contains("price_is_none")) {
+                        tr.style.display = "none";
+                    } else {
+                        list.push(tr);
                     }
                 }
             }
         }
 
-        // Если в input'ах уже что-то будет, таблицы нужно будет показать отфильтрованными
-        filter_table('input_finished_game', 'finished_game');
-        filter_table('input_finished_watched_game', 'finished_watched_game');
+        // Функция перебирает элементы в списке и ищет в них строку, если не найдено, прячет их строку
+        function filter_rows_by_text(text, rows) {
+            // Если значение в фильтре есть, есть смысл перебора строк для вторичной фильтрации
+            if (text != "") {
+                text = text.toLowerCase();
+
+                rows.forEach(function(tr) {
+                    // Перебор ячеек таблицы
+                    var td_list = tr.getElementsByTagName("td");
+
+                    // Строка, содержащая значения ячеек текущей строки
+                    var tr_text = "";
+                    for (var i = 0; i < td_list.length; i++) {
+                        tr_text += td_list[i].innerHTML.toLowerCase();
+                    }
+
+                    console.log(tr_text + " vs " + text + " -> " + (tr_text.indexOf(text) == -1));
+
+                    // Если нашли строку фильтра, то делаем строку видимой и прерываем перебор ячеек
+                    // (если строка фильтра пустая, то поиск вернет 0 индекс, что говорит, что строка нашлась)
+                    if (tr_text.indexOf(text) == -1) {
+                        tr.style.display = "none";
+                    }
+                });
+            }
+        }
+
+        function common_filter() {
+            var finished_game_table = document.getElementById('finished_game');
+            var finished_watched_game_table = document.getElementById('finished_watched_game');
+
+            var finished_game_table_rows = finished_game_table.getElementsByClassName('game_row');
+            var finished_watched_game_table_rows = finished_watched_game_table.getElementsByClassName('game_row');
+
+            // Сначала нужно сделать все строки таблицы видимыми
+            for (var i = 0; i < finished_game_table_rows.length; i++) {
+                finished_game_table_rows[i].style.display = "";
+            }
+            for (var i = 0; i < finished_watched_game_table_rows.length; i++) {
+                finished_watched_game_table_rows[i].style.display = "";
+            }
+
+            // Теперь применим первичный фильтр -- по наличию цены: все игры, с ценой и без цены
+            var filter_finished_game_table_rows = [];
+            var filter_finished_watched_game_table_rows = [];
+
+            // Скрытие строк по фильтру и заполнение списка оставшимися строками
+            fill_list_from_rows(finished_game_table_rows, filter_finished_game_table_rows);
+            fill_list_from_rows(finished_watched_game_table_rows, filter_finished_watched_game_table_rows);
+
+            // Вторичный фильтр по тексту
+            var input_finished_game_value = document.getElementById('input_finished_game').value;
+            filter_rows_by_text(input_finished_game_value, filter_finished_game_table_rows);
+
+            var input_finished_watched_game_value = document.getElementById('input_finished_watched_game').value;
+            filter_rows_by_text(input_finished_watched_game_value, filter_finished_watched_game_table_rows);
+        }
+
+        // Сразу вызовим, т.к. браузер помнит состояние фильтров между обновлениями страницы
+        common_filter();
 
     </script>
 </body>

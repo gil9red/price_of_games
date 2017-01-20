@@ -326,7 +326,7 @@ INDEX_HTML_TEMPLATE = '''\
     <div id="finished_game_caption_table" class="block_caption_search">
         <div class="table_caption">Пройденные игры {{ finished_game_statistic }}</div>
         <div>
-            <input type="text" id="input_finished_game" class="input_search" onkeyup="common_filter()" placeholder="Поиск игр...">
+            <input type="search" id="input_finished_game" class="input_search" onkeyup="common_filter()" placeholder="Поиск игр...">
         </div>
     </div>
     <table id="finished_game" width="70%" border="1">
@@ -362,7 +362,7 @@ INDEX_HTML_TEMPLATE = '''\
     <div id="finished_watched_game_caption_table" class="block_caption_search">
         <div class="table_caption">Просмотренные игры {{ finished_watched_game_statistic }}</div>
         <div>
-            <input type="text" id="input_finished_watched_game" class="input_search" onkeyup="common_filter()" placeholder="Поиск игр...">
+            <input type="search" id="input_finished_watched_game" class="input_search" onkeyup="common_filter()" placeholder="Поиск игр...">
         </div>
     </div>
     <table id="finished_watched_game" width="70%" border="1">

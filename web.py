@@ -443,8 +443,6 @@ INDEX_HTML_TEMPLATE = '''\
                         tr_text += td_list[i].innerHTML.toLowerCase();
                     }
 
-                    console.log(tr_text + " vs " + text + " -> " + (tr_text.indexOf(text) == -1));
-
                     // Если нашли строку фильтра, то делаем строку видимой и прерываем перебор ячеек
                     // (если строка фильтра пустая, то поиск вернет 0 индекс, что говорит, что строка нашлась)
                     if (tr_text.indexOf(text) == -1) {

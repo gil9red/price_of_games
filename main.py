@@ -81,6 +81,7 @@ while True:
     while today <= timeout_date:
         print('\r' * 50, end='')
         print('До следующего запуска осталось {}'.format(timeout_date - today), end='')
+
         import sys
         sys.stdout.flush()
 

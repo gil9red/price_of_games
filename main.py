@@ -59,8 +59,7 @@ while True:
     # Перед выполнением, запоминаем дату и время, чтобы иметь потом представление когда
     # в последний раз выполнялось заполнение списка
     from datetime import datetime
-    today = datetime.today()
-    settings.last_run_date = today
+    settings.last_run_date = datetime.today()
 
     finished_game_list, finished_watched_game_list = get_games_list()
     print("Пройденных игр {}, просмотренных игр: {}".format(len(finished_game_list), len(finished_watched_game_list)))
@@ -76,6 +75,7 @@ while True:
 
     # Every 1 days
     from datetime import timedelta
+    today = datetime.today()
     timeout_date = today + timedelta(days=1)
 
     while today <= timeout_date:

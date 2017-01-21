@@ -76,9 +76,18 @@ while True:
 
     # Every 1 days
     from datetime import timedelta
-    while today <= today + timedelta(days=1):
+    timeout_date = today + timedelta(days=1)
+
+    while today <= timeout_date:
+        print('\r' * 50, end='')
+        print('До следующего запуска осталось {}'.format(timeout_date - today), end='')
+        import sys
+        sys.stdout.flush()
+
         # Delay 15 minutes
         import time
         time.sleep(15 * 60)
 
         today = datetime.today()
+
+    print('\n')

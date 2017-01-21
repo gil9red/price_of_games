@@ -85,9 +85,9 @@ while True:
         import sys
         sys.stdout.flush()
 
-        # Delay 15 minutes
+        # Delay 10 seconds
         import time
-        time.sleep(15 * 60)
+        time.sleep(10)
 
         today = datetime.today()
 

@@ -59,19 +59,21 @@ while True:
     # Перед выполнением, запоминаем дату и время, чтобы иметь потом представление когда
     # в последний раз выполнялось заполнение списка
     from datetime import datetime
-    settings.last_run_date = datetime.today()
-
-    finished_game_list, finished_watched_game_list = get_games_list()
-    print("Пройденных игр {}, просмотренных игр: {}".format(len(finished_game_list), len(finished_watched_game_list)))
-
-    # Добавление в базу новых игр
-    append_games_to_base(connect, finished_game_list, finished_watched_game_list)
-
-    # Заполнение цен игр
-    fill_price_of_games(connect)
-
-    # Создание дубликата базы
-    db_create_backup()
+    today = datetime.today()
+    print(today)
+    # settings.last_run_date = today
+    #
+    # finished_game_list, finished_watched_game_list = get_games_list()
+    # print("Пройденных игр {}, просмотренных игр: {}".format(len(finished_game_list), len(finished_watched_game_list)))
+    #
+    # # Добавление в базу новых игр
+    # append_games_to_base(connect, finished_game_list, finished_watched_game_list)
+    #
+    # # Заполнение цен игр
+    # fill_price_of_games(connect)
+    #
+    # # Создание дубликата базы
+    # db_create_backup()
 
     # Every 1 days
     from datetime import timedelta
@@ -79,8 +81,16 @@ while True:
     timeout_date = today + timedelta(days=1)
 
     while today <= timeout_date:
+        def str_timedelta(td):
+            mm, ss = divmod(td.seconds, 60)
+            hh, mm = divmod(mm, 60)
+            return "%d:%02d:%02d" % (hh, mm, ss)
+
+        left = timeout_date - today
+        left = str_timedelta(left)
+
         print('\r' * 50, end='')
-        print('До следующего запуска осталось {}'.format(timeout_date - today), end='')
+        print('До следующего запуска осталось {}'.format(left), end='')
 
         import sys
         sys.stdout.flush()

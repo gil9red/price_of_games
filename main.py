@@ -61,19 +61,19 @@ while True:
     from datetime import datetime
     today = datetime.today()
     print(today)
-    # settings.last_run_date = today
-    #
-    # finished_game_list, finished_watched_game_list = get_games_list()
-    # print("Пройденных игр {}, просмотренных игр: {}".format(len(finished_game_list), len(finished_watched_game_list)))
-    #
-    # # Добавление в базу новых игр
-    # append_games_to_base(connect, finished_game_list, finished_watched_game_list)
-    #
-    # # Заполнение цен игр
-    # fill_price_of_games(connect)
-    #
-    # # Создание дубликата базы
-    # db_create_backup()
+    settings.last_run_date = today
+
+    finished_game_list, finished_watched_game_list = get_games_list()
+    print("Пройденных игр {}, просмотренных игр: {}".format(len(finished_game_list), len(finished_watched_game_list)))
+
+    # Добавление в базу новых игр
+    append_games_to_base(connect, finished_game_list, finished_watched_game_list)
+
+    # Заполнение цен игр
+    fill_price_of_games(connect)
+
+    # Создание дубликата базы
+    db_create_backup()
 
     # Every 1 days
     from datetime import timedelta

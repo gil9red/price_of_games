@@ -85,10 +85,11 @@ while True:
         import sys
         sys.stdout.flush()
 
-        # Delay 10 seconds
+        # Delay 1 seconds
         import time
-        time.sleep(10)
+        time.sleep(1)
 
         today = datetime.today()
 
+    print('\r' * 50, end='')
     print('\n')

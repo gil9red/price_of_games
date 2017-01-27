@@ -10,7 +10,8 @@ FINISHED_WATCHED = 'Finished watched'
 
 BACKUP_GIST = True
 BACKUP_DIR_LIST = [
-    'backup'
+    'backup',
+    r'C:\Users\ipetrash\Dropbox\backup_price_of_games',
 ]
 
 import os
@@ -375,11 +376,24 @@ def steam_search_game_price_list(name):
 
     game_price_list = list()
 
-    import requests
-    rs = requests.get(url)
-    if not rs.ok:
-        print('Что-то пошло не так: {}\n{}'.format(rs.status_code, rs.text))
-        return game_price_list
+    while True:
+        try:
+            import requests
+            rs = requests.get(url)
+            if not rs.ok:
+                raise Exception('Status code {}, html:\n{}'.format(rs.status_code, rs.text.encode()))
+
+            break
+
+        except:
+            print('При поиске в стиме что-то пошло не так:')
+
+            import traceback
+            print(traceback.format_exc())
+
+            # Если произошла какая-то ошибка попытаемся через 5 минут попробовать снова
+            import time
+            time.sleep(5 * 60)
 
     from bs4 import BeautifulSoup
     root = BeautifulSoup(rs.content, 'lxml')

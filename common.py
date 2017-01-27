@@ -376,12 +376,14 @@ def steam_search_game_price_list(name):
 
     game_price_list = list()
 
+    # Из цикла не выйти, пока не получится скачать и распарсить страницу
     while True:
         try:
             import requests
             rs = requests.get(url)
-            if not rs.ok:
-                raise Exception('Status code {}, html:\n{}'.format(rs.status_code, rs.text.encode()))
+
+            from bs4 import BeautifulSoup
+            root = BeautifulSoup(rs.content, 'lxml')
 
             break
 
@@ -394,9 +396,6 @@ def steam_search_game_price_list(name):
             # Если произошла какая-то ошибка попытаемся через 5 минут попробовать снова
             import time
             time.sleep(5 * 60)
-
-    from bs4 import BeautifulSoup
-    root = BeautifulSoup(rs.content, 'lxml')
 
     for div in root.select('.search_result_row'):
         name = div.select_one('.title').text.strip()

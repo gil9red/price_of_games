@@ -374,6 +374,9 @@ def steam_search_game_price_list(name):
     # Дополнения с категорией Game не ищутся, например: "Pillars of Eternity: The White March Part I"
     url = 'http://store.steampowered.com/search/?term=' + name
 
+    # TODO: проверить http://store.steampowered.com/search/suggest?term=Dig+or+Die&f=games&cc=RU&l=russian&no_violence=0&no_sex=0&v=2651658
+    # По идеи, это вариант запроса рабочий, но нужно потестить на разные ситуации: игры, DLC, как выглядят игры со скидкой и без
+
     game_price_list = list()
 
     # Из цикла не выйти, пока не получится скачать и распарсить страницу

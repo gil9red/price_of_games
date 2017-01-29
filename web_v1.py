@@ -73,6 +73,8 @@ app.jinja_env.globals.update(round_price=round_price)
 
 @app.route("/")
 def index():
+    print('index')
+
     from common import FINISHED, FINISHED_WATCHED, create_connect, settings, get_duplicates
     connect = create_connect()
 
@@ -112,6 +114,8 @@ def set_price():
 
     """
 
+    print('set_price')
+
     if request.method == 'POST':
         print(request.form)
 
@@ -135,6 +139,8 @@ def rename_game():
 
     """
 
+    print('rename_game')
+
     if request.method == 'POST':
         print(request.form)
 
@@ -157,6 +163,8 @@ def check_price():
 
     """
 
+    print('check_price')
+
     if request.method == 'POST':
         print(request.form)
 
@@ -177,6 +185,8 @@ def check_price_all_non_price_games():
     Функция принудительной проверки цен всех игр для которых не получилось найти цену.
 
     """
+
+    print('check_price_all_non_price_games')
 
     from common import check_price_all_non_price_games
     check_price_all_non_price_games()

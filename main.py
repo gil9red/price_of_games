@@ -55,30 +55,10 @@ connect.commit()
 # connect.commit()
 
 
-while True:
-    # Перед выполнением, запоминаем дату и время, чтобы иметь потом представление когда
-    # в последний раз выполнялось заполнение списка
-    from datetime import datetime
-    today = datetime.today()
-    print(today)
-    settings.last_run_date = today
-
-    finished_game_list, finished_watched_game_list = get_games_list()
-    print("Пройденных игр {}, просмотренных игр: {}".format(len(finished_game_list), len(finished_watched_game_list)))
-
-    # Добавление в базу новых игр
-    append_games_to_base(connect, finished_game_list, finished_watched_game_list)
-
-    # Заполнение цен игр
-    fill_price_of_games(connect)
-
-    # Создание дубликата базы
-    db_create_backup()
-
-    # Every 1 days
+def wait(days):
     from datetime import timedelta
     today = datetime.today()
-    timeout_date = today + timedelta(days=1)
+    timeout_date = today + timedelta(days=days)
 
     while today <= timeout_date:
         def str_timedelta(td):
@@ -103,3 +83,39 @@ while True:
 
     print('\r' * 50, end='')
     print('\n')
+
+
+while True:
+    try:
+        # Перед выполнением, запоминаем дату и время, чтобы иметь потом представление когда
+        # в последний раз выполнялось заполнение списка
+        from datetime import datetime
+        today = datetime.today()
+        print(today)
+        settings.last_run_date = today
+
+        finished_game_list, finished_watched_game_list = get_games_list()
+        print("Пройденных игр {}, просмотренных игр: {}".format(len(finished_game_list), len(finished_watched_game_list)))
+
+        # Добавление в базу новых игр
+        append_games_to_base(connect, finished_game_list, finished_watched_game_list)
+
+        # Заполнение цен игр
+        fill_price_of_games(connect)
+
+        # Создание дубликата базы
+        db_create_backup()
+
+        # Every 1 days
+        wait(days=1)
+
+    except Exception:
+        import traceback
+        print('Ошибка:')
+        print(traceback.format_exc())
+
+        print('Через 5 минут попробую снова...')
+
+        # Wait 5 minutes before next attempt
+        import time
+        time.sleep(5 * 60)

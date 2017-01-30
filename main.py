@@ -95,7 +95,10 @@ while True:
         settings.last_run_date = today
 
         finished_game_list, finished_watched_game_list = get_games_list()
-        print("Пройденных игр {}, просмотренных игр: {}".format(len(finished_game_list), len(finished_watched_game_list)))
+        print("Пройденных игр {}, просмотренных игр: {}".format(
+            len(finished_game_list),
+            len(finished_watched_game_list))
+        )
 
         # Добавление в базу новых игр
         append_games_to_base(connect, finished_game_list, finished_watched_game_list)

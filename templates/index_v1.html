@@ -4,6 +4,8 @@
     <meta content='text/html; charset=UTF-8' http-equiv='Content-Type'/>
     <title>Список игр</title>
 
+    <script type="text/javascript" src="{{ url_for('static', filename='jquery-3.1.1.min.js') }}"></script>
+
     <style type="text/css">
         /* Увеличим заголовок таблиц */
         table > caption {
@@ -21,10 +23,10 @@
             border-spacing: 0px; /* Расстояние между ячейками */
         }
 
-        #info_table td {
-            padding: 1px; /* Поля вокруг текста */
-            border: 0px; /* Граница вокруг ячеек */
-        }
+            #info_table td {
+                padding: 1px; /* Поля вокруг текста */
+                border: 0px; /* Граница вокруг ячеек */
+            }
 
         /* Небольшой отступ внутри ячеек */
         td, th {
@@ -43,10 +45,6 @@
             padding: 10px; /* Поля вокруг текста */
             background: lightgray; /* Цвет фона */
             border: 1px solid black; /* Параметры рамки */
-        }
-
-        #form_set_price_error, #form_rename_game_error, #form_check_price_error  {
-            color: red;
         }
 
         #top_right_fixed_panel input[type="text"] {
@@ -101,7 +99,6 @@
         <a href="#top"><span></span>Наверх</a>
     </p>
 
-    <script type="text/javascript" src="{{ url_for('static', filename='jquery-3.1.1.min.js') }}"></script>
     <script>
     $(document).ready(function(){
         // hide #back-top first

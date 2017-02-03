@@ -4,15 +4,32 @@
 __author__ = 'ipetrash'
 
 
-DB_FILE_NAME = 'games.sqlite'
-FINISHED = 'Finished'
-FINISHED_WATCHED = 'Finished watched'
+import config
+print('config.TEST_MODE:', config.TEST_MODE)
 
-BACKUP_GIST = True
+if not config.TEST_MODE:
+    DB_FILE_NAME = 'games.sqlite'
+    BACKUP_GIST = True
+
+else:
+    DB_FILE_NAME = 'test_games.sqlite'
+    BACKUP_GIST = False
+
 BACKUP_DIR_LIST = [
     'backup',
     r'C:\Users\ipetrash\Dropbox\backup_price_of_games',
 ]
+
+print('DB_FILE_NAME:', DB_FILE_NAME)
+print('BACKUP_GIST:', BACKUP_GIST)
+if BACKUP_GIST:
+    print('BACKUP_DIR_LIST:', BACKUP_DIR_LIST)
+
+print()
+
+
+FINISHED = 'Finished'
+FINISHED_WATCHED = 'Finished watched'
 
 import os
 

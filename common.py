@@ -456,25 +456,15 @@ def smart_comparing_names(name_1, name_2):
     return name_1 == name_2
 
 
-class Singleton(type):
-    _instances = {}
-
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-
-        return cls._instances[cls]
-
-
-class Settings(metaclass=Singleton):
+class Settings:
     """
     Класс представляет собой таблицу в базе.
 
     """
 
-    def __init__(self):
+    def __init__(self, connect):
         # Сохраняем для работы с нашей таблицей в базе
-        self._connect = create_connect()
+        self._connect = connect
         self._cursor = self._connect.cursor()
 
         # Создание таблицы для хранения настроек по типу: ключ - значение
@@ -515,6 +505,3 @@ class Settings(metaclass=Singleton):
 
     def items(self):
         return self._cursor.execute('SELECT key, value FROM Settings').fetchall()
-
-
-settings = Settings()

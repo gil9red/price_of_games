@@ -75,7 +75,7 @@ app.jinja_env.globals.update(round_price=round_price)
 def index():
     print('index')
 
-    from common import FINISHED, FINISHED_WATCHED, create_connect, settings, get_duplicates
+    from common import FINISHED, FINISHED_WATCHED, create_connect, Settings, get_duplicates
     connect = create_connect()
 
     try:
@@ -90,6 +90,9 @@ def index():
         finished_games = cursor.execute(get_game_sql, (FINISHED,)).fetchall()
         finished_watched_games = cursor.execute(get_game_sql, (FINISHED_WATCHED,)).fetchall()
 
+        settings = Settings(connect=connect)
+        last_run_date = settings.last_run_date
+
     finally:
         connect.close()
 
@@ -101,7 +104,7 @@ def index():
         finished_watched_game_statistic=statistic_string(finished_watched_games),
         total_price_finished_games=total_price(finished_games),
         total_price_finished_watched_games=total_price(finished_watched_games),
-        last_run_date=settings.last_run_date,
+        last_run_date=last_run_date,
         has_duplicates=bool(get_duplicates()),
         UNKNOWN_PRICE_TITLE='Цена не задана',
     )
@@ -202,13 +205,8 @@ if __name__ == '__main__':
     app.run(
         port=5000,
 
-        # TODO: сделать возможным многопоточную работу с базой
-        # NOTE: убрал т.к. вызывало при получении запроса ошибку "sqlite3.ProgrammingError: SQLite objects created
-        # in a thread can only be used in that same thread.The object was created in thread id 9284 and this is"
-        # а разбираться с этим не было желания
-        #
-        # # Включение поддержки множества подключений
-        # threaded=True,
+        # Включение поддержки множества подключений
+        threaded=True,
     )
 
     # # Public IP

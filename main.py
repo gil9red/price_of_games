@@ -11,11 +11,13 @@ __author__ = 'ipetrash'
 """
 
 
-from common import create_connect, get_games_list, append_games_to_base, fill_price_of_games, settings, db_create_backup
+from common import create_connect, get_games_list, append_games_to_base, fill_price_of_games, Settings, db_create_backup
 
 # Создание базы и таблицы
 connect = create_connect()
 cursor = connect.cursor()
+
+settings = Settings(connect=connect)
 
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS Game (

@@ -307,13 +307,17 @@ def fill_price_of_games(connect):
 
     cursor = connect.cursor()
     games_list = set(game for (game,) in cursor.execute(sql_text).fetchall())
-    print("Нужно найти цену {} играм".format(len(games_list)))
 
-    for game in games_list:
-        check_and_fill_price_of_game(game)
+    if games_list:
+        print("Нужно найти цену {} играм".format(len(games_list)))
 
-        import time
-        time.sleep(3)
+        for game in games_list:
+            check_and_fill_price_of_game(game)
+
+            import time
+            time.sleep(3)
+    else:
+        print("Игр на проверку цены нет")
 
 
 # Регулярка вытаскивает выражения вида: 1, 2, 3 или 1-3, или римские цифры: III, IV

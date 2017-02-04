@@ -4,6 +4,8 @@
 __author__ = 'ipetrash'
 
 
+import config
+
 # TODO: окну фильтра добавить кнопку очищения его
 
 
@@ -107,6 +109,11 @@ def index():
         last_run_date=last_run_date,
         has_duplicates=bool(get_duplicates()),
         UNKNOWN_PRICE_TITLE='Цена не задана',
+
+        TEST_MODE=config.TEST_MODE,
+        DB_FILE_NAME=config.DB_FILE_NAME,
+        BACKUP_GIST=config.BACKUP_GIST,
+        BACKUP_DIR_LIST=config.BACKUP_DIR_LIST,
     )
 
 

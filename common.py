@@ -4,34 +4,11 @@
 __author__ = 'ipetrash'
 
 
-import config
-print('TEST_MODE:', config.TEST_MODE)
-
-if not config.TEST_MODE:
-    DB_FILE_NAME = 'games.sqlite'
-    BACKUP_GIST = True
-
-else:
-    DB_FILE_NAME = 'test_games.sqlite'
-    BACKUP_GIST = False
-
-BACKUP_DIR_LIST = [
-    'backup',
-    r'C:\Users\ipetrash\Dropbox\backup_price_of_games',
-]
-
-print('DB_FILE_NAME:', DB_FILE_NAME)
-print('BACKUP_GIST:', BACKUP_GIST)
-if BACKUP_GIST:
-    print('BACKUP_DIR_LIST:', BACKUP_DIR_LIST)
-
-print()
-
+import os
+from config import BACKUP_DIR_LIST, DB_FILE_NAME, BACKUP_GIST
 
 FINISHED = 'Finished'
 FINISHED_WATCHED = 'Finished watched'
-
-import os
 
 for path in BACKUP_DIR_LIST:
     if not os.path.exists(path):

@@ -16,14 +16,14 @@
             font-size: 120%;
         }
 
-        #info_table {
+        .info_table {
             width: 40%;
             border: 0px double #333; /* Рамка вокруг таблицы */
             border-collapse: separate; /* Способ отображения границы */
             border-spacing: 0px; /* Расстояние между ячейками */
         }
 
-            #info_table td {
+            .info_table td {
                 padding: 1px; /* Поля вокруг текста */
                 border: 0px; /* Граница вокруг ячеек */
             }
@@ -134,7 +134,25 @@
     Последнее обновление было: {{ last_run_date }}
     <br><br>
 
-    <table id="info_table">
+    <table class="info_table">
+        <tr>
+            <td width="180">TEST_MODE:</td><td>{{ TEST_MODE }}</td>
+        </tr>
+        <tr>
+            <td>DB_FILE_NAME:</td><td>{{ DB_FILE_NAME }}</td>
+        </tr>
+        <tr>
+            <td>BACKUP_GIST:</td><td>{{ BACKUP_GIST }}</td>
+        </tr>
+        {% if BACKUP_GIST %}
+        <tr>
+            <td>BACKUP_DIR_LIST:</td><td>{{ BACKUP_DIR_LIST }}</td>
+        </tr>
+        {% endif %}
+    </table>
+    <br><br>
+
+    <table class="info_table">
         <tr>
             <td>Итого по пройденным играм:</td><td>{{ round_price(total_price_finished_games) }} руб.</td>
             <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>

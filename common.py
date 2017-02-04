@@ -5,7 +5,7 @@ __author__ = 'ipetrash'
 
 
 import config
-print('config.TEST_MODE:', config.TEST_MODE)
+print('TEST_MODE:', config.TEST_MODE)
 
 if not config.TEST_MODE:
     DB_FILE_NAME = 'games.sqlite'

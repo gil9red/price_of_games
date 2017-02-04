@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type'/>
+    <title>Список игр</title>
+
+    <script type="text/javascript" src="{{ url_for('static', filename='jquery-3.1.1.min.js') }}"></script>
+
+    <!-- noty -->
+    <script type="text/javascript" src="{{ url_for('static', filename='jquery.noty.packaged.min.js') }}"></script>
+
+    <style type="text/css">
+        /* Увеличим заголовок таблиц */
+        table > caption {
+            font-size: 150%;
+        }
+
+        th {
+            font-size: 120%;
+        }
+
+        .info_table {
+            width: 40%;
+            border: 0px double #333; /* Рамка вокруг таблицы */
+            border-collapse: separate; /* Способ отображения границы */
+            border-spacing: 0px; /* Расстояние между ячейками */
+        }
+
+            .info_table td {
+                padding: 1px; /* Поля вокруг текста */
+                border: 0px; /* Граница вокруг ячеек */
+            }
+
+        /* Небольшой отступ внутри ячеек */
+        td, th {
+            padding: 5px;
+        }
+
+        .price_is_none {
+            background-color: lightgray;
+        }
+
+        #top_right_fixed_panel {
+            position: fixed; /* Фиксированное положение */
+            right: 10px; /* Расстояние от правого края окна браузера */
+            top: 10px; /* Расстояние сверху */
+            width: 25%;
+            padding: 10px; /* Поля вокруг текста */
+            background: lightgray; /* Цвет фона */
+            border: 1px solid black; /* Параметры рамки */
+        }
+
+        #top_right_fixed_panel input[type="text"] {
+            width: 100%;
+        }
+
+        .input_search {
+            width: 70%;
+            font-size: 16px; /* Increase font-size */
+        }
+
+        .table_caption {
+            width: 70%;
+            font-size: 150%; /* Размер шрифта в процентах */
+            text-align: center;
+        }
+
+        /* Для добавления отступов между заголовком таблицы, input поиска и самой таблицы */
+        .block_caption_search > div {
+            margin-bottom: 7px;
+        }
+
+        #back-top {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+        }
+        #back-top a {
+            width: 100px;
+            color: black;
+            display: block;
+            background-color: lightgray;
+            text-align: center;
+            font: 20px/100% Arial, Helvetica, sans-serif;
+            text-decoration: none;
+            -webkit-transition: 1s;
+            -moz-transition: 1s;
+            transition: 1s;
+            line-height: 30px;
+            -webkit-border-radius: 10px;
+            border-radius: 10px;
+        }
+        #back-top a:hover {
+            background-color: gray;
+        }
+
+    </style>
+</head>
+
+<body id="top">
+    <p id="back-top">
+        <a href="#top"><span></span>Наверх</a>
+    </p>
+
+    <script>
+    $(document).ready(function() {
+        // hide #back-top first
+        $("#back-top").hide();
+
+        // fade in #back-top
+        $(function () {
+            $(window).scroll(function () {
+                if ($(this).scrollTop() > 100) {
+                    $('#back-top').fadeIn();
+                } else {
+                    $('#back-top').fadeOut();
+                }
+            });
+
+            // scroll body to 0px on click
+            $('#back-top a').click(function () {
+                $('body,html').animate({
+                    scrollTop: 0
+                }, 800);
+                return false;
+            });
+        });
+    });
+    </script>
+
+
+    {% if has_duplicates %}
+    <p><font size="20" color="red">АХТУНГ! Найдены дубликаты!</font></p>
+    {% endif %}
+
+    Последнее обновление было: {{ last_run_date }}
+    <br><br>
+
+    <table class="info_table">
+        <tr>
+            <td width="180">TEST_MODE:</td><td>{{ TEST_MODE }}</td>
+        </tr>
+        <tr>
+            <td>DB_FILE_NAME:</td><td>{{ DB_FILE_NAME }}</td>
+        </tr>
+        <tr>
+            <td>BACKUP_GIST:</td><td>{{ BACKUP_GIST }}</td>
+        </tr>
+        {% if BACKUP_GIST %}
+        <tr>
+            <td>BACKUP_DIR_LIST:</td><td>{{ BACKUP_DIR_LIST }}</td>
+        </tr>
+        {% endif %}
+    </table>
+    <br><br>
+
+    <table class="info_table">
+        <tr>
+            <td>Итого по пройденным играм:</td><td>{{ round_price(total_price_finished_games) }} руб.</td>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td>Пройденных игр:</td><td>{{finished_games|length}}</td>
+        </tr>
+        <tr>
+            <td>Итого по просмотренным играм:</td><td>{{ round_price(total_price_finished_watched_games) }} руб.</td>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td>Просмотренных игр:</td><td>{{finished_watched_games|length}}</td>
+        </tr>
+        <tr>
+            <td>Общая сумма:</td><td>{{ round_price(total_price_finished_games + total_price_finished_watched_games) }} руб.</td>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td>Всего игр:</td><td>{{finished_games|length + finished_watched_games|length}}</td>
+        </tr>
+    </table>
+    <br>
+
+    <div id="top_right_fixed_panel">
+        <form id="form__set_price" method="post" action="/set_price">
+            <b>Установка цены у игры:</b>
+            <p>Название:<input id="form_name" type="text" name="name" required></p>
+            <p>Цена:<input id="form_price" type="text" name="price" required></p>
+            <p><input type="submit" value="Установить цену"></p>
+        </form>
+
+        <hr>
+        <form method="post" action="/rename_game">
+            <b>Изменение названия игры:</b>
+            <p>Старое название:<input id="form_old_name" type="text" name="old_name" required></p>
+            <p>Новое название:<input id="form_new_name" type="text" name="new_name" required></p>
+            <p><input type="submit" value="Изменить название"></p>
+        </form>
+
+        <hr>
+        <form method="post" action="/check_price">
+            <b>Вызов проверки цены у игры:</b>
+            <p>Название игры:<input id="form_check_price" type="text" name="name" required></p>
+            <p><input type="submit" value="Проверить цену"></p>
+        </form>
+
+        <hr>
+        <form id="form__check_price_all_non_price_games" action="/check_price_all_non_price_games">
+            <b>Вызов проверки цены у всех игр без цены:</b>
+            <p><input type="submit" value="Проверить цены всех игр"></p>
+        </form>
+
+        <hr>
+        <button onclick="document.location.href='#finished_game_caption_table'">Перейти к таблице пройденных игр</button>
+        <button onclick="document.location.href='#finished_watched_game_caption_table'">Перейти к таблице просмотренных игр</button>
+    </div>
+
+    <form>
+        <input id="radio_show_all_games" name="radio_show_game" type="radio" onclick="common_filter()" checked> Показывать все игры</input><br>
+        <input id="radio_show_games_with_price" name="radio_show_game" type="radio" onclick="common_filter()"> Показывать игры с ценой</input><br>
+        <input id="radio_show_games_without_price" name="radio_show_game" type="radio" onclick="common_filter()"> Показывать игры без цены</input>
+    </form>
+
+    <div id="finished_game_caption_table" class="block_caption_search">
+        <div class="table_caption">Пройденные игры {{ finished_game_statistic }}</div>
+        <div>
+            <input type="search" id="input_finished_game" class="input_search" onkeyup="common_filter()" placeholder="Поиск игр...">
+        </div>
+    </div>
+    <table id="finished_game" width="70%" border="1">
+        <colgroup>
+           <col span="1" style="width: 80%;">
+           <col span="1" style="width: 20%;">
+        </colgroup>
+
+        <tr>
+        {% for header in headers %}
+            <th>{{ header }}</th>
+        {% endfor %}
+        </tr>
+
+        {% for name, price in finished_games %}
+            {% if price %}
+                <tr class="game_row">
+                    <td>{{ name }}</td>
+                    <td>{{ price }}</td>
+                </tr>
+            {% else %}
+                <tr class="game_row price_is_none">
+                    <td>{{ name }}</td>
+                    <td>{{ UNKNOWN_PRICE_TITLE }}</td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+
+        <tr><td align="right">Итого:</td><td>{{ round_price(total_price_finished_games) }}</td></tr>
+    </table>
+    <br><br><br>
+
+    <div id="finished_watched_game_caption_table" class="block_caption_search">
+        <div class="table_caption">Просмотренные игры {{ finished_watched_game_statistic }}</div>
+        <div>
+            <input type="search" id="input_finished_watched_game" class="input_search" onkeyup="common_filter()" placeholder="Поиск игр...">
+        </div>
+    </div>
+    <table id="finished_watched_game" width="70%" border="1">
+        <colgroup>
+           <col span="1" style="width: 80%;">
+           <col span="1" style="width: 20%;">
+        </colgroup>
+
+        <tr>
+        {% for header in headers %}
+            <th>{{ header }}</th>
+        {% endfor %}
+        </tr>
+
+        {% for name, price in finished_watched_games %}
+            {% if price %}
+                <tr class="game_row">
+                    <td>{{ name }}</td>
+                    <td>{{ price }}</td>
+                </tr>
+            {% else %}
+                <tr class="game_row price_is_none">
+                    <td>{{ name }}</td>
+                    <td>{{ UNKNOWN_PRICE_TITLE }}</td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+
+        <tr><td align="right">Итого:</td><td>{{ round_price(total_price_finished_watched_games) }}</td></tr>
+    </table>
+
+    <script>
+    $(document).ready(function() {
+        /**
+         * Number.prototype.toMoney(n, x, s, c)
+         *
+         * @param integer n: length of decimal
+         * @param integer x: length of whole part
+         * @param mixed   s: sections delimiter
+         * @param mixed   c: decimal delimiter
+         */
+        Number.prototype.toMoney = function(n, x, s, c) {
+            var re = '\\d(?=(\\d{' + (x || 3) + '})+' + (n > 0 ? '\\D' : '$') + ')',
+                num = this.toFixed(Math.max(0, ~~n));
+
+            return (c ? num.replace('.', c) : num).replace(new RegExp(re, 'g'), '$&' + (s || ','));
+        };
+        console.log(12345678.9.toMoney(2, 3, ' ', ','));  // "12 345 678,90"
+
+
+        $("#form__set_price").submit(function() {
+            var thisForm = this;
+
+            var url = $(this).attr("action");
+            var method = $(this).attr("method");
+            if (method === undefined) {
+                method = "get";
+            }
+
+            var data = $(this).serialize();
+
+            $.ajax({
+                url: url,
+                method: method,  // HTTP метод, по умолчанию GET
+                data: data,
+                dataType: "json",  // тип данных загружаемых с сервера
+                success: function (data) {
+                    console.log(JSON.stringify(data));
+                    console.log(data);
+
+                    var type = data.status == 'ok' ? 'success' : 'warning';
+
+                    noty({
+                        text: data.text,
+                        layout: 'bottomRight',
+                        type: type,
+                        timeout: 6000,
+                    });
+
+                    // Очищение полей формы
+                    thisForm.reset();
+                }
+            });
+
+            return false;
+        });
+
+        $("#form__check_price_all_non_price_games").submit(function(){
+            var url = $(this).attr("action");
+            var method = $(this).attr("method");
+            if (method === undefined) {
+                method = "get";
+            }
+
+            $.ajax({
+                url: url, // указываем URL
+                method: method,  // HTTP метод, по умолчанию GET
+                dataType: "json",  // тип данных загружаемых с сервера
+                success: function (data) {
+                    console.log("ok!: " + JSON.stringify(data));
+                    // вешаем свой обработчик события success
+                    //$("#content").html(data)
+                }
+            });
+
+            return false;
+        });
+
+
+        // Функция перебирает строки таблицы оценивает их, и если они не подходит прячет, иначе добавляет в список.
+        // Цель -- фильтр таблицы и заполнение списка строками, оставшимися видимыми после фильтра
+        function fill_list_from_rows(rows, list) {
+            var is_radio_show_all_games_checked = document.getElementById('radio_show_all_games').checked;
+            var is_radio_show_games_with_price_checked = document.getElementById('radio_show_games_with_price').checked;
+            var is_radio_show_games_without_price_checked = document.getElementById('radio_show_games_without_price').checked;
+
+            for (var i = 0; i < rows.length; i++) {
+                var tr = rows[i];
+
+                if (is_radio_show_all_games_checked) {
+                    list.push(tr);
+
+                } else if (is_radio_show_games_with_price_checked) {
+                    // Если цена не указана и хотим видить игры с ценой
+                    if (tr.classList.contains("price_is_none")) {
+                        tr.style.display = "none";
+                    } else {
+                        list.push(tr);
+                    }
+
+                } else if (is_radio_show_games_without_price_checked) {
+                    // Если цена указана и хотим видить игры без ценой
+                    if (!tr.classList.contains("price_is_none")) {
+                        tr.style.display = "none";
+                    } else {
+                        list.push(tr);
+                    }
+                }
+            }
+        }
+
+        // Функция перебирает элементы в списке и ищет в них строку, если не найдено, прячет их строку
+        function filter_rows_by_text(text, rows) {
+            // Если значение в фильтре есть, есть смысл перебора строк для вторичной фильтрации
+            if (text != "") {
+                text = text.toLowerCase();
+
+                rows.forEach(function(tr) {
+                    // Перебор ячеек таблицы
+                    var td_list = tr.getElementsByTagName("td");
+
+                    // Строка, содержащая значения ячеек текущей строки
+                    var tr_text = "";
+                    for (var i = 0; i < td_list.length; i++) {
+                        tr_text += td_list[i].innerHTML.toLowerCase();
+                    }
+
+                    // Если нашли строку фильтра, то делаем строку видимой и прерываем перебор ячеек
+                    // (если строка фильтра пустая, то поиск вернет 0 индекс, что говорит, что строка нашлась)
+                    if (tr_text.indexOf(text) == -1) {
+                        tr.style.display = "none";
+                    }
+                });
+            }
+        }
+
+        function common_filter() {
+            var finished_game_table = document.getElementById('finished_game');
+            var finished_watched_game_table = document.getElementById('finished_watched_game');
+
+            var finished_game_table_rows = finished_game_table.getElementsByClassName('game_row');
+            var finished_watched_game_table_rows = finished_watched_game_table.getElementsByClassName('game_row');
+
+            // Сначала нужно сделать все строки таблицы видимыми
+            for (var i = 0; i < finished_game_table_rows.length; i++) {
+                finished_game_table_rows[i].style.display = "";
+            }
+            for (var i = 0; i < finished_watched_game_table_rows.length; i++) {
+                finished_watched_game_table_rows[i].style.display = "";
+            }
+
+            // Теперь применим первичный фильтр -- по наличию цены: все игры, с ценой и без цены
+            var filter_finished_game_table_rows = [];
+            var filter_finished_watched_game_table_rows = [];
+
+            // Скрытие строк по фильтру и заполнение списка оставшимися строками
+            fill_list_from_rows(finished_game_table_rows, filter_finished_game_table_rows);
+            fill_list_from_rows(finished_watched_game_table_rows, filter_finished_watched_game_table_rows);
+
+            // Вторичный фильтр по тексту
+            var input_finished_game_value = document.getElementById('input_finished_game').value;
+            filter_rows_by_text(input_finished_game_value, filter_finished_game_table_rows);
+
+            var input_finished_watched_game_value = document.getElementById('input_finished_watched_game').value;
+            filter_rows_by_text(input_finished_watched_game_value, filter_finished_watched_game_table_rows);
+        }
+
+        // Сразу вызовим, т.к. браузер помнит состояние фильтров между обновлениями страницы
+        common_filter();
+    });
+    </script>
+</body>
+</html>

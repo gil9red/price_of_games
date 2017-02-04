@@ -264,7 +264,7 @@ def append_games_to_base(connect, finished_game_list, finished_watched_game_list
 
 def check_and_fill_price_of_game(game):
     """
-    Функция ищет цену игры и при нахождении ее ставит ей цену.
+    Функция ищет цену игры и при нахождении ее ставит ей цену в базе.
 
     """
 
@@ -302,7 +302,7 @@ def check_and_fill_price_of_game(game):
         print('Не получилось найти цену игры {}, price is {}'.format(game, game_price))
         return
 
-    print('Нашли игру: {} -> {} : {}'.format(game, name, price))
+    print('Нашли игру: {} ({}) : {}'.format(game, name, price))
 
     set_price_game(game, price)
 

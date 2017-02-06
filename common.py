@@ -10,9 +10,10 @@ from config import BACKUP_DIR_LIST, DB_FILE_NAME, BACKUP_GIST
 FINISHED = 'Finished'
 FINISHED_WATCHED = 'Finished watched'
 
-for path in BACKUP_DIR_LIST:
-    if not os.path.exists(path):
-        os.mkdir(path)
+if BACKUP_GIST:
+    for path in BACKUP_DIR_LIST:
+        if not os.path.exists(path):
+            os.mkdir(path)
 
 
 def create_connect():

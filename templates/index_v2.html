@@ -231,16 +231,16 @@
         {% endfor %}
         </tr>
 
-        {% for name, price in finished_games %}
+        {% for id, name, price in finished_games %}
             {% if price %}
-                <tr class="game_row">
+                <tr game_id="{{ id }}" class="game_row">
                     <td>{{ name }}</td>
-                    <td class="price">{{ price }}</td>
+                    <td class="price price_cell">{{ price }}</td>
                 </tr>
             {% else %}
-                <tr class="game_row price_is_none">
+                <tr game_id="{{ id }}" class="game_row price_is_none">
                     <td>{{ name }}</td>
-                    <td>{{ UNKNOWN_PRICE_TITLE }}</td>
+                    <td class="price_cell">{{ UNKNOWN_PRICE_TITLE }}</td>
                 </tr>
             {% endif %}
         {% endfor %}
@@ -267,16 +267,16 @@
         {% endfor %}
         </tr>
 
-        {% for name, price in finished_watched_games %}
+        {% for id, name, price in finished_watched_games %}
             {% if price %}
-                <tr class="game_row">
+                <tr game_id="{{ id }}" class="game_row">
                     <td>{{ name }}</td>
-                    <td class="price">{{ price }}</td>
+                    <td class="price price_cell">{{ price }}</td>
                 </tr>
             {% else %}
-                <tr class="game_row price_is_none">
+                <tr game_id="{{ id }}" class="game_row price_is_none">
                     <td>{{ name }}</td>
-                    <td>{{ UNKNOWN_PRICE_TITLE }}</td>
+                    <td class="price_cell">{{ UNKNOWN_PRICE_TITLE }}</td>
                 </tr>
             {% endif %}
         {% endfor %}
@@ -397,26 +397,7 @@
             filter_rows_by_text(input_finished_watched_game_value, filter_finished_watched_game_table_rows);
         }
 
-    $(document).ready(function() {
-        // Функция возвращает строку с статистикой: сколько всего игр, сколько имеют цены, и процент.
-        // Пример: (0 / 160 (0%))
-        function statistic_for_table(table_id) {
-            var table = $(table_id);
-
-            var price_is_none_rows_number = table.find('.price_is_none').length;
-            var all_rows_number = table.find('.game_row').length;
-            var number_price_rows = all_rows_number - price_is_none_rows_number;
-            var percent = all_rows_number > 0 ? (number_price_rows / all_rows_number * 100) : 0;
-            percent = Math.round(percent);
-
-            return `(${number_price_rows} / ${all_rows_number} (${percent}%))`
-        }
-
-        // Добавление статистики о играх в таблице
-        $('.finished_game_statistic').html(statistic_for_table("#finished_game"));
-        $('.finished_watched_game_statistic').html(statistic_for_table("#finished_watched_game"));
-
-
+    function update_total_price_all_tables() {
         var total_price_of_finished_game = 0;
         $("#finished_game .price").each(function(i) {
             var price_str = $(this).text();
@@ -442,8 +423,40 @@
         $('.info_table .total_price_finished_watched_games').html(pretty_total_price_of_finished_watched_game + " руб.");
 
         $('.info_table .sum_total_price_games').html(sum_total + " руб.");
+    }
+
+    // Функция для изменения цены игры по ее id
+    function update_price_game(game_id, game_price) {
+        var css_select = `[game_id = ${game_id}] > .price_cell`;
+        console.log("update_price_game: " + css_select);
+
+        $(css_select).html(game_price)
+    }
+
+    $(document).ready(function() {
+        // Функция возвращает строку с статистикой: сколько всего игр, сколько имеют цены, и процент.
+        // Пример: (0 / 160 (0%))
+        function statistic_for_table(table_id) {
+            var table = $(table_id);
+
+            var price_is_none_rows_number = table.find('.price_is_none').length;
+            var all_rows_number = table.find('.game_row').length;
+            var number_price_rows = all_rows_number - price_is_none_rows_number;
+            var percent = all_rows_number > 0 ? (number_price_rows / all_rows_number * 100) : 0;
+            percent = Math.round(percent);
+
+            return `(${number_price_rows} / ${all_rows_number} (${percent}%))`
+        }
+
+        // Добавление статистики о играх в таблице
+        $('.finished_game_statistic').html(statistic_for_table("#finished_game"));
+        $('.finished_watched_game_statistic').html(statistic_for_table("#finished_watched_game"));
+
+        // Функция для подсчета итоговых сумм всех игр
+        update_total_price_all_tables();
 
 
+        // Обработка изменения цены конкретной игры
         $("#form__set_price").submit(function() {
             var thisForm = this;
 
@@ -460,21 +473,40 @@
                 method: method,  // HTTP метод, по умолчанию GET
                 data: data,
                 dataType: "json",  // тип данных загружаемых с сервера
-                success: function (data) {
-                    console.log(JSON.stringify(data));
+                success: function(data) {
                     console.log(data);
+                    console.log(JSON.stringify(data));
 
-                    var type = data.status == 'ok' ? 'success' : 'warning';
+                    var ok = data.status == 'ok';
+                    if (ok && data.result) {
+                        for (var i = 0; i < data.result.modify_id_games.length; i++) {
+                            var game_id = data.result.modify_id_games[i];
+                            var price = data.result.new_price;
+
+                            update_price_game(game_id, price);
+                        }
+
+                        update_total_price_all_tables();
+                    }
 
                     noty({
                         text: data.text,
                         layout: 'bottomRight',
-                        type: type,
+                        type: ok ? 'success' : 'warning',
                         timeout: 6000,
                     });
 
                     // Очищение полей формы
                     thisForm.reset();
+                },
+
+                error: function(data) {
+                    noty({
+                        text: 'На сервере произошла ошибка',
+                        layout: 'bottomRight',
+                        type: 'error',
+                        timeout: 6000,
+                    });
                 }
             });
 

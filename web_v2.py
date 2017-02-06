@@ -35,7 +35,7 @@ def index():
         cursor = connect.cursor()
 
         get_game_sql = '''
-            SELECT name, price
+            SELECT id, name, price
             FROM game
             WHERE kind = ?
             ORDER BY name
@@ -72,39 +72,34 @@ def set_price():
     """
 
     print('set_price')
+    print(request.form)
 
-    status = 'ok'
+    name = request.form['name']
+    price = request.form['price']
+    print(name, price)
 
-    # TODO: Итого нужно будет обновлять
-    #   * вызывать функцию после установки цены
+    from common import set_price_game
+    modify_id_games = set_price_game(name, price)
 
-    try:
-        if request.method == 'POST':
-            print(request.form)
+    if modify_id_games:
+        status = 'ok'
+        text = 'Игре "{0}" удачно установлена цена "{1}"'.format(name, price)
+        result = {
+            'new_price': price,
+            'modify_id_games': modify_id_games,
+        }
 
-            name = request.form['name']
-            price = request.form['price']
-            print(name, price)
-
-            from common import set_price_game
-            set_price_game(name, price)
-
-            text = 'Игре "{0}" удачно установлена цена "{1}"'.format(name, price)
-
-    except Exception as e:
-        import traceback
-        print("Error: {}\n\n{}".format(e, traceback.format_exc()))
-
-        import sys
-        func_name = sys._getframe().f_code.co_name
-
-        status = 'error'
-        text = 'На сервере произошла ошибка, метод: {}'.format(func_name)
+    else:
+        status = 'warning'
+        text = 'Игры с названием "{0}" не существует'.format(name)
+        result = None
 
     data = {
         'status': status,
         'text': text,
+        'result': result,
     }
+    print(data)
 
     from flask import jsonify
     return jsonify(data)

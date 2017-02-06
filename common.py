@@ -21,13 +21,19 @@ def create_connect():
     return sqlite3.connect(DB_FILE_NAME)
 
 
-def set_price_game(game, price):
+def set_price_game(game: str, price: str) -> list:
+    """
+    Функция найдет игры с указанным названием и изменит их цену в базе.
+    Возвращает список id игр с измененной ценой.
+
+    """
+
     game = game.strip()
     price = price.strip()
 
     if not game or not price:
         print('Не указано game ( = "{}") или price ( = "{}")'.format(game, price))
-        return
+        return []
 
     connect = create_connect()
     try:
@@ -35,8 +41,13 @@ def set_price_game(game, price):
         cursor.execute("UPDATE Game SET price = ?, modify_date = date('now') WHERE name = ?", (price, game))
         connect.commit()
 
+        # Получение id игр с указанным названием
+        modify_id_games = [id_ for (id_,) in cursor.execute("SELECT id FROM Game WHERE name = ?", (game,)).fetchall()]
+
     finally:
         connect.close()
+
+    return modify_id_games
 
 
 def rename_game(old_name, new_name):

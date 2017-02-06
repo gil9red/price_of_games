@@ -17,68 +17,11 @@ import common
 # TODO: окну фильтра добавить кнопку очищения его
 
 
-def statistic_string(games):
-    """
-    Функция возвращает строку с статистикой: сколько всего игр, сколько имеют цены, и процент.
-    Пример: (0 / 160 (0%))
-
-    """
-
-    price_number = len([(name, price) for name, price in games if price is not None])
-    number = len(games)
-
-    return '({} / {} ({:.0f}%))'.format(
-        price_number,
-        number,
-        (price_number / number * 100) if number > 0 else 0
-    )
-
-
-def total_price(games):
-    """
-    Функция подсчитает и вернет сумму цен игр в списке.
-
-    """
-
-    def get_price(price):
-        """Функция удаляет из получаемое строки все символы кроме цифровых и точки."""
-
-        try:
-            price = float(price)
-        except Exception as e:
-            print('Произошла ошибка, цена не будет участвовать в сумме')
-            print(e)
-            import traceback
-            print(traceback.format_exc())
-            price = 0
-
-        return price
-
-    total = sum(get_price(price) for _, price in games if price is not None)
-
-    # Чтобы избавиться от пустой дробной части: 50087.0 -> 50087
-    return total if total != int(total) else int(total)
-
-
 from flask import Flask, render_template, request
 app = Flask(__name__)
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
-
-
-def round_price(value):
-    try:
-        # Попытка избавиться от нуля справа, например: 50087.0 -> 50087
-        if int(value) == value:
-            return int(value)
-        else:
-            return '{:.2f}'.format(value)
-    except:
-        return '{:.2f}'.format(value)
-
-# Добавление функции внутрь шаблона
-app.jinja_env.globals.update(round_price=round_price)
 
 
 @app.route("/")
@@ -110,10 +53,6 @@ def index():
         'index_v2.html',
         headers=['Название', 'Цена (руб.)'],
         finished_games=finished_games, finished_watched_games=finished_watched_games,
-        finished_game_statistic=statistic_string(finished_games),
-        finished_watched_game_statistic=statistic_string(finished_watched_games),
-        total_price_finished_games=total_price(finished_games),
-        total_price_finished_watched_games=total_price(finished_watched_games),
         last_run_date=last_run_date,
         has_duplicates=bool(get_duplicates()),
         UNKNOWN_PRICE_TITLE='Цена не задана',
@@ -137,13 +76,7 @@ def set_price():
     status = 'ok'
 
     # TODO: Итого нужно будет обновлять
-    #   * написать на js функцию для подсчета итого
-    #   * с сервера итого не возвращать, а после загрузки body вызывать ту функцию
-    #     подсчета итого
     #   * вызывать функцию после установки цены
-    #   * у итого таблиц выставить определенный класс и при успешном подсчете суммы
-    #     выставлять цену элементам с таким классам
-    #   * Общий итого заполняется в конце, путем взятия итого таблиц
 
     try:
         if request.method == 'POST':
@@ -153,8 +86,8 @@ def set_price():
             price = request.form['price']
             print(name, price)
 
-            # from common import set_price_game
-            # set_price_game(name, price)
+            from common import set_price_game
+            set_price_game(name, price)
 
             text = 'Игре "{0}" удачно установлена цена "{1}"'.format(name, price)
 

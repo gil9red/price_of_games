@@ -156,17 +156,17 @@
 
     <table class="info_table">
         <tr>
-            <td>Итого по пройденным играм:</td><td>{{ round_price(total_price_finished_games) }} руб.</td>
+            <td>Итого по пройденным играм:</td><td class="total_price_finished_games"></td>
             <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
             <td>Пройденных игр:</td><td>{{finished_games|length}}</td>
         </tr>
         <tr>
-            <td>Итого по просмотренным играм:</td><td>{{ round_price(total_price_finished_watched_games) }} руб.</td>
+            <td>Итого по просмотренным играм:</td><td class="total_price_finished_watched_games"></td>
             <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
             <td>Просмотренных игр:</td><td>{{finished_watched_games|length}}</td>
         </tr>
         <tr>
-            <td>Общая сумма:</td><td>{{ round_price(total_price_finished_games + total_price_finished_watched_games) }} руб.</td>
+            <td>Общая сумма:</td><td class="sum_total_price_games"></td>
             <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
             <td>Всего игр:</td><td>{{finished_games|length + finished_watched_games|length}}</td>
         </tr>
@@ -214,7 +214,7 @@
     </form>
 
     <div id="finished_game_caption_table" class="block_caption_search">
-        <div class="table_caption">Пройденные игры {{ finished_game_statistic }}</div>
+        <div class="table_caption">Пройденные игры <div class="finished_game_statistic" style="display:inline-block;"></div></div>
         <div>
             <input type="search" id="input_finished_game" class="input_search" onkeyup="common_filter()" placeholder="Поиск игр...">
         </div>
@@ -235,7 +235,7 @@
             {% if price %}
                 <tr class="game_row">
                     <td>{{ name }}</td>
-                    <td>{{ price }}</td>
+                    <td class="price">{{ price }}</td>
                 </tr>
             {% else %}
                 <tr class="game_row price_is_none">
@@ -245,12 +245,12 @@
             {% endif %}
         {% endfor %}
 
-        <tr><td align="right">Итого:</td><td>{{ round_price(total_price_finished_games) }}</td></tr>
+        <tr><td align="right">Итого:</td><td class="total_price_finished_games"></td></tr>
     </table>
     <br><br><br>
 
     <div id="finished_watched_game_caption_table" class="block_caption_search">
-        <div class="table_caption">Просмотренные игры {{ finished_watched_game_statistic }}</div>
+        <div class="table_caption">Просмотренные игры <div class="finished_watched_game_statistic" style="display:inline-block;;"></div></div>
         <div>
             <input type="search" id="input_finished_watched_game" class="input_search" onkeyup="common_filter()" placeholder="Поиск игр...">
         </div>
@@ -271,7 +271,7 @@
             {% if price %}
                 <tr class="game_row">
                     <td>{{ name }}</td>
-                    <td>{{ price }}</td>
+                    <td class="price">{{ price }}</td>
                 </tr>
             {% else %}
                 <tr class="game_row price_is_none">
@@ -281,13 +281,14 @@
             {% endif %}
         {% endfor %}
 
-        <tr><td align="right">Итого:</td><td>{{ round_price(total_price_finished_watched_games) }}</td></tr>
+        <tr><td align="right">Итого:</td><td class="total_price_finished_watched_games"></td></tr>
     </table>
 
     <script>
-    $(document).ready(function() {
         /**
          * Number.prototype.toMoney(n, x, s, c)
+         *
+         * Example: 12345678.9.toMoney(2, 3, ' ', ',')  // "12 345 678,90"
          *
          * @param integer n: length of decimal
          * @param integer x: length of whole part
@@ -295,72 +296,18 @@
          * @param mixed   c: decimal delimiter
          */
         Number.prototype.toMoney = function(n, x, s, c) {
-            var re = '\\d(?=(\\d{' + (x || 3) + '})+' + (n > 0 ? '\\D' : '$') + ')',
-                num = this.toFixed(Math.max(0, ~~n));
+            var re = '\\d(?=(\\d{' + (x || 3) + '})+' + (n > 0 ? '\\D' : '$') + ')';
+            var num = this.toFixed(Math.max(0, ~~n));
 
             return (c ? num.replace('.', c) : num).replace(new RegExp(re, 'g'), '$&' + (s || ','));
         };
-        console.log(12345678.9.toMoney(2, 3, ' ', ','));  // "12 345 678,90"
 
-
-        $("#form__set_price").submit(function() {
-            var thisForm = this;
-
-            var url = $(this).attr("action");
-            var method = $(this).attr("method");
-            if (method === undefined) {
-                method = "get";
-            }
-
-            var data = $(this).serialize();
-
-            $.ajax({
-                url: url,
-                method: method,  // HTTP метод, по умолчанию GET
-                data: data,
-                dataType: "json",  // тип данных загружаемых с сервера
-                success: function (data) {
-                    console.log(JSON.stringify(data));
-                    console.log(data);
-
-                    var type = data.status == 'ok' ? 'success' : 'warning';
-
-                    noty({
-                        text: data.text,
-                        layout: 'bottomRight',
-                        type: type,
-                        timeout: 6000,
-                    });
-
-                    // Очищение полей формы
-                    thisForm.reset();
-                }
-            });
-
-            return false;
-        });
-
-        $("#form__check_price_all_non_price_games").submit(function(){
-            var url = $(this).attr("action");
-            var method = $(this).attr("method");
-            if (method === undefined) {
-                method = "get";
-            }
-
-            $.ajax({
-                url: url, // указываем URL
-                method: method,  // HTTP метод, по умолчанию GET
-                dataType: "json",  // тип данных загружаемых с сервера
-                success: function (data) {
-                    console.log("ok!: " + JSON.stringify(data));
-                    // вешаем свой обработчик события success
-                    //$("#content").html(data)
-                }
-            });
-
-            return false;
-        });
-
+        /**
+         *   Example: 12345678.9.toPrettyPrice()  // "12 345 678,90"
+         */
+        function toPrettyPrice(num) {
+            return num.toMoney(2, 3, ' ', ',');
+        }
 
         // Функция перебирает строки таблицы оценивает их, и если они не подходит прячет, иначе добавляет в список.
         // Цель -- фильтр таблицы и заполнение списка строками, оставшимися видимыми после фильтра
@@ -449,6 +396,111 @@
             var input_finished_watched_game_value = document.getElementById('input_finished_watched_game').value;
             filter_rows_by_text(input_finished_watched_game_value, filter_finished_watched_game_table_rows);
         }
+
+    $(document).ready(function() {
+        // Функция возвращает строку с статистикой: сколько всего игр, сколько имеют цены, и процент.
+        // Пример: (0 / 160 (0%))
+        function statistic_for_table(table_id) {
+            var table = $(table_id);
+
+            var price_is_none_rows_number = table.find('.price_is_none').length;
+            var all_rows_number = table.find('.game_row').length;
+            var number_price_rows = all_rows_number - price_is_none_rows_number;
+            var percent = all_rows_number > 0 ? (number_price_rows / all_rows_number * 100) : 0;
+            percent = Math.round(percent);
+
+            return `(${number_price_rows} / ${all_rows_number} (${percent}%))`
+        }
+
+        // Добавление статистики о играх в таблице
+        $('.finished_game_statistic').html(statistic_for_table("#finished_game"));
+        $('.finished_watched_game_statistic').html(statistic_for_table("#finished_watched_game"));
+
+
+        var total_price_of_finished_game = 0;
+        $("#finished_game .price").each(function(i) {
+            var price_str = $(this).text();
+            total_price_of_finished_game += parseFloat(price_str);
+        });
+
+        var total_price_of_finished_watched_game = 0;
+        $("#finished_watched_game .price").each(function(i) {
+            var price_str = $(this).text();
+            total_price_of_finished_watched_game += parseFloat(price_str);
+        });
+
+        var pretty_total_price_of_finished_game = toPrettyPrice(total_price_of_finished_game);
+        var pretty_total_price_of_finished_watched_game = toPrettyPrice(total_price_of_finished_watched_game);
+
+        var sum_total = toPrettyPrice(total_price_of_finished_game + total_price_of_finished_watched_game);
+
+        // Установка итого цен
+        $('#finished_game .total_price_finished_games').html(pretty_total_price_of_finished_game);
+        $('.info_table .total_price_finished_games').html(pretty_total_price_of_finished_game + " руб.");
+
+        $('#finished_watched_game .total_price_finished_watched_games').html(pretty_total_price_of_finished_watched_game);
+        $('.info_table .total_price_finished_watched_games').html(pretty_total_price_of_finished_watched_game + " руб.");
+
+        $('.info_table .sum_total_price_games').html(sum_total + " руб.");
+
+
+        $("#form__set_price").submit(function() {
+            var thisForm = this;
+
+            var url = $(this).attr("action");
+            var method = $(this).attr("method");
+            if (method === undefined) {
+                method = "get";
+            }
+
+            var data = $(this).serialize();
+
+            $.ajax({
+                url: url,
+                method: method,  // HTTP метод, по умолчанию GET
+                data: data,
+                dataType: "json",  // тип данных загружаемых с сервера
+                success: function (data) {
+                    console.log(JSON.stringify(data));
+                    console.log(data);
+
+                    var type = data.status == 'ok' ? 'success' : 'warning';
+
+                    noty({
+                        text: data.text,
+                        layout: 'bottomRight',
+                        type: type,
+                        timeout: 6000,
+                    });
+
+                    // Очищение полей формы
+                    thisForm.reset();
+                }
+            });
+
+            return false;
+        });
+
+        $("#form__check_price_all_non_price_games").submit(function(){
+            var url = $(this).attr("action");
+            var method = $(this).attr("method");
+            if (method === undefined) {
+                method = "get";
+            }
+
+            $.ajax({
+                url: url, // указываем URL
+                method: method,  // HTTP метод, по умолчанию GET
+                dataType: "json",  // тип данных загружаемых с сервера
+                success: function (data) {
+                    console.log("ok!: " + JSON.stringify(data));
+                    // вешаем свой обработчик события success
+                    //$("#content").html(data)
+                }
+            });
+
+            return false;
+        });
 
         // Сразу вызовим, т.к. браузер помнит состояние фильтров между обновлениями страницы
         common_filter();

@@ -78,15 +78,16 @@ def index():
     print('index')
 
     from common import create_connect, Settings, get_duplicates, get_finished_games, get_finished_watched_games
+
+    finished_games = get_finished_games()
+    finished_games = [(name, price) for _, name, price in finished_games]
+
+    finished_watched_games = get_finished_watched_games()
+    finished_watched_games = [(name, price) for _, name, price in finished_watched_games]
+
     connect = create_connect()
 
     try:
-        finished_games = get_finished_games()
-        finished_games = [(name, price) for _, name, price in finished_games]
-
-        finished_watched_games = get_finished_watched_games()
-        finished_watched_games = [(name, price) for _, name, price in finished_watched_games]
-
         settings = Settings(connect=connect)
         last_run_date = settings.last_run_date
 

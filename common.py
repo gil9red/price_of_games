@@ -7,18 +7,76 @@ __author__ = 'ipetrash'
 import os
 from config import BACKUP_DIR_LIST, DB_FILE_NAME, BACKUP_GIST
 
+
+class WebUserAlertException(Exception):
+    """
+    Исключение, которое будет показано пользователю на странице.
+
+    Работает только для v2.
+
+    """
+
+
 FINISHED = 'Finished'
 FINISHED_WATCHED = 'Finished watched'
+
 
 if BACKUP_GIST:
     for path in BACKUP_DIR_LIST:
         if not os.path.exists(path):
-            os.mkdir(path)
+            try:
+                os.mkdir(path)
+
+            except FileNotFoundError as e:
+                print(e)
+                import traceback
+                print(traceback.format_exc())
 
 
 def create_connect():
     import sqlite3
     return sqlite3.connect(DB_FILE_NAME)
+
+
+def get_games_by_kind(kind: str) -> [(int, str, str)]:
+    """
+    Функция возвращает список игр как кортеж из (id, name, price)
+
+    """
+
+    connect = create_connect()
+
+    try:
+        cursor = connect.cursor()
+
+        get_game_sql = '''
+            SELECT id, name, price
+            FROM game
+            WHERE kind = ?
+            ORDER BY name
+        '''
+        return cursor.execute(get_game_sql, (kind,)).fetchall()
+
+    finally:
+        connect.close()
+
+
+def get_finished_games() -> [(int, str, str)]:
+    """
+    Функция возвращает список завершенных игр как кортеж из (id, name, price)
+
+    """
+
+    return get_games_by_kind(FINISHED)
+
+
+def get_finished_watched_games() -> [(int, str, str)]:
+    """
+    Функция возвращает список просмотренных игр как кортеж из (id, name, price)
+
+    """
+
+    return get_games_by_kind(FINISHED_WATCHED)
 
 
 def set_price_game(game: str, price: str) -> list:
@@ -32,8 +90,9 @@ def set_price_game(game: str, price: str) -> list:
     price = price.strip()
 
     if not game or not price:
-        print('Не указано game ( = "{}") или price ( = "{}")'.format(game, price))
-        return []
+        error_text = 'Не указано game ( = "{}") или price ( = "{}")'.format(game, price)
+        print(error_text)
+        raise WebUserAlertException(error_text)
 
     connect = create_connect()
     try:
@@ -42,21 +101,26 @@ def set_price_game(game: str, price: str) -> list:
         connect.commit()
 
         # Получение id игр с указанным названием
-        modify_id_games = [id_ for (id_,) in cursor.execute("SELECT id FROM Game WHERE name = ?", (game,)).fetchall()]
+        return [id_ for (id_,) in cursor.execute("SELECT id FROM Game WHERE name = ?", (game,)).fetchall()]
 
     finally:
         connect.close()
 
-    return modify_id_games
 
+def rename_game(old_name: str, new_name: str) -> list:
+    """
+    Функция меняет название указанной игры и возвращает список id игр, у которых
+    было изменено название.
 
-def rename_game(old_name, new_name):
+    """
+
     old_name = old_name.strip()
     new_name = new_name.strip()
 
     if not old_name or not new_name:
-        print('Не указано old_name ( = "{}") или new_name ( = "{}")'.format(old_name, new_name))
-        return
+        error_text = 'Не указано old_name ( = "{}") или new_name ( = "{}")'.format(old_name, new_name)
+        print(error_text)
+        raise WebUserAlertException(error_text)
 
     connect = create_connect()
     try:
@@ -64,14 +128,18 @@ def rename_game(old_name, new_name):
 
         has = cursor.execute("SELECT 1 FROM Game WHERE name = ?", (new_name,)).fetchone()
         if has:
-            print('Нельзя переименовать "{}", т.к. имя "{}" уже занято'.format(old_name, new_name))
-            return
+            error_text = 'Нельзя переименовать "{}", т.к. имя "{}" уже занято'.format(old_name, new_name)
+            print(error_text)
+            raise WebUserAlertException(error_text)
 
         cursor.execute("UPDATE Game SET name = ? WHERE name = ?", (new_name, old_name))
         connect.commit()
 
-        # Попытаемся после переименовани игры сразу найти ее цену
-        check_and_fill_price_of_game(new_name)
+        # # Попытаемся после переименовани игры сразу найти ее цену
+        # check_and_fill_price_of_game(new_name)
+
+        # Получение id игр с указанным названием
+        return [id_ for (id_,) in cursor.execute("SELECT id FROM Game WHERE name = ?", (new_name,)).fetchall()]
 
     finally:
         connect.close()

@@ -77,20 +77,15 @@ app.jinja_env.globals.update(round_price=round_price)
 def index():
     print('index')
 
-    from common import FINISHED, FINISHED_WATCHED, create_connect, Settings, get_duplicates
+    from common import create_connect, Settings, get_duplicates, get_finished_games, get_finished_watched_games
     connect = create_connect()
 
     try:
-        cursor = connect.cursor()
+        finished_games = get_finished_games()
+        finished_games = [(name, price) for _, name, price in finished_games]
 
-        get_game_sql = '''
-            SELECT name, price
-            FROM game
-            WHERE kind = ?
-            ORDER BY name
-        '''
-        finished_games = cursor.execute(get_game_sql, (FINISHED,)).fetchall()
-        finished_watched_games = cursor.execute(get_game_sql, (FINISHED_WATCHED,)).fetchall()
+        finished_watched_games = get_finished_watched_games()
+        finished_watched_games = [(name, price) for _, name, price in finished_watched_games]
 
         settings = Settings(connect=connect)
         last_run_date = settings.last_run_date

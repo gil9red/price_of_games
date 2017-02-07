@@ -9,8 +9,6 @@ import os
 os.environ['TEST_MODE'] = 'True'
 
 import config
-
-
 import common
 
 
@@ -28,20 +26,12 @@ logging.basicConfig(level=logging.DEBUG)
 def index():
     print('index')
 
-    from common import FINISHED, FINISHED_WATCHED, create_connect, Settings, get_duplicates
+    from common import create_connect, Settings, get_duplicates, get_finished_games, get_finished_watched_games
     connect = create_connect()
 
     try:
-        cursor = connect.cursor()
-
-        get_game_sql = '''
-            SELECT id, name, price
-            FROM game
-            WHERE kind = ?
-            ORDER BY name
-        '''
-        finished_games = cursor.execute(get_game_sql, (FINISHED,)).fetchall()
-        finished_watched_games = cursor.execute(get_game_sql, (FINISHED_WATCHED,)).fetchall()
+        finished_games = get_finished_games()
+        finished_watched_games = get_finished_watched_games()
 
         settings = Settings(connect=connect)
         last_run_date = settings.last_run_date
@@ -74,24 +64,36 @@ def set_price():
     print('set_price')
     print(request.form)
 
-    name = request.form['name']
-    price = request.form['price']
-    print(name, price)
+    try:
+        if 'name' not in request.form or 'price' not in request.form:
+            status = 'warning'
+            text = 'В запросе должны присутствовать параметры "name" и "price"'
+            result = None
 
-    from common import set_price_game
-    modify_id_games = set_price_game(name, price)
+        else:
+            name = request.form['name']
+            price = request.form['price']
+            print(name, price)
 
-    if modify_id_games:
-        status = 'ok'
-        text = 'Игре "{0}" удачно установлена цена "{1}"'.format(name, price)
-        result = {
-            'new_price': price,
-            'modify_id_games': modify_id_games,
-        }
+            from common import set_price_game
+            modify_id_games = set_price_game(name, price)
 
-    else:
+            if modify_id_games:
+                status = 'ok'
+                text = 'Игре "{}" установлена цена "{}"'.format(name, price)
+                result = {
+                    'new_price': price,
+                    'modify_id_games': modify_id_games,
+                }
+
+            else:
+                status = 'warning'
+                text = 'Игры с названием "{}" не существует'.format(name)
+                result = None
+
+    except common.WebUserAlertException as e:
         status = 'warning'
-        text = 'Игры с названием "{0}" не существует'.format(name)
+        text = str(e)
         result = None
 
     data = {
@@ -114,21 +116,51 @@ def rename_game():
     """
 
     print('rename_game')
+    print(request.form)
+    print(request.args)
 
-    if request.method == 'POST':
-        print(request.form)
-        print(request.args)
+    try:
+        if 'old_name' not in request.form or 'new_name' not in request.form:
+            status = 'warning'
+            text = 'В запросе должны присутствовать параметры "old_name" и "new_name"'
+            result = None
 
-        # if 'old_name' in request.form and 'new_name' in request.form:
-        #     old_name = request.form['old_name']
-        #     new_name = request.form['new_name']
-        #     print(old_name, new_name)
-        #
-        #     from common import rename_game
-        #     rename_game(old_name, new_name)
+        else:
+            old_name = request.form['old_name']
+            new_name = request.form['new_name']
+            print(old_name, new_name)
 
-    from flask import redirect
-    return redirect("/")
+            from common import rename_game
+            modify_id_games = rename_game(old_name, new_name)
+
+            if modify_id_games:
+                status = 'ok'
+                text = 'Игра "{}" переименована в "{}"'.format(old_name, new_name)
+                result = {
+                    'new_name': new_name,
+                    # 'new_price': new_price,
+                    'modify_id_games': modify_id_games,
+                }
+
+            else:
+                status = 'warning'
+                text = 'Игры с названием "{0}" не существует'.format(old_name)
+                result = None
+
+    except common.WebUserAlertException as e:
+        status = 'warning'
+        text = str(e)
+        result = None
+
+    data = {
+        'status': status,
+        'text': text,
+        'result': result,
+    }
+    print(data)
+
+    from flask import jsonify
+    return jsonify(data)
 
 
 @app.route("/check_price", methods=['POST'])

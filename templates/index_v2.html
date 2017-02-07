@@ -179,17 +179,17 @@
         <tr>
             <td>Итого по пройденным играм:</td><td class="total_price_finished_games"></td>
             <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-            <td>Пройденных игр:</td><td>{{finished_games|length}}</td>
+            <td>Пройденных игр:</td><td class="number_finished_games"></td>
         </tr>
         <tr>
             <td>Итого по просмотренным играм:</td><td class="total_price_finished_watched_games"></td>
             <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-            <td>Просмотренных игр:</td><td>{{finished_watched_games|length}}</td>
+            <td>Просмотренных игр:</td><td class="number_finished_watched_games"></td>
         </tr>
         <tr>
             <td>Общая сумма:</td><td class="sum_total_price_games"></td>
             <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-            <td>Всего игр:</td><td>{{finished_games|length + finished_watched_games|length}}</td>
+            <td>Всего игр:</td><td class="sum_number_games"></td>
         </tr>
     </table>
     <br>
@@ -246,11 +246,12 @@
            <col span="1" style="width: 20%;">
         </colgroup>
 
-        <tr>
-        {% for header in headers %}
-            <th>{{ header }}</th>
-        {% endfor %}
-        </tr>
+        <tbody>
+            <tr>
+            {% for header in headers %}
+                <th>{{ header }}</th>
+            {% endfor %}
+            </tr>
 
         {% for id, name, price in finished_games %}
             {% if price %}
@@ -266,7 +267,8 @@
             {% endif %}
         {% endfor %}
 
-        <tr><td align="right">Итого:</td><td class="total_price_finished_games"></td></tr>
+            <tr><td align="right">Итого:</td><td class="total_price_finished_games"></td></tr>
+        </tbody>
     </table>
     <br><br><br>
 
@@ -282,27 +284,29 @@
            <col span="1" style="width: 20%;">
         </colgroup>
 
-        <tr>
-        {% for header in headers %}
-            <th>{{ header }}</th>
-        {% endfor %}
-        </tr>
+        <tbody>
+            <tr>
+            {% for header in headers %}
+                <th>{{ header }}</th>
+            {% endfor %}
+            </tr>
 
-        {% for id, name, price in finished_watched_games %}
-            {% if price %}
-                <tr game_id="{{ id }}" class="game_row">
-                    <td>{{ name }}</td>
-                    <td class="price price_cell">{{ price }}</td>
-                </tr>
-            {% else %}
-                <tr game_id="{{ id }}" class="game_row price_is_none">
-                    <td>{{ name }}</td>
-                    <td class="price_cell">{{ UNKNOWN_PRICE_TITLE }}</td>
-                </tr>
-            {% endif %}
-        {% endfor %}
+            {% for id, name, price in finished_watched_games %}
+                {% if price %}
+                    <tr game_id="{{ id }}" class="game_row">
+                        <td>{{ name }}</td>
+                        <td class="price price_cell">{{ price }}</td>
+                    </tr>
+                {% else %}
+                    <tr game_id="{{ id }}" class="game_row price_is_none">
+                        <td>{{ name }}</td>
+                        <td class="price_cell">{{ UNKNOWN_PRICE_TITLE }}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
 
-        <tr><td align="right">Итого:</td><td class="total_price_finished_watched_games"></td></tr>
+            <tr><td align="right">Итого:</td><td class="total_price_finished_watched_games"></td></tr>
+        </tbody>
     </table>
 
     <script>
@@ -454,28 +458,107 @@
         $(css_select).html(game_price)
     }
 
-    $(document).ready(function() {
-        // Функция возвращает строку с статистикой: сколько всего игр, сколько имеют цены, и процент.
-        // Пример: (0 / 160 (0%))
-        function statistic_for_table(table_id) {
-            var table = $(table_id);
+    function fillTable(tableId, totalClass, items) {
+        console.log("fillTable from " + tableId + ", totalClass=" + totalClass + ", items: " + JSON.stringify(items));
 
-            var price_is_none_rows_number = table.find('.price_is_none').length;
-            var all_rows_number = table.find('.game_row').length;
-            var number_price_rows = all_rows_number - price_is_none_rows_number;
-            var percent = all_rows_number > 0 ? (number_price_rows / all_rows_number * 100) : 0;
-            percent = Math.round(percent);
+        // Очищение содержимого таблицы
+        $(tableId + ' > tbody').remove();
 
-            return `(${number_price_rows} / ${all_rows_number} (${percent}%))`
+        var tbody = $('<tbody><tr><th>Название</th><th>Цена (руб.)</th></tr></tbody>');
+
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+
+            var id = item[0];
+            var name = item[1];
+            var price = item[2];
+
+            var tr = $('<tr class="game_row"></tr>');
+            tr.attr("game_id", id);
+
+            var tdName = $('<td></td>').text(name);
+            var tdPrice = $('<td class="price_cell"></td>').text(price);
+
+            if (price == null) {
+                tr.addClass('price_is_none');
+                tdPrice.text('Цена не задана');
+
+            } else {
+                tdPrice.addClass('price');
+            }
+
+            tr.append(tdName);
+            tr.append(tdPrice);
+
+            tbody.append(tr);
         }
 
-        // Добавление статистики о играх в таблице
-        $('.finished_game_statistic').html(statistic_for_table("#finished_game"));
-        $('.finished_watched_game_statistic').html(statistic_for_table("#finished_watched_game"));
+        tbody.append('<tr><td align="right">Итого:</td><td class="' + totalClass + '"></td></tr>');
 
-        // Функция для подсчета итоговых сумм всех игр
-        update_total_price_all_tables();
+        $(tableId).append(tbody);
+    }
 
+    // Функция возвращает строку с статистикой: сколько всего игр, сколько имеют цены, и процент.
+    // Пример: (0 / 160 (0%))
+    function statistic_for_table(table_id) {
+        var table = $(table_id);
+
+        var price_is_none_rows_number = table.find('.price_is_none').length;
+        var all_rows_number = table.find('.game_row').length;
+        var number_price_rows = all_rows_number - price_is_none_rows_number;
+        var percent = all_rows_number > 0 ? (number_price_rows / all_rows_number * 100) : 0;
+        percent = Math.round(percent);
+
+        return `(${number_price_rows} / ${all_rows_number} (${percent}%))`
+    }
+
+    // Функция загружает все игры, перезаполняет таблицы игр, подсчитывает итого и статистику
+    function load_tables() {
+        $.ajax({
+            url: '/get_games',
+            dataType: "json",  // тип данных загружаемых с сервера
+            success: function(data) {
+                console.log(data);
+                console.log(JSON.stringify(data));
+
+                var FINISHED = 'Finished';
+                var FINISHED_WATCHED = 'Finished watched';
+
+                var finished_games = data[FINISHED];
+                var finished_watched_games = data[FINISHED_WATCHED];
+
+                fillTable('#finished_game', 'total_price_finished_games', finished_games);
+                fillTable('#finished_watched_game', 'total_price_finished_watched_games', finished_watched_games);
+
+                // Добавление статистики о играх в таблице
+                $('.finished_game_statistic').html(statistic_for_table("#finished_game"));
+                $('.finished_watched_game_statistic').html(statistic_for_table("#finished_watched_game"));
+
+                // Добавление статистики о количестве игр в таблицах
+                $('.number_finished_games').text(finished_games.length);
+                $('.number_finished_watched_games').text(finished_watched_games.length);
+                $('.sum_number_games').text(finished_games.length + finished_watched_games.length);
+
+                // Функция для подсчета итоговых сумм всех игр
+                update_total_price_all_tables();
+
+                // Применение текущего фильтра таблиц
+                common_filter();
+            },
+
+            error: function(data) {
+                noty({
+                    text: 'Не удалось загрузить игры: на сервере произошла ошибка',
+                    layout: 'bottomRight',
+                    type: 'error',
+                    timeout: 6000,
+                });
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        load_tables();
 
         // Обработка изменения цены конкретной игры
         $("#form__set_price").submit(function() {
@@ -559,16 +642,11 @@
 
                     var ok = data.status == 'ok';
                     if (ok && data.result) {
-/*
-                        for (var i = 0; i < data.result.modify_id_games.length; i++) {
-                            var game_id = data.result.modify_id_games[i];
-                            var price = data.result.new_price;
-
-                            update_price_game(game_id, price);
-                        }
-
-                        update_total_price_all_tables();
-*/
+                        // Т.к. после переименования игры ее местоположение в таблице может поменяться
+                        // ведь приходят уже отсортированные игры и то, что переименование игры
+                        // вызывает проверку ее цены, то пойду простым путем и просто перезагружу
+                        // все игры из базы
+                        load_tables();
                     }
 
                     noty({
@@ -579,7 +657,7 @@
                     });
 
                     // Очищение полей формы
-//                    thisForm.reset();
+                    thisForm.reset();
                 },
 
                 error: function(data) {
@@ -625,9 +703,6 @@
 
             return false;
         });
-
-        // Сразу вызовим, т.к. браузер помнит состояние фильтров между обновлениями страницы
-        common_filter();
     });
     </script>
 </body>

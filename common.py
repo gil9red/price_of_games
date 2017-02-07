@@ -135,6 +135,7 @@ def rename_game(old_name: str, new_name: str) -> list:
         cursor.execute("UPDATE Game SET name = ? WHERE name = ?", (new_name, old_name))
         connect.commit()
 
+        # TODO: возвращать инфу об успехе
         # # Попытаемся после переименовани игры сразу найти ее цену
         # check_and_fill_price_of_game(new_name)
 

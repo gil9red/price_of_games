@@ -129,11 +129,15 @@ def rename_game():
             print(old_name, new_name)
 
             from common import rename_game
-            modify_id_games = rename_game(old_name, new_name)
-
-            if modify_id_games:
+            result_rename = rename_game(old_name, new_name)
+            if result_rename:
                 status = 'ok'
                 text = 'Игра "{}" переименована в "{}"'.format(old_name, new_name)
+
+                # Возможно, после переименования игры мы смогли найти ее цену...
+                price = result_rename['price']
+                if price is not None:
+                    text += ' и найдена ее цена: "{}"'.format(price)
 
                 # Просто без напряга возвращаем весь список и на странице заменяем все игры
                 from common import FINISHED, FINISHED_WATCHED, get_finished_games, get_finished_watched_games
@@ -141,12 +145,6 @@ def rename_game():
                     FINISHED: get_finished_games(),
                     FINISHED_WATCHED: get_finished_watched_games(),
                 }
-
-                # result = {
-                #     'new_name': new_name,
-                #     # 'new_price': new_price,
-                #     'modify_id_games': modify_id_games,
-                # }
 
             else:
                 status = 'warning'
@@ -177,19 +175,48 @@ def check_price():
     """
 
     print('check_price')
+    print(request.form)
 
-    # if request.method == 'POST':
-    #     print(request.form)
-    #
-    #     if 'name' in request.form:
-    #         name = request.form['name']
-    #         print(name)
-    #
-    #         from common import check_and_fill_price_of_game
-    #         check_and_fill_price_of_game(name)
+    try:
+        if 'name' not in request.form:
+            status = 'warning'
+            text = 'В запросе должен присутствовать параметр "name"'
+            result = None
 
-    from flask import redirect
-    return redirect("/")
+        else:
+            name = request.form['name']
+            print(name)
+
+            from common import check_and_fill_price_of_game
+            id_games_with_changed_price, price = check_and_fill_price_of_game(name)
+
+            if price is None:
+                status = 'ok'
+                text = 'Не получилось найти цену для игры "{}"'.format(name)
+                result = {
+                    'new_price': price,
+                    'id_games_with_changed_price': id_games_with_changed_price,
+                }
+
+            else:
+                status = 'ok'
+                text = 'Для игры "{}" найдена и установлена цена: "{}"'.format(name, price)
+                result = None
+
+    except common.WebUserAlertException as e:
+        status = 'warning'
+        text = str(e)
+        result = None
+
+    data = {
+        'status': status,
+        'text': text,
+        'result': result,
+    }
+    print(data)
+
+    from flask import jsonify
+    return jsonify(data)
 
 
 @app.route("/check_price_all_non_price_games")

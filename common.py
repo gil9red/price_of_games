@@ -79,6 +79,23 @@ def get_finished_watched_games() -> [(int, str, str)]:
     return get_games_by_kind(FINISHED_WATCHED)
 
 
+def get_id_games_by_name(game_name: str) -> list:
+    """
+    Функция возвращает список id игр.
+
+    """
+
+    connect = create_connect()
+    try:
+        cursor = connect.cursor()
+
+        # Получение id игр с указанным названием
+        return [id_ for (id_,) in cursor.execute("SELECT id FROM Game WHERE name = ?", (game_name,)).fetchall()]
+
+    finally:
+        connect.close()
+
+
 def set_price_game(game: str, price: str) -> list:
     """
     Функция найдет игры с указанным названием и изменит их цену в базе.
@@ -101,16 +118,15 @@ def set_price_game(game: str, price: str) -> list:
         connect.commit()
 
         # Получение id игр с указанным названием
-        return [id_ for (id_,) in cursor.execute("SELECT id FROM Game WHERE name = ?", (game,)).fetchall()]
+        return get_id_games_by_name(game)
 
     finally:
         connect.close()
 
 
-def rename_game(old_name: str, new_name: str) -> list:
+def rename_game(old_name: str, new_name: str) -> dict:
     """
-    Функция меняет название указанной игры и возвращает список id игр, у которых
-    было изменено название.
+    Функция меняет название указанной игры и возвращает словарь с результатом работы.
 
     """
 
@@ -135,12 +151,19 @@ def rename_game(old_name: str, new_name: str) -> list:
         cursor.execute("UPDATE Game SET name = ? WHERE name = ?", (new_name, old_name))
         connect.commit()
 
-        # TODO: возвращать инфу об успехе
-        # # Попытаемся после переименовани игры сразу найти ее цену
-        # check_and_fill_price_of_game(new_name)
-
         # Получение id игр с указанным названием
-        return [id_ for (id_,) in cursor.execute("SELECT id FROM Game WHERE name = ?", (new_name,)).fetchall()]
+        id_games_with_changed_name = get_id_games_by_name(new_name)
+
+        # Попытаемся после переименования игры сразу найти ее цену
+        id_games_with_changed_price, price = check_and_fill_price_of_game(new_name)
+
+        result = {
+            'id_games_with_changed_name': id_games_with_changed_name,
+            'id_games_with_changed_price': id_games_with_changed_price,
+            'new_name': new_name,
+            'price': price,
+        }
+        return result
 
     finally:
         connect.close()
@@ -320,9 +343,10 @@ def append_games_to_base(connect, finished_game_list, finished_watched_game_list
         print()
 
 
-def check_and_fill_price_of_game(game):
+def check_and_fill_price_of_game(game) -> (list, str):
     """
     Функция ищет цену игры и при нахождении ее ставит ей цену в базе.
+    Возвращает кортеж из списка id игр с измененной ценой и саму цену.
 
     """
 
@@ -330,7 +354,7 @@ def check_and_fill_price_of_game(game):
 
     if not game:
         print('Не указано game ( = "{}")'.format(game))
-        return
+        return list(), None
 
     game_price = None
 
@@ -358,11 +382,10 @@ def check_and_fill_price_of_game(game):
     if game_price == 0 or game_price is None:
         # TODO: заполнять вручную или искать на других сайтах цену
         print('Не получилось найти цену игры {}, price is {}'.format(game, game_price))
-        return
+        return list(), None
 
-    print('Нашли игру: {} ({}) : {}'.format(game, name, price))
-
-    set_price_game(game, price)
+    print('Нашли игру: {} ({}) : {}'.format(game, name, game_price))
+    return set_price_game(game, game_price), game_price
 
 
 def fill_price_of_games(connect):

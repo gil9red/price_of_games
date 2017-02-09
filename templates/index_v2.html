@@ -629,13 +629,15 @@
 
                     var ok = data.status == 'ok';
                     if (ok && data.result) {
+                        var price = data.result.new_price;
+
                         for (var i = 0; i < data.result.modify_id_games.length; i++) {
                             var game_id = data.result.modify_id_games[i];
-                            var price = data.result.new_price;
 
                             update_price_game(game_id, price);
                         }
 
+                        // Пересчет цены всех игр
                         update_total_price_all_tables();
                     }
 
@@ -685,7 +687,6 @@
                     console.log(data);
                     console.log(JSON.stringify(data));
 
-
                     var ok = data.status == 'ok';
                     if (ok && data.result) {
                         // Т.к. после переименования игры ее местоположение в таблице может поменяться
@@ -722,7 +723,6 @@
 
         // Обработка проверки цены игры
         $("#form__check_price").submit(function() {
-        /*
             var thisForm = this;
 
             var url = $(this).attr("action");
@@ -742,14 +742,19 @@
                     console.log(data);
                     console.log(JSON.stringify(data));
 
-
                     var ok = data.status == 'ok';
                     if (ok && data.result) {
-                        // Т.к. после переименования игры ее местоположение в таблице может поменяться
-                        // ведь приходят уже отсортированные игры и то, что переименование игры
-                        // вызывает проверку ее цены, то пойду простым путем и просто перезагружу
-                        // все игры из базы
-                        load_tables();
+                        var id_games = data.result.id_games_with_changed_price;
+                        var price = data.result.new_price;
+
+                        for (var i = 0; i < id_games.length; i++) {
+                            var game_id = id_games[i];
+
+                            update_price_game(game_id, price);
+                        }
+
+                        // Пересчет цены всех игр
+                        update_total_price_all_tables();
                     }
 
                     noty({
@@ -772,27 +777,45 @@
                     });
                 }
             });
-            */
 
             return false;
         });
 
 
-        $("#form__check_price_all_non_price_games").submit(function(){
+        $("#form__check_price_all_non_price_games").submit(function() {
             var url = $(this).attr("action");
             var method = $(this).attr("method");
             if (method === undefined) {
                 method = "get";
             }
 
+            var data = $(this).serialize();
+
             $.ajax({
-                url: url, // указываем URL
+                url: url,
                 method: method,  // HTTP метод, по умолчанию GET
+                data: data,
                 dataType: "json",  // тип данных загружаемых с сервера
-                success: function (data) {
-                    console.log("ok!: " + JSON.stringify(data));
-                    // вешаем свой обработчик события success
-                    //$("#content").html(data)
+                success: function(data) {
+                    console.log(data);
+                    console.log(JSON.stringify(data));
+
+
+                    var ok = data.status == 'ok';
+                    if (ok && data.result) {
+                        // TODO: Найти игры и поменять их цены
+                    }
+
+                    // TODO: при любом исходе сообщить результат
+                    // TODO: можно как статистику сделать: сколько игр без цены,
+                    // для скольких найдена цена и ниже список:
+                    //     <Игра> -> <Цена>
+                    noty({
+                        text: data.text,
+                        layout: 'bottomRight',
+                        type: ok ? 'success' : 'warning',
+                        timeout: 6000,
+                    });
                 },
 
                 error: function(data) {

@@ -4,10 +4,10 @@
     <meta content='text/html; charset=UTF-8' http-equiv='Content-Type'/>
     <title>Список игр</title>
 
-    <script type="text/javascript" src="{{ url_for('static', filename='jquery-3.1.1.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.1.1.min.js') }}"></script>
 
     <!-- noty -->
-    <script type="text/javascript" src="{{ url_for('static', filename='jquery.noty.packaged.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.noty.packaged.min.js') }}"></script>
 
     <style type="text/css">
         /* Увеличим заголовок таблиц */
@@ -265,7 +265,10 @@
             <hr>
             <form id="form__check_price_all_non_price_games" action="/check_price_all_non_price_games">
                 <b>Вызов проверки цены у всех игр без цены:</b>
-                <p><input type="submit" value="Проверить цены всех игр"></p>
+                <p>
+                    <img class="loading" style="display:none" src="{{ url_for('static', filename='images/loading.gif') }}"/>
+                    <input type="submit" value="Проверить цены всех игр"/>
+                </p>
             </form>
         </div>
     </div>
@@ -510,10 +513,12 @@
 
     // Функция для изменения цены игры по ее id
     function update_price_game(game_id, game_price) {
-        var css_select = `[game_id = ${game_id}] > .price_cell`;
-        console.log("update_price_game: " + css_select);
+        console.log(`update_price_game: #${game_id} -> ${game_price}`);
 
-        $(css_select).html(game_price)
+        var game_tr = $(`[game_id = ${game_id}]`);
+        game_tr.removeClass('price_is_none');
+
+        game_tr.find('.price_cell').html(game_price)
     }
 
     function fillTable(tableId, totalClass, items) {
@@ -740,6 +745,7 @@
                 method: method,  // HTTP метод, по умолчанию GET
                 data: data,
                 dataType: "json",  // тип данных загружаемых с сервера
+
                 success: function(data) {
                     console.log(data);
                     console.log(JSON.stringify(data));
@@ -781,13 +787,15 @@
 
 
         $("#form__check_price_all_non_price_games").submit(function() {
-            var url = $(this).attr("action");
-            var method = $(this).attr("method");
+            var thisForm = this;
+
+            var url = $(thisForm).attr("action");
+            var method = $(thisForm).attr("method");
             if (method === undefined) {
                 method = "get";
             }
 
-            var data = $(this).serialize();
+            var data = $(thisForm).serialize();
 
             $.ajax({
                 url: url,
@@ -798,25 +806,31 @@
                     console.log(data);
                     console.log(JSON.stringify(data));
 
-/*
                     var ok = data.status == 'ok';
                     if (ok && data.result) {
                         var games = data.result.games_with_changed_price;
 
                         for (var i = 0; i < games.length; i++) {
+                            // Пример: [[145],"Blades of Time","249"]
                             var game = games[i];
 
-                            update_price_game(game_id, price);
+                            var id_games = game[0];
+                            var price = game[2];
+
+                            for (var j = 0; j < id_games.length; j++) {
+                                update_price_game(id_games[j], price);
+                            }
                         }
 
                         // Пересчет цены всех игр
                         update_total_price_all_tables();
                     }
-                    */
 
                     noty({
                         text: data.text,
                         type: ok ? 'success' : 'warning',
+
+                        timeout: false,
                     });
                 },
 
@@ -825,6 +839,14 @@
                         text: 'На сервере произошла ошибка',
                         type: 'error',
                     });
+                },
+
+                beforeSend: function() {
+                    $(thisForm).find('.loading').show();
+                },
+
+                complete: function() {
+                    $(thisForm).find('.loading').hide();
                 }
             });
 

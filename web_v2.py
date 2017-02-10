@@ -144,7 +144,7 @@ def rename_game():
 
             else:
                 status = 'warning'
-                text = 'Игры с названием "{0}" не существует'.format(new_name)
+                text = 'Игры с названием "{}" не существует'.format(new_name)
                 result = None
 
     except common.WebUserAlertException as e:
@@ -189,15 +189,15 @@ def check_price():
             if price is None:
                 status = 'ok'
                 text = 'Не получилось найти цену для игры "{}"'.format(name)
-                result = {
-                    'new_price': price,
-                    'id_games_with_changed_price': id_games_with_changed_price,
-                }
+                result = None
 
             else:
                 status = 'ok'
                 text = 'Для игры "{}" найдена и установлена цена: "{}"'.format(name, price)
-                result = None
+                result = {
+                    'new_price': price,
+                    'id_games_with_changed_price': id_games_with_changed_price,
+                }
 
     except common.WebUserAlertException as e:
         status = 'warning'
@@ -227,18 +227,19 @@ def check_price_all_non_price_games():
     try:
         from common import check_price_all_non_price_games
         games_with_changed_price = check_price_all_non_price_games()
+        print(games_with_changed_price)
 
         status = 'ok'
 
         if games_with_changed_price:
-            text = 'Цена найдена для {} игр:\n'
-            for name, price in games_with_changed_price:
-                text += '  "{}" -> "{}"\n'.format(name, price)
+            text = 'Цена найдена для {} игр:<br>'.format(len(games_with_changed_price))
+            for _, name, price in games_with_changed_price:
+                text += '&nbsp;&nbsp;"{}" -> {}<br>'.format(name, price)
 
         else:
             text = 'Не удалось найти цену для игр'
 
-        text = text.strip()
+        text = text.strip('<br>')
 
         result = {
             'games_with_changed_price': games_with_changed_price,
@@ -255,6 +256,13 @@ def check_price_all_non_price_games():
         'result': result,
     }
     print(data)
+
+
+    from common import create_connect
+    connect = create_connect()
+    connect.execute("update game set price = null")
+    connect.commit()
+
 
     from flask import jsonify
     return jsonify(data)

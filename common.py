@@ -390,7 +390,7 @@ def check_and_fill_price_of_game(game: str) -> (list, str):
         print('Не получилось найти цену игры {}, price is {}'.format(game, game_price))
         return list(), None
 
-    print('Нашли игру: {} ({}) : {}'.format(game, name, game_price))
+    print('Нашли игру: {} ({}) -> {}'.format(game, name, game_price))
     return set_price_game(game, game_price), game_price
 
 

@@ -28,7 +28,7 @@
             }
 
         .info_table {
-            width: 40%;
+            width: 70%;
             border: 0px double #333; /* Рамка вокруг таблицы */
             border-collapse: separate; /* Способ отображения границы */
             border-spacing: 0px; /* Расстояние между ячейками */
@@ -202,19 +202,26 @@
     <br>
 
     <table class="info_table">
+        <colgroup>
+            <col style="width: 250px;">
+            <col style="width: 150px;">
+            <col style="width: 10px;">
+            <col style="width: 200px;">
+        </colgroup>
+
         <tr>
             <td>Итого по пройденным играм:</td><td class="total_price_finished_games"></td>
-            <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td></td>
             <td>Пройденных игр:</td><td class="number_finished_games"></td>
         </tr>
         <tr>
             <td>Итого по просмотренным играм:</td><td class="total_price_finished_watched_games"></td>
-            <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td></td>
             <td>Просмотренных игр:</td><td class="number_finished_watched_games"></td>
         </tr>
         <tr>
             <td>Общая сумма:</td><td class="sum_total_price_games"></td>
-            <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td></td>
             <td>Всего игр:</td><td class="sum_number_games"></td>
         </tr>
     </table>

@@ -26,11 +26,7 @@ logging.basicConfig(level=logging.DEBUG)
 def index():
     print('index')
 
-    from common import create_connect, Settings, get_duplicates, get_finished_games, get_finished_watched_games
-
-    finished_games = get_finished_games()
-    finished_watched_games = get_finished_watched_games()
-
+    from common import create_connect, Settings, get_duplicates
     connect = create_connect()
 
     try:

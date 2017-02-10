@@ -227,18 +227,38 @@ def check_price_all_non_price_games():
     """
 
     print('check_price_all_non_price_games')
-    # print(request.form)
-    # print(request.args)
 
-    # from common import check_price_all_non_price_games
-    # check_price_all_non_price_games()
+    try:
+        from common import check_price_all_non_price_games
+        games_with_changed_price = check_price_all_non_price_games()
 
-    # from flask import redirect
-    # return redirect("/")
+        status = 'ok'
+
+        if games_with_changed_price:
+            text = 'Цена найдена для {} игр:\n'
+            for name, price in games_with_changed_price:
+                text += '  "{}" -> "{}"\n'.format(name, price)
+
+        else:
+            text = 'Не удалось найти цену для игр'
+
+        text = text.strip()
+
+        result = {
+            'games_with_changed_price': games_with_changed_price,
+        }
+
+    except common.WebUserAlertException as e:
+        status = 'warning'
+        text = str(e)
+        result = None
 
     data = {
-        'status': 'ok',
+        'status': status,
+        'text': text,
+        'result': result,
     }
+    print(data)
 
     from flask import jsonify
     return jsonify(data)
@@ -264,38 +284,38 @@ def get_games():
     return jsonify(data)
 
 
-# @app.route("/get_finished_games")
-# def get_finished_games():
-#     """
-#     Функция для возврата списка пройденных игр как json.
-#
-#     """
-#
-#     print('get_finished_games')
-#
-#     from common import get_finished_games
-#     data = get_finished_games()
-#     print(data)
-#
-#     from flask import jsonify
-#     return jsonify(data)
-#
-#
-# @app.route("/get_finished_watched_games")
-# def get_finished_watched_games():
-#     """
-#     Функция для возврата списка просмотренных игр как json.
-#
-#     """
-#
-#     print('get_finished_watched_games')
-#
-#     from common import get_finished_watched_games
-#     data = get_finished_watched_games()
-#     print(data)
-#
-#     from flask import jsonify
-#     return jsonify(data)
+@app.route("/get_finished_games")
+def get_finished_games():
+    """
+    Функция для возврата списка пройденных игр как json.
+
+    """
+
+    print('get_finished_games')
+
+    from common import get_finished_games
+    data = get_finished_games()
+    print(data)
+
+    from flask import jsonify
+    return jsonify(data)
+
+
+@app.route("/get_finished_watched_games")
+def get_finished_watched_games():
+    """
+    Функция для возврата списка просмотренных игр как json.
+
+    """
+
+    print('get_finished_watched_games')
+
+    from common import get_finished_watched_games
+    data = get_finished_watched_games()
+    print(data)
+
+    from flask import jsonify
+    return jsonify(data)
 
 
 if __name__ == '__main__':

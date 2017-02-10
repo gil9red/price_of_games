@@ -197,7 +197,6 @@ def get_duplicates():
     return list(filter(lambda item: len(item[1]) > 1, name_kind_by_id_dict.items()))
 
 
-# TODO: тут нехватат статистики: сколько было проверено игр, сколько нашли, какие это игры и их цена
 def check_price_all_non_price_games():
     """
     Принудительная проверка цены у игр без цены. То, что цены игр уже проверялись для этой функции
@@ -207,6 +206,9 @@ def check_price_all_non_price_games():
 
     connect = create_connect()
     try:
+        # Список игр с измененной ценой
+        games_with_changed_price = list()
+
         games = connect.cursor().execute('SELECT name FROM game WHERE price IS NULL').fetchall()
 
         # Удаление дубликатов (игры могут повторяться для категорий пройденных и просмотренных)
@@ -214,10 +216,14 @@ def check_price_all_non_price_games():
         print('Игр без цены: {}'.format(len(games)))
 
         for name in games:
-            check_and_fill_price_of_game(name)
+            id_games, price = check_and_fill_price_of_game(name)
+            if price is not None:
+                games_with_changed_price.append((id_games, name, price))
 
             import time
             time.sleep(3)
+
+        return games_with_changed_price
 
     finally:
         connect.close()
@@ -343,7 +349,7 @@ def append_games_to_base(connect, finished_game_list, finished_watched_game_list
         print()
 
 
-def check_and_fill_price_of_game(game) -> (list, str):
+def check_and_fill_price_of_game(game: str) -> (list, str):
     """
     Функция ищет цену игры и при нахождении ее ставит ей цену в базе.
     Возвращает кортеж из списка id игр с измененной ценой и саму цену.

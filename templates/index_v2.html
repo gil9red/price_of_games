@@ -807,16 +807,22 @@
                     console.log(data);
                     console.log(JSON.stringify(data));
 
-
+/*
                     var ok = data.status == 'ok';
                     if (ok && data.result) {
-                        // TODO: Найти игры и поменять их цены
-                    }
+                        var games = data.result.games_with_changed_price;
 
-                    // TODO: при любом исходе сообщить результат
-                    // TODO: можно как статистику сделать: сколько игр без цены,
-                    // для скольких найдена цена и ниже список:
-                    //     <Игра> -> <Цена>
+                        for (var i = 0; i < games.length; i++) {
+                            var game = games[i];
+
+                            update_price_game(game_id, price);
+                        }
+
+                        // Пересчет цены всех игр
+                        update_total_price_all_tables();
+                    }
+                    */
+
                     noty({
                         text: data.text,
                         layout: 'bottomRight',

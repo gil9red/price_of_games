@@ -150,6 +150,11 @@
     </p>
 
     <script>
+    $.noty.defaults.theme = 'defaultTheme';
+    $.noty.defaults.layout = 'bottomRight';
+    $.noty.defaults.timeout = 6000;
+
+
     $(document).ready(function() {
         // hide #back-top first
         $("#back-top").hide();
@@ -602,9 +607,7 @@
             error: function(data) {
                 noty({
                     text: 'Не удалось загрузить игры: на сервере произошла ошибка',
-                    layout: 'bottomRight',
                     type: 'error',
-                    timeout: 6000,
                 });
             }
         });
@@ -650,9 +653,7 @@
 
                     noty({
                         text: data.text,
-                        layout: 'bottomRight',
                         type: ok ? 'success' : 'warning',
-                        timeout: 6000,
                     });
 
                     // Очищение полей формы
@@ -662,9 +663,7 @@
                 error: function(data) {
                     noty({
                         text: 'На сервере произошла ошибка',
-                        layout: 'bottomRight',
                         type: 'error',
-                        timeout: 6000,
                     });
                 }
             });
@@ -705,9 +704,7 @@
 
                     noty({
                         text: data.text,
-                        layout: 'bottomRight',
                         type: ok ? 'success' : 'warning',
-                        timeout: 6000,
                     });
 
                     // Очищение полей формы
@@ -717,9 +714,7 @@
                 error: function(data) {
                     noty({
                         text: 'На сервере произошла ошибка',
-                        layout: 'bottomRight',
                         type: 'error',
-                        timeout: 6000,
                     });
                 }
             });
@@ -766,9 +761,7 @@
 
                     noty({
                         text: data.text,
-                        layout: 'bottomRight',
                         type: ok ? 'success' : 'warning',
-                        timeout: 6000,
                     });
 
                     // Очищение полей формы
@@ -778,9 +771,7 @@
                 error: function(data) {
                     noty({
                         text: 'На сервере произошла ошибка',
-                        layout: 'bottomRight',
                         type: 'error',
-                        timeout: 6000,
                     });
                 }
             });
@@ -825,18 +816,14 @@
 
                     noty({
                         text: data.text,
-                        layout: 'bottomRight',
                         type: ok ? 'success' : 'warning',
-                        timeout: 6000,
                     });
                 },
 
                 error: function(data) {
                     noty({
                         text: 'На сервере произошла ошибка',
-                        layout: 'bottomRight',
                         type: 'error',
-                        timeout: 6000,
                     });
                 }
             });

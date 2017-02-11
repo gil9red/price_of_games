@@ -6,6 +6,15 @@ __author__ = 'ipetrash'
 
 # Чтобы установить тестовый режим нужно будет в переменную TEST_MODE хотя бы что-то
 # поместить и вызывать перед импортом модуля config
+#
+# Например:
+# import os
+# os.environ['TEST_MODE'] = 'True'
+#
+# import config
+# import common
+
+
 import os
 TEST_MODE = bool(os.environ.get('TEST_MODE', ''))
 

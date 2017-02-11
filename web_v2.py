@@ -4,10 +4,6 @@
 __author__ = 'ipetrash'
 
 
-# Установка тестового режима, нужно вызывать перед импортом модуля config
-import os
-os.environ['TEST_MODE'] = 'True'
-
 import config
 import common
 
@@ -232,9 +228,12 @@ def check_price_all_non_price_games():
         status = 'ok'
 
         if games_with_changed_price:
-            text = 'Цена найдена для {} игр:<br>'.format(len(games_with_changed_price))
-            for _, name, price in games_with_changed_price:
-                text += '&nbsp;&nbsp;"{}" -> {}<br>'.format(name, price)
+            text = 'Цена найдена для {} игр'.format(len(games_with_changed_price))
+
+            # NOTE: если будет много игр, все не влезут
+            # text = 'Цена найдена для {} игр:<br>'.format(len(games_with_changed_price))
+            # for _, name, price in games_with_changed_price:
+            #     text += '&nbsp;&nbsp;"{}" -> {}<br>'.format(name, price)
 
         else:
             text = 'Не удалось найти цену для игр'
@@ -256,13 +255,6 @@ def check_price_all_non_price_games():
         'result': result,
     }
     print(data)
-
-
-    from common import create_connect
-    connect = create_connect()
-    connect.execute("update game set price = null")
-    connect.commit()
-
 
     from flask import jsonify
     return jsonify(data)

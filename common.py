@@ -4,6 +4,17 @@
 __author__ = 'ipetrash'
 
 
+# TODO: костыль для винды, для исправления проблем с исключениями
+# при выводе юникодных символов в консоль винды
+# Возможно, не только для винды, но и для любой платформы стоит использовать
+# эту настройку -- мало какие проблемы могут встретиться
+import sys
+if sys.platform == 'win32':
+    import codecs
+    sys.stdout = codecs.getwriter(sys.stdout.encoding)(sys.stdout.detach(), 'backslashreplace')
+    sys.stderr = codecs.getwriter(sys.stderr.encoding)(sys.stderr.detach(), 'backslashreplace')
+
+
 import os
 from config import BACKUP_DIR_LIST, DB_FILE_NAME, BACKUP_GIST
 

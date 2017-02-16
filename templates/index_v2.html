@@ -595,6 +595,11 @@
         return `(${number_price_rows} / ${all_rows_number} (${percent}%))`
     }
 
+    function fill_statistics() {
+        $('.finished_game_statistic').html(statistic_for_table("#finished_game"));
+        $('.finished_watched_game_statistic').html(statistic_for_table("#finished_watched_game"));
+    }
+
     // Функция загружает все игры, перезаполняет таблицы игр, подсчитывает итого и статистику
     function load_tables() {
         $.ajax({
@@ -614,8 +619,7 @@
                 fillTable('#finished_watched_game', 'total_price_finished_watched_games', finished_watched_games);
 
                 // Добавление статистики о играх в таблице
-                $('.finished_game_statistic').html(statistic_for_table("#finished_game"));
-                $('.finished_watched_game_statistic').html(statistic_for_table("#finished_watched_game"));
+                fill_statistics();
 
                 // Добавление статистики о количестве игр в таблицах
                 $('.number_finished_games').text(finished_games.length);
@@ -674,6 +678,8 @@
 
                         // Пересчет цены всех игр
                         update_total_price_all_tables();
+
+                        fill_statistics();
 
                         common_filter();
                     }
@@ -787,6 +793,8 @@
                         update_total_price_all_tables();
 
                         common_filter();
+
+                        fill_statistics();
                     }
 
                     noty({
@@ -851,6 +859,8 @@
                         update_total_price_all_tables();
 
                         common_filter();
+
+                        fill_statistics();
                     }
 
                     noty({
@@ -917,6 +927,8 @@
                         update_total_price_all_tables();
 
                         common_filter();
+
+                        fill_statistics();
                     }
 
                     noty({

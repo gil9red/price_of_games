@@ -260,6 +260,58 @@ def check_price_all_non_price_games():
     return jsonify(data)
 
 
+# # NOTE: функция нужна только для тестирования
+# @app.route("/set_null_price", methods=['POST'])
+# def set_null_price():
+#     """
+#     Функция убирает у игры цену т.е. будет значение null.
+#
+#     """
+#
+#     print('set_null_price')
+#     print(request.form)
+#
+#     try:
+#         if 'name' not in request.form:
+#             status = 'warning'
+#             text = 'В запросе должен присутствовать параметр "name"'
+#             result = None
+#
+#         else:
+#             name = request.form['name']
+#             print(name)
+#
+#             from common import create_connect, get_id_games_by_name
+#             try:
+#                 connect = create_connect()
+#                 connect.execute("UPDATE Game SET price = ? WHERE name = ?", (None, name))
+#                 connect.commit()
+#
+#                 status = 'ok'
+#                 text = 'Для игры "{}" убрана цена'.format(name)
+#                 result = {
+#                     'id_games_with_changed_price': get_id_games_by_name(name),
+#                 }
+#
+#             finally:
+#                 connect.close()
+#
+#     except common.WebUserAlertException as e:
+#         status = 'warning'
+#         text = str(e)
+#         result = None
+#
+#     data = {
+#         'status': status,
+#         'text': text,
+#         'result': result,
+#     }
+#     print(data)
+#
+#     from flask import jsonify
+#     return jsonify(data)
+
+
 @app.route("/get_games")
 def get_games():
     """

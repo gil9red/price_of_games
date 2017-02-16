@@ -270,6 +270,15 @@
                     <input type="submit" value="Проверить цены всех игр"/>
                 </p>
             </form>
+{#
+
+            <br><br>
+            <hr>
+            <form id="form__set_null_price" method="post" action="/set_null_price">
+                <p>Название:<br><input type="text" name="name" required/></p>
+                <p><input type="submit" value="Убрать цену игры"/></p>
+            </form>
+#}
         </div>
     </div>
 
@@ -516,9 +525,20 @@
         console.log(`update_price_game: #${game_id} -> ${game_price}`);
 
         var game_tr = $(`[game_id = ${game_id}]`);
-        game_tr.removeClass('price_is_none');
+        var price_td = game_tr.find('.price_cell');
 
-        game_tr.find('.price_cell').html(game_price)
+        if (game_price != null) {
+            game_tr.removeClass('price_is_none');
+            price_td.addClass('price');
+
+            price_td.html(game_price)
+
+        } else {
+            game_tr.addClass('price_is_none');
+            price_td.removeClass('price');
+
+            price_td.html("Цена не задана")
+        }
     }
 
     function fillTable(tableId, totalClass, items) {
@@ -786,6 +806,7 @@
         });
 
 
+        // Проверка всех цен игр без цены
         $("#form__check_price_all_non_price_games").submit(function() {
             var thisForm = this;
 
@@ -852,6 +873,64 @@
 
             return false;
         });
+
+{#
+        // Обработка проверки цены игры
+        $("#form__set_null_price").submit(function() {
+            var thisForm = this;
+
+            var url = $(this).attr("action");
+            var method = $(this).attr("method");
+            if (method === undefined) {
+                method = "get";
+            }
+
+            var data = $(this).serialize();
+
+            $.ajax({
+                url: url,
+                method: method,  // HTTP метод, по умолчанию GET
+                data: data,
+                dataType: "json",  // тип данных загружаемых с сервера
+
+                success: function(data) {
+                    console.log(data);
+                    console.log(JSON.stringify(data));
+
+                    var ok = data.status == 'ok';
+                    if (ok && data.result) {
+                        var id_games = data.result.id_games_with_changed_price;
+
+                        for (var i = 0; i < id_games.length; i++) {
+                            var game_id = id_games[i];
+
+                            update_price_game(game_id, null);
+                        }
+
+                        // Пересчет цены всех игр
+                        update_total_price_all_tables();
+                    }
+
+                    noty({
+                        text: data.text,
+                        type: ok ? 'success' : 'warning',
+                    });
+
+                    // Очищение полей формы
+                    thisForm.reset();
+                },
+
+                error: function(data) {
+                    noty({
+                        text: 'На сервере произошла ошибка',
+                        type: 'error',
+                    });
+                }
+            });
+
+            return false;
+        });
+#}
     });
     </script>
 </body>

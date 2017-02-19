@@ -9,6 +9,8 @@ import common
 
 
 # TODO: окну фильтра добавить кнопку очищения его
+# TODO: добавить возможность удалить игру
+# TODO: добавить возможность выполнить sql запрос
 
 
 from flask import Flask, render_template, request

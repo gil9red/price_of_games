@@ -96,6 +96,7 @@ while True:
         print(today)
         settings.last_run_date = today
 
+        # Получение игр из файла gist
         finished_game_list, finished_watched_game_list = get_games_list()
         print("Пройденных игр {}, просмотренных игр: {}".format(
             len(finished_game_list),

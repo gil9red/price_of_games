@@ -83,7 +83,7 @@ def wait(days):
 
         today = datetime.today()
 
-    print('\r' * 50, end='')
+    print('\r' * 100, end='')
     print('\n')
 
 

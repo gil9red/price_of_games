@@ -71,7 +71,7 @@ def wait(days):
         left = timeout_date - today
         left = str_timedelta(left)
 
-        print('\r' * 50, end='')
+        print('\r' * 100, end='')
         print('До следующего запуска осталось {}'.format(left), end='')
 
         import sys

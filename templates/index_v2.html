@@ -541,6 +541,20 @@
         }
     }
 
+    function open_tab_with_steam_search_from_game_id(game_id) {
+        // Ищем игру с указанным id и вытаскиваем ее название
+        var game = $(`[game_id = ${game_id}] > .name`).text();
+
+        open_tab_with_steam_search(game);
+    }
+
+    function open_tab_with_steam_search(game) {
+        var url = 'http://store.steampowered.com/search/?term=' + game;
+        console.log(`open_tab_with_steam_search("${game}") -> ${url}`);
+
+        window.open(url);
+    }
+
     function fillTable(tableId, totalClass, items) {
         console.log("fillTable from " + tableId + ", totalClass=" + totalClass + ", items: " + JSON.stringify(items));
 
@@ -559,12 +573,19 @@
             var tr = $('<tr class="game_row"></tr>');
             tr.attr("game_id", id);
 
-            var tdName = $('<td></td>').text(name);
+            var tdName = $('<td class="name"></td>').text(name);
             var tdPrice = $('<td class="price_cell"></td>').text(price);
 
             if (price == null) {
                 tr.addClass('price_is_none');
                 tdPrice.text('Цена не задана');
+
+                // Добавление иконки для поиска игры в стиме
+                var img_steam_search = $(`<img src="{{ url_for('static', filename='images/steam_favicon.ico') }}" style="float:right;"/>`);
+                img_steam_search.attr('game_id', id);
+                img_steam_search.attr('onclick', 'open_tab_with_steam_search_from_game_id($(this).attr("game_id"))');
+
+                tdPrice.append(img_steam_search);
 
             } else {
                 tdPrice.addClass('price');

@@ -4,6 +4,11 @@
 __author__ = 'ipetrash'
 
 
+# # Тестовый режим
+# import os
+# os.environ['TEST_MODE'] = 'True'
+
+
 import config
 
 # TODO: окну фильтра добавить кнопку очищения его
@@ -52,8 +57,8 @@ def total_price(games):
     return total if total != int(total) else int(total)
 
 
-from flask import Flask, render_template, request
-app = Flask(__name__)
+from flask import render_template, request
+from app import app
 
 import logging
 logging.basicConfig(level=logging.DEBUG)

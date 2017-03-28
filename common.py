@@ -296,7 +296,7 @@ def get_games_list():
         line = line.rstrip()
 
         # Если строка пустая
-        if not line.strip():
+        if not line:
             continue
 
         # Проверка, что первым символом не может быть флаг для игр и что последним символом будет :

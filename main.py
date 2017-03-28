@@ -10,6 +10,10 @@ __author__ = 'ipetrash'
 
 """
 
+# # Тестовый режим
+# import os
+# os.environ['TEST_MODE'] = 'True'
+
 
 from common import create_connect, get_games_list, append_games_to_base, fill_price_of_games, Settings, db_create_backup
 

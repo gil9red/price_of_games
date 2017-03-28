@@ -4,6 +4,11 @@
 __author__ = 'ipetrash'
 
 
+# # Тестовый режим
+# import os
+# os.environ['TEST_MODE'] = 'True'
+
+
 import config
 import common
 
@@ -13,16 +18,13 @@ import common
 # TODO: добавить возможность выполнить sql запрос
 
 
-from flask import Flask, render_template, request
-app = Flask(__name__)
-
-import logging
-logging.basicConfig(level=logging.DEBUG)
+from app import app, logger
+from flask import render_template, request
 
 
 @app.route("/")
 def index():
-    print('index')
+    logger.debug('index')
 
     from common import create_connect, Settings, get_duplicates
     connect = create_connect()
@@ -53,8 +55,8 @@ def set_price():
 
     """
 
-    print('set_price')
-    print(request.form)
+    logger.debug('set_price')
+    logger.debug(request.form)
 
     try:
         if 'name' not in request.form or 'price' not in request.form:
@@ -63,9 +65,9 @@ def set_price():
             result = None
 
         else:
-            name = request.form['name']
-            price = request.form['price']
-            print(name, price)
+            name = request.form['name'].strip()
+            price = request.form['price'].strip()
+            logger.debug('%s %s', name, price)
 
             from common import set_price_game
             modify_id_games = set_price_game(name, price)
@@ -93,7 +95,7 @@ def set_price():
         'text': text,
         'result': result,
     }
-    print(data)
+    logger.debug(data)
 
     from flask import jsonify
     return jsonify(data)
@@ -107,9 +109,9 @@ def rename_game():
 
     """
 
-    print('rename_game')
-    print(request.form)
-    print(request.args)
+    logger.debug('rename_game')
+    logger.debug(request.form)
+    logger.debug(request.args)
 
     try:
         if 'old_name' not in request.form or 'new_name' not in request.form:
@@ -118,9 +120,9 @@ def rename_game():
             result = None
 
         else:
-            old_name = request.form['old_name']
-            new_name = request.form['new_name']
-            print(old_name, new_name)
+            old_name = request.form['old_name'].strip()
+            new_name = request.form['new_name'].strip()
+            logger.debug('%s %s', old_name, new_name)
 
             from common import rename_game
             result_rename = rename_game(old_name, new_name)
@@ -155,7 +157,7 @@ def rename_game():
         'text': text,
         'result': result,
     }
-    print(data)
+    logger.debug(data)
 
     from flask import jsonify
     return jsonify(data)
@@ -168,8 +170,8 @@ def check_price():
 
     """
 
-    print('check_price')
-    print(request.form)
+    logger.debug('check_price')
+    logger.debug(request.form)
 
     try:
         if 'name' not in request.form:
@@ -178,8 +180,8 @@ def check_price():
             result = None
 
         else:
-            name = request.form['name']
-            print(name)
+            name = request.form['name'].strip()
+            logger.debug(name)
 
             from common import check_and_fill_price_of_game
             id_games_with_changed_price, price = check_and_fill_price_of_game(name)
@@ -207,7 +209,7 @@ def check_price():
         'text': text,
         'result': result,
     }
-    print(data)
+    logger.debug(data)
 
     from flask import jsonify
     return jsonify(data)
@@ -220,12 +222,12 @@ def check_price_all_non_price_games():
 
     """
 
-    print('check_price_all_non_price_games')
+    logger.debug('check_price_all_non_price_games')
 
     try:
         from common import check_price_all_non_price_games
         games_with_changed_price = check_price_all_non_price_games()
-        print(games_with_changed_price)
+        logger.debug(games_with_changed_price)
 
         status = 'ok'
 
@@ -256,7 +258,7 @@ def check_price_all_non_price_games():
         'text': text,
         'result': result,
     }
-    print(data)
+    logger.debug(data)
 
     from flask import jsonify
     return jsonify(data)
@@ -270,8 +272,8 @@ def check_price_all_non_price_games():
 #
 #     """
 #
-#     print('set_null_price')
-#     print(request.form)
+#     logger.debug('set_null_price')
+#     logger.debug(request.form)
 #
 #     try:
 #         if 'name' not in request.form:
@@ -281,7 +283,7 @@ def check_price_all_non_price_games():
 #
 #         else:
 #             name = request.form['name']
-#             print(name)
+#             logger.debug(name)
 #
 #             from common import create_connect, get_id_games_by_name
 #             try:
@@ -308,7 +310,7 @@ def check_price_all_non_price_games():
 #         'text': text,
 #         'result': result,
 #     }
-#     print(data)
+#     logger.debug(data)
 #
 #     from flask import jsonify
 #     return jsonify(data)
@@ -321,14 +323,16 @@ def get_games():
 
     """
 
-    print('get_games')
+    logger.debug('get_games')
 
     from common import FINISHED, FINISHED_WATCHED, get_finished_games, get_finished_watched_games
     data = {
         FINISHED: get_finished_games(),
         FINISHED_WATCHED: get_finished_watched_games(),
     }
-    print(data)
+    logger.debug('Finished games: {}'.format(len(data[FINISHED])))
+    logger.debug('Watched games: {}'.format(len(data[FINISHED_WATCHED])))
+    logger.debug('Total games: {}'.format(len(data[FINISHED]) + len(data[FINISHED_WATCHED])))
 
     from flask import jsonify
     return jsonify(data)
@@ -341,11 +345,11 @@ def get_finished_games():
 
     """
 
-    print('get_finished_games')
+    logger.debug('get_finished_games')
 
     from common import get_finished_games
     data = get_finished_games()
-    print(data)
+    logger.debug('Finished games: {}'.format(len(data)))
 
     from flask import jsonify
     return jsonify(data)
@@ -358,19 +362,19 @@ def get_finished_watched_games():
 
     """
 
-    print('get_finished_watched_games')
+    logger.debug('get_finished_watched_games')
 
     from common import get_finished_watched_games
     data = get_finished_watched_games()
-    print(data)
+    logger.debug('Watched games: {}'.format(len(data)))
 
     from flask import jsonify
     return jsonify(data)
 
 
 if __name__ == '__main__':
-    # Localhost
-    app.debug = True
+    # # Localhost
+    # app.debug = True
 
     app.run(
         port=5500,

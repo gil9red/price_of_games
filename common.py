@@ -283,9 +283,8 @@ def get_games_list():
             file_name = str(datetime.today().date()) + '.txt'
             file_name = os.path.join(path, file_name)
 
-            if not os.path.exists(file_name):
-                with open(file_name, 'w', encoding='utf-8') as f:
-                    f.write(content_gist)
+            with open(file_name, 'w', encoding='utf-8') as f:
+                f.write(content_gist)
 
     # Для поиска игр, относящихся только к PC
     found_pc = False

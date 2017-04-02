@@ -246,9 +246,8 @@ def db_create_backup():
         file_name = str(datetime.today().date()) + '.sqlite'
         file_name = os.path.join(path, file_name)
 
-        if not os.path.exists(file_name):
-            import shutil
-            shutil.copy(DB_FILE_NAME, file_name)
+        import shutil
+        shutil.copy(DB_FILE_NAME, file_name)
 
 
 def get_games_list():

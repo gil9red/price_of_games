@@ -14,7 +14,6 @@ import common
 
 
 # TODO: окну фильтра добавить кнопку очищения его
-# TODO: добавить возможность удалить игру
 # TODO: добавить возможность выполнить sql запрос
 
 
@@ -45,6 +44,9 @@ def index():
         DB_FILE_NAME=common.DB_FILE_NAME,
         BACKUP_GIST=common.BACKUP_GIST,
         BACKUP_DIR_LIST=common.BACKUP_DIR_LIST,
+
+        FINISHED=common.FINISHED,
+        FINISHED_WATCHED=common.FINISHED_WATCHED,
     )
 
 
@@ -367,6 +369,54 @@ def get_finished_watched_games():
     from common import get_finished_watched_games
     data = get_finished_watched_games()
     logger.debug('Watched games: {}'.format(len(data)))
+
+    from flask import jsonify
+    return jsonify(data)
+
+
+@app.route("/delete_game", methods=['POST'])
+def delete_game():
+    """
+    Функция для удаления указанной игры.
+
+    """
+
+    logger.debug('delete_game')
+    logger.debug(request.form)
+
+    if 'name' not in request.form or 'kind' not in request.form:
+        status = 'warning'
+        text = 'В запросе должен присутствовать параметр "name" / "kind"'
+        result = None
+
+    else:
+        name = request.form['name'].strip()
+        logger.debug(name)
+
+        kind = request.form['kind'].strip()
+        logger.debug(kind)
+
+        try:
+            from common import delete_game
+            id_game = delete_game(name, kind)
+
+            status = 'ok'
+            text = 'Удалена игра #{} "{}" ({})'.format(id_game, name, kind)
+            result = {
+                'id_game': id_game,
+            }
+
+        except common.WebUserAlertException as e:
+            status = 'warning'
+            text = str(e)
+            result = None
+
+    data = {
+        'status': status,
+        'text': text,
+        'result': result,
+    }
+    logger.debug(data)
 
     from flask import jsonify
     return jsonify(data)

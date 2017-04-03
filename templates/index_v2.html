@@ -270,6 +270,20 @@
                     <input type="submit" value="Проверить цены всех игр"/>
                 </p>
             </form>
+
+            <hr>
+            <form id="form__delete_game" method="post" action="/delete_game">
+                <b>Удаление игры:</b>
+                <p>
+                    <select name="kind">
+                        <option value="{{ FINISHED }}">Пройденные игры</option>
+                        <option value="{{ FINISHED_WATCHED }}">Просмотренные игры</option>
+                   </select>
+                </p>
+                <p>Название игры:<br><input id="form__delete_game__name" type="text" name="name" required></p>
+                <p><input type="submit" value="Удалить"/></p>
+            </form>
+
 {#
 
             <br><br>
@@ -539,6 +553,13 @@
 
             price_td.html("Цена не задана")
         }
+    }
+
+    // Функция для удаления игры по ее id
+    function delete_game(game_id) {
+        console.log(`delete_game: #${game_id}`);
+
+        $(`[game_id = ${game_id}]`).remove();
     }
 
     function open_tab_with_steam_search_from_game_id(game_id) {
@@ -972,6 +993,59 @@
             return false;
         });
 #}
+
+        // Обработка удаления конкретной игры
+        $("#form__delete_game").submit(function() {
+            var thisForm = this;
+
+            var url = $(this).attr("action");
+            var method = $(this).attr("method");
+            if (method === undefined) {
+                method = "get";
+            }
+
+            var data = $(this).serialize();
+
+            $.ajax({
+                url: url,
+                method: method,  // HTTP метод, по умолчанию GET
+                data: data,
+                dataType: "json",  // тип данных загружаемых с сервера
+                success: function(data) {
+                    console.log(data);
+                    console.log(JSON.stringify(data));
+
+                    var ok = data.status == 'ok';
+                    if (ok && data.result) {
+                        var id_game = data.result.id_game;
+
+                        delete_game(id_game);
+
+                        // Пересчет цены всех игр
+                        update_total_price_all_tables();
+                        fill_statistics();
+                    }
+
+                    noty({
+                        text: data.text,
+                        type: ok ? 'success' : 'warning',
+                    });
+
+                    // Очищение полей формы
+                    thisForm.reset();
+                },
+
+                error: function(data) {
+                    noty({
+                        text: 'На сервере произошла ошибка',
+                        type: 'error',
+                    });
+                }
+            });
+
+            return false;
+        });
+
     });
     </script>
 </body>

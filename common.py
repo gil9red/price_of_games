@@ -49,6 +49,16 @@ def create_connect():
     return sqlite3.connect(DB_FILE_NAME)
 
 
+def db_create_backup():
+    for path in BACKUP_DIR_LIST:
+        from datetime import datetime
+        file_name = str(datetime.today().date()) + '.sqlite'
+        file_name = os.path.join(path, file_name)
+
+        import shutil
+        shutil.copy(DB_FILE_NAME, file_name)
+
+
 def get_games_by_kind(kind: str) -> [(int, str, str)]:
     """
     Функция возвращает список игр как кортеж из (id, name, price)
@@ -180,7 +190,47 @@ def rename_game(old_name: str, new_name: str) -> dict:
         connect.close()
 
 
-def set_check_game_by_steam(game, check=1):
+def delete_game(name: str, kind: str) -> int:
+    """
+    Функция удаляет указанную игру и возвращает ее id.
+    Возможна отправка исключения <WebUserAlertException> при ошибке.
+
+    """
+
+    try:
+        if not name or not kind or (kind != FINISHED and kind != FINISHED_WATCHED):
+            error_text = 'Не указано name ( = "{}") или kind ( = "{}"), ' \
+                         'или kind неправильный (может быть {} или {}).'.format(name, kind, FINISHED, FINISHED_WATCHED)
+            print(error_text)
+            raise WebUserAlertException(error_text)
+
+        connect = create_connect()
+
+        id_game = connect.execute("SELECT id FROM Game WHERE kind = ? AND name = ?", (kind, name)).fetchone()
+        if not id_game:
+            error_text = 'Не получилось найти игру с name ( = "{}") и kind ( = "{}")'.format(name, kind)
+            print(error_text)
+            raise WebUserAlertException(error_text)
+
+        id_game = id_game[0]
+
+        connect.execute("DELETE FROM Game WHERE id = ?", (id_game,))
+        connect.commit()
+
+        return id_game
+
+    except WebUserAlertException as e:
+        raise e
+
+    except Exception as e:
+        error_text = 'При удалении игры "{}" ({}) произошла ошибка: {}'.format(name, kind, e)
+        raise WebUserAlertException(error_text)
+
+    finally:
+        connect.close()
+
+
+def set_check_game_by_steam(game: str, check=1):
     game = game.strip()
 
     connect = create_connect()
@@ -193,7 +243,7 @@ def set_check_game_by_steam(game, check=1):
         connect.close()
 
 
-def get_duplicates():
+def get_duplicates() -> list:
     from collections import defaultdict
     name_kind_by_id_dict = defaultdict(list)
 
@@ -208,7 +258,7 @@ def get_duplicates():
     return list(filter(lambda item: len(item[1]) > 1, name_kind_by_id_dict.items()))
 
 
-def check_price_all_non_price_games():
+def check_price_all_non_price_games() -> list:
     """
     Принудительная проверка цены у игр без цены. То, что цены игр уже проверялись для этой функции
     значение не имеет.
@@ -240,17 +290,7 @@ def check_price_all_non_price_games():
         connect.close()
 
 
-def db_create_backup():
-    for path in BACKUP_DIR_LIST:
-        from datetime import datetime
-        file_name = str(datetime.today().date()) + '.sqlite'
-        file_name = os.path.join(path, file_name)
-
-        import shutil
-        shutil.copy(DB_FILE_NAME, file_name)
-
-
-def get_games_list():
+def get_games_list() -> list:
     """
     Функция возвращает кортеж из двух списков: список пройденных игр и список просмотренных игр
 

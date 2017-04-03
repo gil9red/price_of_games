@@ -15,6 +15,11 @@ import common
 
 # TODO: окну фильтра добавить кнопку очищения его
 # TODO: добавить возможность выполнить sql запрос
+# TODO: нарисовать график указания цен на игры:
+#   modify_date_list = connect.execute("SELECT modify_date FROM Game WHERE modify_date IS NOT NULL ORDER BY modify_date").fetchall()
+#   modify_date_list = [item for (item,) in modify_date_list]
+#   print(modify_date_list)
+
 
 
 from app import app, logger

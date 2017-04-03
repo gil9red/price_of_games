@@ -22,6 +22,9 @@ import common
 #                                        "ORDER BY modify_date").fetchall()
 #     modify_date_list = [item for (item,) in modify_date_list]
 #     print(modify_date_list)
+#
+# Ось X -- дата
+# Ось Y -- количество игр в текущей дате
 
 
 from app import app, logger

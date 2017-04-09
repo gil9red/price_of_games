@@ -566,12 +566,28 @@
         // Ищем игру с указанным id и вытаскиваем ее название
         var game = $(`[game_id = ${game_id}] > .name`).text();
 
-        open_tab_with_steam_search(game);
-    }
-
-    function open_tab_with_steam_search(game) {
         var url = 'http://store.steampowered.com/search/?term=' + game;
         console.log(`open_tab_with_steam_search("${game}") -> ${url}`);
+
+        window.open(url);
+    }
+
+    function open_tab_with_yandex_search_from_game_id(game_id) {
+        // Ищем игру с указанным id и вытаскиваем ее название
+        var game = $(`[game_id = ${game_id}] > .name`).text();
+
+        var url = 'https://yandex.ru/yandsearch?text=' + game;
+        console.log(`open_tab_with_yandex_search("${game}") -> ${url}`);
+
+        window.open(url);
+    }
+
+    function open_tab_with_google_search_from_game_id(game_id) {
+        // Ищем игру с указанным id и вытаскиваем ее название
+        var game = $(`[game_id = ${game_id}] > .name`).text();
+
+        var url = 'https://www.google.ru/#newwindow=1&q=' + game;
+        console.log(`open_tab_with_google_search("${game}") -> ${url}`);
 
         window.open(url);
     }
@@ -602,11 +618,36 @@
                 tdPrice.text('Цена не задана');
 
                 // Добавление иконки для поиска игры в стиме
-                var img_steam_search = $(`<img src="{{ url_for('static', filename='images/steam_favicon.ico') }}" style="float:right;"/>`);
+                var img_steam_search = $(`<img src="{{ url_for('static', filename='images/steam_favicon.ico') }}" width="16" height="16"/>`);
                 img_steam_search.attr('game_id', id);
                 img_steam_search.attr('onclick', 'open_tab_with_steam_search_from_game_id($(this).attr("game_id"))');
+                img_steam_search.attr('alt', 'steam');
+                img_steam_search.attr('title', 'Поиск игры в стиме');
 
-                tdPrice.append(img_steam_search);
+
+                // Добавление иконки для поиска игры в яндексе
+                var img_yandex_search = $(`<img src="https://yandex.ru/favicon.ico" width="16" height="16"/>`);
+                img_yandex_search.attr('game_id', id);
+                img_yandex_search.attr('onclick', 'open_tab_with_yandex_search_from_game_id($(this).attr("game_id"))');
+                img_yandex_search.attr('alt', 'yandex');
+                img_yandex_search.attr('title', 'Поиск игры в яндексе');
+
+
+                // Добавление иконки для поиска игры в гугле
+                var img_google_search = $(`<img src="https://google.com/favicon.ico" width="16" height="16"/>`);
+                img_google_search.attr('game_id', id);
+                img_google_search.attr('onclick', 'open_tab_with_google_search_from_game_id($(this).attr("game_id"))');
+                img_google_search.attr('alt', 'google');
+                img_google_search.attr('title', 'Поиск игры в гугле');
+
+                var buttons_div = $('<div style="display: inline-block; float: right;"></div>');
+                buttons_div.append(img_steam_search);
+                buttons_div.append("&nbsp;");
+                buttons_div.append(img_yandex_search);
+                buttons_div.append("&nbsp;");
+                buttons_div.append(img_google_search);
+
+                tdPrice.append(buttons_div);
 
             } else {
                 tdPrice.addClass('price');

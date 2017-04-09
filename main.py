@@ -62,7 +62,7 @@ connect.commit()
 
 
 def wait(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0):
-    from datetime import timedelta
+    from datetime import timedelta, datetime
     today = datetime.today()
     timeout_date = today + timedelta(
         days=days, seconds=seconds, microseconds=microseconds,
@@ -71,9 +71,12 @@ def wait(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, 
 
     while today <= timeout_date:
         def str_timedelta(td):
-            mm, ss = divmod(td.seconds, 60)
-            hh, mm = divmod(mm, 60)
-            return "%d:%02d:%02d" % (hh, mm, ss)
+            # Remove ms
+            td = str(td)
+            if '.' in td:
+                td = td[:td.index('.')]
+
+            return td
 
         left = timeout_date - today
         left = str_timedelta(left)

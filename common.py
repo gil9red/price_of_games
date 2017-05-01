@@ -523,8 +523,12 @@ def steam_search_game_price_list(name):
 
     # category1 = 998 (Game)
     # url = 'http://store.steampowered.com/search/?category1=998&os=win&supportedlang=english&term=' + name
+
+    # TODO: валюта найденных игр определяется по текущему моему ip, поэтому она правильная -- ru, но из-за этого
+    # может быть неправильный подсчет цены при запуске на каком-то хосте
     #
-    # Дополнения с категорией Game не ищутся, например: "Pillars of Eternity: The White March Part I"
+    # Дополнения с категорией Game не ищутся, например: "Pillars of Eternity: The White March Part I", поэтому url
+    # был упрощен для поиска всего
     url = 'http://store.steampowered.com/search/?term=' + name
 
     # TODO: проверить http://store.steampowered.com/search/suggest?term=Dig+or+Die&f=games&cc=RU&l=russian&no_violence=0&no_sex=0&v=2651658

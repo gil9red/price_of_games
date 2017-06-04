@@ -4,15 +4,16 @@
 __author__ = 'ipetrash'
 
 
-LOG_FILENAME = 'log'
+LOG_FILENAME = 'web.log'
 
 
 from flask import Flask
-app = Flask(__name__)
+app = Flask('web__price_of_games')
 logger = app.logger
 
 import logging
-formatter = logging.Formatter("[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s")
+# formatter = logging.Formatter("[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s")
+formatter = logging.Formatter('[%(asctime)s] %(filename)s:%(lineno)d %(levelname)-8s %(message)s')
 
 from logging.handlers import RotatingFileHandler
 file_handler = RotatingFileHandler(LOG_FILENAME, maxBytes=10000000, backupCount=5, encoding='utf-8')

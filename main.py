@@ -61,6 +61,30 @@ connect.commit()
 # connect.commit()
 
 
+def get_logger(name, file='log.txt', encoding='utf-8'):
+    import logging
+    log = logging.getLogger(name)
+    log.setLevel(logging.DEBUG)
+
+    formatter = logging.Formatter('[%(asctime)s] %(filename)s:%(lineno)d %(levelname)-8s %(message)s')
+
+    from logging.handlers import RotatingFileHandler
+    fh = RotatingFileHandler(file, maxBytes=10000000, backupCount=5, encoding=encoding)
+    fh.setFormatter(formatter)
+    log.addHandler(fh)
+
+    import sys
+    sh = logging.StreamHandler(stream=sys.stdout)
+    sh.setLevel(logging.DEBUG)
+    sh.setFormatter(formatter)
+    log.addHandler(sh)
+
+    return log
+
+
+log = get_logger('main__price_of_games', file='main.log')
+
+
 def wait(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0):
     from datetime import timedelta, datetime
     today = datetime.today()
@@ -99,16 +123,16 @@ def wait(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, 
 
 while True:
     try:
+        log.debug('Start')
+
         # Перед выполнением, запоминаем дату и время, чтобы иметь потом представление когда
         # в последний раз выполнялось заполнение списка
         from datetime import datetime
-        today = datetime.today()
-        print(today)
-        settings.last_run_date = today
+        settings.last_run_date = datetime.today()
 
         # Получение игр из файла gist
         finished_game_list, finished_watched_game_list = get_games_list()
-        print("Пройденных игр {}, просмотренных игр: {}".format(
+        log.debug("Пройденных игр {}, просмотренных игр: {}".format(
             len(finished_game_list),
             len(finished_watched_game_list))
         )
@@ -125,12 +149,9 @@ while True:
         # Every 1 days
         wait(days=1)
 
-    except Exception:
-        import traceback
-        print('Ошибка:')
-        print(traceback.format_exc())
-
-        print('Через 5 минут попробую снова...')
+    except:
+        log.exception('Ошибка:')
+        log.debug('Через 5 минут попробую снова...')
 
         # Wait 5 minutes before next attempt
         import time

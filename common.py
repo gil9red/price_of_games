@@ -32,6 +32,30 @@ FINISHED = 'Finished'
 FINISHED_WATCHED = 'Finished watched'
 
 
+def get_logger(name, file='log.txt', encoding='utf-8'):
+    import logging
+    log = logging.getLogger(name)
+    log.setLevel(logging.DEBUG)
+
+    formatter = logging.Formatter('[%(asctime)s] %(filename)s:%(lineno)d %(levelname)-8s %(message)s')
+
+    from logging.handlers import RotatingFileHandler
+    fh = RotatingFileHandler(file, maxBytes=10000000, backupCount=5, encoding=encoding)
+    fh.setFormatter(formatter)
+    log.addHandler(fh)
+
+    import sys
+    sh = logging.StreamHandler(stream=sys.stdout)
+    sh.setLevel(logging.DEBUG)
+    sh.setFormatter(formatter)
+    log.addHandler(sh)
+
+    return log
+
+
+log_common = get_logger('log_common', 'common.log')
+
+
 if BACKUP_GIST:
     for path in BACKUP_DIR_LIST:
         if not os.path.exists(path):
@@ -39,9 +63,7 @@ if BACKUP_GIST:
                 os.mkdir(path)
 
             except FileNotFoundError as e:
-                print(e)
-                import traceback
-                print(traceback.format_exc())
+                log_common.exception("Error:")
 
 
 def create_connect():
@@ -129,7 +151,7 @@ def set_price_game(game: str, price: str) -> list:
 
     if not game or not price:
         error_text = 'Не указано game ( = "{}") или price ( = "{}")'.format(game, price)
-        print(error_text)
+        log_common.debug(error_text)
         raise WebUserAlertException(error_text)
 
     connect = create_connect()
@@ -156,7 +178,7 @@ def rename_game(old_name: str, new_name: str) -> dict:
 
     if not old_name or not new_name:
         error_text = 'Не указано old_name ( = "{}") или new_name ( = "{}")'.format(old_name, new_name)
-        print(error_text)
+        log_common.debug(error_text)
         raise WebUserAlertException(error_text)
 
     connect = create_connect()
@@ -166,7 +188,7 @@ def rename_game(old_name: str, new_name: str) -> dict:
         has = cursor.execute("SELECT 1 FROM Game WHERE name = ?", (new_name,)).fetchone()
         if has:
             error_text = 'Нельзя переименовать "{}", т.к. имя "{}" уже занято'.format(old_name, new_name)
-            print(error_text)
+            log_common.debug(error_text)
             raise WebUserAlertException(error_text)
 
         cursor.execute("UPDATE Game SET name = ? WHERE name = ?", (new_name, old_name))
@@ -201,7 +223,7 @@ def delete_game(name: str, kind: str) -> int:
         if not name or not kind or (kind != FINISHED and kind != FINISHED_WATCHED):
             error_text = 'Не указано name ( = "{}") или kind ( = "{}"), ' \
                          'или kind неправильный (может быть {} или {}).'.format(name, kind, FINISHED, FINISHED_WATCHED)
-            print(error_text)
+            log_common.debug(error_text)
             raise WebUserAlertException(error_text)
 
         connect = create_connect()
@@ -209,7 +231,7 @@ def delete_game(name: str, kind: str) -> int:
         id_game = connect.execute("SELECT id FROM Game WHERE kind = ? AND name = ?", (kind, name)).fetchone()
         if not id_game:
             error_text = 'Не получилось найти игру с name ( = "{}") и kind ( = "{}")'.format(name, kind)
-            print(error_text)
+            log_common.debug(error_text)
             raise WebUserAlertException(error_text)
 
         id_game = id_game[0]
@@ -274,7 +296,7 @@ def check_price_all_non_price_games() -> list:
 
         # Удаление дубликатов (игры могут повторяться для категорий пройденных и просмотренных)
         games = {name for (name,) in games}
-        print('Игр без цены: {}'.format(len(games)))
+        log_common.debug('Игр без цены: {}'.format(len(games)))
 
         for name in games:
             id_games, price = check_and_fill_price_of_game(name)
@@ -374,7 +396,8 @@ def append_games_to_base(connect, finished_game_list, finished_watched_game_list
         if has:
             return
 
-        print('Добавляю новую игру "{}" ({})'.format(name, kind))
+        # log_common.debug('Добавляю новую игру "{}" ({})'.format(name, kind))
+        log_common.debug('Добавляю новую игру "{}" ({})'.format(name, kind))
         cursor.execute("INSERT INTO Game (name, kind) VALUES (?,?)", (name, kind))
 
     # Добавлени в базу пройденных игр
@@ -391,11 +414,9 @@ def append_games_to_base(connect, finished_game_list, finished_watched_game_list
     # Вряд ли такое произойдет...
     duplicates = get_duplicates()
     if duplicates:
-        print("АХТУНГ! Найдены дубликаты:")
+        log_common.debug("АХТУНГ! Найдены дубликаты:")
         for (name, kind), id_list in duplicates:
-            print('    {} / {} c id {}'.format(name, kind, id_list))
-
-        print()
+            log_common.debug('    {} / {} c id {}'.format(name, kind, id_list))
 
 
 def check_and_fill_price_of_game(game: str) -> (list, str):
@@ -408,7 +429,7 @@ def check_and_fill_price_of_game(game: str) -> (list, str):
     game = game.strip()
 
     if not game:
-        print('Не указано game ( = "{}")'.format(game))
+        log_common.debug('Не указано game ( = "{}")'.format(game))
         return list(), None
 
     game_price = None
@@ -436,10 +457,10 @@ def check_and_fill_price_of_game(game: str) -> (list, str):
 
     if game_price == 0 or game_price is None:
         # TODO: заполнять вручную или искать на других сайтах цену
-        print('Не получилось найти цену игры {}, price is {}'.format(game, game_price))
+        log_common.debug('Не получилось найти цену игры {}, price is {}'.format(game, game_price))
         return list(), None
 
-    print('Нашли игру: {} ({}) -> {}'.format(game, name, game_price))
+    log_common.debug('Нашли игру: {} ({}) -> {}'.format(game, name, game_price))
     return set_price_game(game, game_price), game_price
 
 
@@ -460,7 +481,7 @@ def fill_price_of_games(connect):
 
     cursor = connect.cursor()
     games_list = set(game for (game,) in cursor.execute(sql_text).fetchall())
-    print("Нужно найти цену {} играм".format(len(games_list)))
+    log_common.debug("Нужно найти цену {} играм".format(len(games_list)))
 
     for game in games_list:
         check_and_fill_price_of_game(game)
@@ -502,12 +523,12 @@ def parse_game_name(game_name):
     elif '-' in seq_str:
         seq = seq_str.replace(' ', '').split('-')
         if len(seq) > 2:
-            print('Unknown seq str = "{}".'.format(seq_str))
+            log_common.debug('Unknown seq str = "{}".'.format(seq_str))
         else:
             seq = tuple(map(int, seq))
             seq = tuple(range(seq[0], seq[1] + 1))
     else:
-        print('Unknown seq str = "{}".'.format(seq_str))
+        log_common.debug('Unknown seq str = "{}".'.format(seq_str))
         return [game_name]
 
     # Сразу проверяем номер игры в серии и если она первая, то не добавляем в названии ее номер
@@ -548,10 +569,7 @@ def steam_search_game_price_list(name):
             break
 
         except:
-            print('При поиске в стиме что-то пошло не так:')
-
-            import traceback
-            print(traceback.format_exc())
+            log_common.exception('При поиске в стиме что-то пошло не так:')
 
             # Если произошла какая-то ошибка попытаемся через 5 минут попробовать снова
             import time
@@ -578,7 +596,7 @@ def steam_search_game_price_list(name):
             else:
                 # Только значение цены
                 if 'pуб' not in price:
-                    print('АХТУНГ! Неизвестный формат цены: "{}".'.format(price))
+                    log_common.debug('АХТУНГ! Неизвестный формат цены: "{}".'.format(price))
 
                 price = price.replace(' pуб.', '').strip()
 

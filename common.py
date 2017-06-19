@@ -32,28 +32,31 @@ FINISHED = 'Finished'
 FINISHED_WATCHED = 'Finished watched'
 
 
-def get_logger(name, file='log.txt', encoding='utf-8'):
+def get_logger(name, file='log.txt', encoding='utf-8', log_stdout=True, log_file=True):
     import logging
     log = logging.getLogger(name)
     log.setLevel(logging.DEBUG)
 
     formatter = logging.Formatter('[%(asctime)s] %(filename)s:%(lineno)d %(levelname)-8s %(message)s')
 
-    from logging.handlers import RotatingFileHandler
-    fh = RotatingFileHandler(file, maxBytes=10000000, backupCount=5, encoding=encoding)
-    fh.setFormatter(formatter)
-    log.addHandler(fh)
+    if log_file:
+        from logging.handlers import RotatingFileHandler
+        fh = RotatingFileHandler(file, maxBytes=10000000, backupCount=5, encoding=encoding)
+        fh.setFormatter(formatter)
+        log.addHandler(fh)
 
-    import sys
-    sh = logging.StreamHandler(stream=sys.stdout)
-    sh.setLevel(logging.DEBUG)
-    sh.setFormatter(formatter)
-    log.addHandler(sh)
+    if log_stdout:
+        import sys
+        sh = logging.StreamHandler(stream=sys.stdout)
+        sh.setLevel(logging.DEBUG)
+        sh.setFormatter(formatter)
+        log.addHandler(sh)
 
     return log
 
 
 log_common = get_logger('log_common', 'common.log')
+log_append_game = get_logger('log_append_game', 'append_game.log', log_stdout=False)
 
 
 if BACKUP_GIST:
@@ -219,15 +222,15 @@ def delete_game(name: str, kind: str) -> int:
 
     """
 
+    if not name or not kind or (kind != FINISHED and kind != FINISHED_WATCHED):
+        error_text = 'Не указано name ( = "{}") или kind ( = "{}"), ' \
+                     'или kind неправильный (может быть {} или {}).'.format(name, kind, FINISHED, FINISHED_WATCHED)
+        log_common.debug(error_text)
+        raise WebUserAlertException(error_text)
+
+    connect = create_connect()
+
     try:
-        if not name or not kind or (kind != FINISHED and kind != FINISHED_WATCHED):
-            error_text = 'Не указано name ( = "{}") или kind ( = "{}"), ' \
-                         'или kind неправильный (может быть {} или {}).'.format(name, kind, FINISHED, FINISHED_WATCHED)
-            log_common.debug(error_text)
-            raise WebUserAlertException(error_text)
-
-        connect = create_connect()
-
         id_game = connect.execute("SELECT id FROM Game WHERE kind = ? AND name = ?", (kind, name)).fetchone()
         if not id_game:
             error_text = 'Не получилось найти игру с name ( = "{}") и kind ( = "{}")'.format(name, kind)
@@ -396,8 +399,9 @@ def append_games_to_base(connect, finished_game_list, finished_watched_game_list
         if has:
             return
 
-        # log_common.debug('Добавляю новую игру "{}" ({})'.format(name, kind))
+        # print('Добавляю новую игру "{}" ({})'.format(name, kind))
         log_common.debug('Добавляю новую игру "{}" ({})'.format(name, kind))
+        log_append_game.debug('Добавляю новую игру "{}" ({})'.format(name, kind))
         cursor.execute("INSERT INTO Game (name, kind) VALUES (?,?)", (name, kind))
 
     # Добавлени в базу пройденных игр
@@ -461,6 +465,7 @@ def check_and_fill_price_of_game(game: str) -> (list, str):
         return list(), None
 
     log_common.debug('Нашли игру: {} ({}) -> {}'.format(game, name, game_price))
+    log_append_game.debug('Нашли игру: {} ({}) -> {}'.format(game, name, game_price))
     return set_price_game(game, game_price), game_price
 
 

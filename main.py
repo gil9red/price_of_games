@@ -117,7 +117,7 @@ while True:
         )
 
         # Добавление в базу новых игр
-        append_games_to_base(connect, finished_game_list, finished_watched_game_list)
+        append_games_to_database(connect, finished_game_list, finished_watched_game_list)
 
         # Заполнение цен игр
         fill_price_of_games(connect)

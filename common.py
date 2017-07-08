@@ -385,7 +385,7 @@ def get_games_list() -> list:
     return finished_game_list, finished_watched_game_list
 
 
-def append_games_to_base(connect, finished_game_list, finished_watched_game_list):
+def append_games_to_database(connect, finished_game_list, finished_watched_game_list):
     """
     Функция для добавление игр в таблицу базы. Если игра уже есть в базе, то запрос игнорируется.
 

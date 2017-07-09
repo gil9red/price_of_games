@@ -423,6 +423,21 @@ def append_games_to_database(connect, finished_game_list, finished_watched_game_
             log_common.debug('    {} / {} c id {}'.format(name, kind, id_list))
 
 
+def get_game_list_with_price(game: str) -> [int, str, str]:
+    """
+    Функция по названию игры вернет список игр с их id, kind и price
+
+    """
+
+    connect = create_connect()
+    try:
+        sql = "SELECT id, kind, price from Game WHERE name = ? and price is not null"
+        return connect.execute(sql, (game,)).fetchall()
+
+    finally:
+        connect.close()
+
+
 def check_and_fill_price_of_game(game: str) -> (list, str):
     """
     Функция ищет цену игры и при нахождении ее ставит ей цену в базе.
@@ -438,7 +453,25 @@ def check_and_fill_price_of_game(game: str) -> (list, str):
 
     game_price = None
 
-    # Поищем игру и ее цену
+    # Попробуем найти цену игры в базе -- возможно игра уже есть, но в другой категории
+    game_list = get_game_list_with_price(game)
+    if game_list:
+        log_common.debug('get_game_list_with_price(game="%s"): %s', game, game_list)
+
+        # Вытащим id, kind и price найденной игры
+        id_, kind, game_price = game_list[0]
+
+        log_common.debug('Для игры "%s" удалось найти цену "%s" из базы, взяв ее из аналога c id=%s в категории "%s"',
+                         game, game_price, id_, kind)
+
+        # Отметим что игра искалась в стиме (чтобы она не искалась в нем, если будет вызывана проверка)
+        set_check_game_by_steam(game)
+
+        log_common.debug('Нашли игру: %s -> %s', game, game_price)
+        log_append_game.debug('Нашли игру: %s -> %s', game, game_price)
+        return set_price_game(game, game_price), game_price
+
+    # Поищем игру и ее цену в стиме
     game_price_list = steam_search_game_price_list(game)
 
     # Отметим что игра искалась в стиме
@@ -546,6 +579,8 @@ def steam_search_game_price_list(name):
     кортежей из (название игры, цена).
 
     """
+
+    log_common.debug('Поиск в стиме "%s"', name)
 
     # category1 = 998 (Game)
     # url = 'http://store.steampowered.com/search/?category1=998&os=win&supportedlang=english&term=' + name

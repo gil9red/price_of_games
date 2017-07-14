@@ -186,22 +186,32 @@ def rename_game(old_name: str, new_name: str) -> dict:
 
     connect = create_connect()
     try:
-        cursor = connect.cursor()
+        has = connect.execute("SELECT 1 FROM Game WHERE name = ?", (old_name,)).fetchone()
+        if not has:
+            error_text = 'Игры с названием "{}" не существует'.format(old_name)
+            log_common.debug(error_text)
+            raise WebUserAlertException(error_text)
 
-        has = cursor.execute("SELECT 1 FROM Game WHERE name = ?", (new_name,)).fetchone()
+        has = connect.execute("SELECT 1 FROM Game WHERE name = ?", (new_name,)).fetchone()
         if has:
             error_text = 'Нельзя переименовать "{}", т.к. имя "{}" уже занято'.format(old_name, new_name)
             log_common.debug(error_text)
             raise WebUserAlertException(error_text)
 
-        cursor.execute("UPDATE Game SET name = ? WHERE name = ?", (new_name, old_name))
+        connect.execute("UPDATE Game SET name = ? WHERE name = ?", (new_name, old_name))
         connect.commit()
 
         # Получение id игр с указанным названием
         id_games_with_changed_name = get_id_games_by_name(new_name)
 
-        # Попытаемся после переименования игры сразу найти ее цену
-        id_games_with_changed_price, price = check_and_fill_price_of_game(new_name)
+        # Если у игры нет цены, попытаемся ее найти, т.к. после переименования что-то
+        # могло поменяться
+        id_games_with_changed_price = list()
+        price = None
+
+        has = connect.execute("SELECT 1 FROM Game WHERE name = ? AND price is null", (new_name,)).fetchone()
+        if has:
+            id_games_with_changed_price, price = check_and_fill_price_of_game(new_name)
 
         result = {
             'id_games_with_changed_name': id_games_with_changed_name,
@@ -438,7 +448,7 @@ def get_game_list_with_price(game: str) -> [int, str, str]:
         connect.close()
 
 
-def check_and_fill_price_of_game(game: str) -> (list, str):
+def check_and_fill_price_of_game(game: str, cache=True) -> (list, str):
     """
     Функция ищет цену игры и при нахождении ее ставит ей цену в базе.
     Возвращает кортеж из списка id игр с измененной ценой и саму цену.
@@ -454,22 +464,23 @@ def check_and_fill_price_of_game(game: str) -> (list, str):
     game_price = None
 
     # Попробуем найти цену игры в базе -- возможно игра уже есть, но в другой категории
-    game_list = get_game_list_with_price(game)
-    if game_list:
-        log_common.debug('get_game_list_with_price(game="%s"): %s', game, game_list)
+    if cache:
+        game_list = get_game_list_with_price(game)
+        if game_list:
+            log_common.debug('get_game_list_with_price(game="%s"): %s', game, game_list)
 
-        # Вытащим id, kind и price найденной игры
-        id_, kind, game_price = game_list[0]
+            # Вытащим id, kind и price найденной игры
+            id_, kind, game_price = game_list[0]
 
-        log_common.debug('Для игры "%s" удалось найти цену "%s" из базы, взяв ее из аналога c id=%s в категории "%s"',
-                         game, game_price, id_, kind)
+            log_common.debug('Для игры "%s" удалось найти цену "%s" из базы, взяв ее из '
+                             'аналога c id=%s в категории "%s"', game, game_price, id_, kind)
 
-        # Отметим что игра искалась в стиме (чтобы она не искалась в нем, если будет вызывана проверка)
-        set_check_game_by_steam(game)
+            # Отметим что игра искалась в стиме (чтобы она не искалась в нем, если будет вызывана проверка)
+            set_check_game_by_steam(game)
 
-        log_common.debug('Нашли игру: %s -> %s', game, game_price)
-        log_append_game.debug('Нашли игру: %s -> %s', game, game_price)
-        return set_price_game(game, game_price), game_price
+            log_common.debug('Нашли игру: %s -> %s', game, game_price)
+            log_append_game.debug('Нашли игру: %s -> %s', game, game_price)
+            return set_price_game(game, game_price), game_price
 
     # Поищем игру и ее цену в стиме
     game_price_list = steam_search_game_price_list(game)

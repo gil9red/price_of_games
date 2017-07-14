@@ -136,28 +136,23 @@ def rename_game():
             new_name = request.form['new_name'].strip()
             logger.debug('%s %s', old_name, new_name)
 
+            status = 'ok'
+            text = 'Игра "{}" переименована в "{}"'.format(old_name, new_name)
+
             from common import rename_game
             result_rename = rename_game(old_name, new_name)
-            if result_rename:
-                status = 'ok'
-                text = 'Игра "{}" переименована в "{}"'.format(old_name, new_name)
 
-                # Возможно, после переименования игры мы смогли найти ее цену...
-                price = result_rename['price']
-                if price is not None:
-                    text += ' и найдена ее цена: "{}"'.format(price)
+            # Возможно, после переименования игры мы смогли найти ее цену...
+            price = result_rename['price']
+            if price is not None:
+                text += ' и найдена ее цена: "{}"'.format(price)
 
-                # Просто без напряга возвращаем весь список и на странице заменяем все игры
-                from common import FINISHED, FINISHED_WATCHED, get_finished_games, get_finished_watched_games
-                result = {
-                    FINISHED: get_finished_games(),
-                    FINISHED_WATCHED: get_finished_watched_games(),
-                }
-
-            else:
-                status = 'warning'
-                text = 'Игры с названием "{}" не существует'.format(new_name)
-                result = None
+            # Просто без напряга возвращаем весь список и на странице заменяем все игры
+            from common import FINISHED, FINISHED_WATCHED, get_finished_games, get_finished_watched_games
+            result = {
+                FINISHED: get_finished_games(),
+                FINISHED_WATCHED: get_finished_watched_games(),
+            }
 
     except common.WebUserAlertException as e:
         status = 'warning'
@@ -196,7 +191,7 @@ def check_price():
             logger.debug(name)
 
             from common import check_and_fill_price_of_game
-            id_games_with_changed_price, price = check_and_fill_price_of_game(name)
+            id_games_with_changed_price, price = check_and_fill_price_of_game(name, cache=False)
 
             if price is None:
                 status = 'ok'

@@ -325,17 +325,127 @@ def check_price_all_non_price_games() -> list:
         connect.close()
 
 
-def get_games_list() -> list:
+# Parser from https://github.com/gil9red/played_games/blob/master/mini_played_games_parser.py
+def parse_played_games(text: str) -> dict:
+    """
+    Функция для парсинга списка игр.
+
+    """
+
+    FINISHED_GAME = 'FINISHED_GAME'
+    NOT_FINISHED_GAME = 'NOT_FINISHED_GAME'
+    FINISHED_WATCHED = 'FINISHED_WATCHED'
+    NOT_FINISHED_WATCHED = 'NOT_FINISHED_WATCHED'
+
+    FLAG_BY_CATEGORY = {
+        '  ': FINISHED_GAME,
+        '- ': NOT_FINISHED_GAME,
+        ' -': NOT_FINISHED_GAME,
+        ' @': FINISHED_WATCHED,
+        '@ ': FINISHED_WATCHED,
+        '-@': NOT_FINISHED_WATCHED,
+        '@-': NOT_FINISHED_WATCHED,
+    }
+
+    # Регулярка вытаскивает выражения вида: 1, 2, 3 или 1-3, или римские цифры: III, IV
+    import re
+    PARSE_GAME_NAME_PATTERN = re.compile(r'(\d+(, *?\d+)+)|(\d+ *?- *?\d+)|([MDCLXVI]+(, ?[MDCLXVI]+)+)',
+                                         flags=re.IGNORECASE)
+
+    def parse_game_name(game_name: str) -> list:
+        """
+        Функция принимает название игры и пытается разобрать его, после возвращает список названий.
+        У некоторых игр в названии может указываться ее части или диапазон частей, поэтому для правильного
+        составления списка игр такие случаи нужно обрабатывать.
+
+        Пример:
+            "Resident Evil 4, 5, 6" -> ["Resident Evil 4", "Resident Evil 5", "Resident Evil 6"]
+            "Resident Evil 1-3"     -> ["Resident Evil", "Resident Evil 2", "Resident Evil 3"]
+            "Resident Evil 4"       -> ["Resident Evil 4"]
+
+        """
+
+        match = PARSE_GAME_NAME_PATTERN.search(game_name)
+        if match is None:
+            return [game_name]
+
+        seq_str = match.group(0)
+
+        # "Resident Evil 4, 5, 6" -> "Resident Evil"
+        # For not valid "Trollface Quest 1-7-8" -> "Trollface Quest"
+        index = game_name.index(seq_str)
+        base_name = game_name[:index].strip()
+
+        seq_str = seq_str.replace(' ', '')
+
+        if ',' in seq_str:
+            # '1,2,3' -> ['1', '2', '3']
+            seq = seq_str.split(',')
+
+        elif '-' in seq_str:
+            seq = seq_str.split('-')
+
+            # ['1', '7'] -> [1, 7]
+            seq = list(map(int, seq))
+
+            # [1, 7] -> ['1', '2', '3', '4', '5', '6', '7']
+            seq = list(map(str, range(seq[0], seq[1] + 1)))
+
+        else:
+            return [game_name]
+
+        # Сразу проверяем номер игры в серии и если она первая, то не добавляем в названии ее номер
+        return [base_name if num == '1' else base_name + " " + num for num in seq]
+
+    from collections import OrderedDict
+    platforms = OrderedDict()
+    platform = None
+
+    for line in text.splitlines():
+        line = line.rstrip()
+        if not line:
+            continue
+
+        if line[0] not in ' -@' and line[1] not in ' -@' and line.endswith(':'):
+            platform_name = line[:-1]
+
+            platform = OrderedDict()
+            platform[FINISHED_GAME] = list()
+            platform[NOT_FINISHED_GAME] = list()
+            platform[FINISHED_WATCHED] = list()
+            platform[NOT_FINISHED_WATCHED] = list()
+
+            platforms[platform_name] = platform
+
+            continue
+
+        if not platform:
+            continue
+
+        flag = line[:2]
+        category_name = FLAG_BY_CATEGORY.get(flag)
+        if not category_name:
+            print('Странный формат строки: "{}"'.format(line))
+            continue
+
+        category = platform[category_name]
+
+        game_name = line[2:]
+        for game in parse_game_name(game_name):
+            if game in category:
+                print('Предотвращено добавление дубликата игры "{}"'.format(game))
+                continue
+
+            category.append(game)
+
+    return platforms
+
+
+def get_games_list() -> (list, list):
     """
     Функция возвращает кортеж из двух списков: список пройденных игр и список просмотренных игр
 
     """
-
-    # Пройденные игры
-    finished_game_list = list()
-
-    # Просмотренные игры
-    finished_watched_game_list = list()
 
     import requests
     rs = requests.get('https://gist.github.com/gil9red/2f80a34fb601cd685353')
@@ -360,37 +470,13 @@ def get_games_list() -> list:
             with open(file_name, 'w', encoding='utf-8') as f:
                 f.write(content_gist)
 
-    # Для поиска игр, относящихся только к PC
-    found_pc = False
+    platforms = parse_played_games(content_gist)
 
-    # Перебор строк файла
-    for line in content_gist.splitlines():
-        # Удаление пустых символов справа (пробелы, переводы на следующую строку и т.п.)
-        line = line.rstrip()
+    # Пройденные игры
+    finished_game_list = platforms['PC']['FINISHED_GAME']
 
-        # Если строка пустая
-        if not line:
-            continue
-
-        # Проверка, что первым символом не может быть флаг для игр и что последним символом будет :
-        # Т.е. ищем признак платформы
-        if line[0] not in [' ', '-', '@'] and line.endswith(':'):
-            # Если встретили PC
-            found_pc = line == 'PC:'
-            continue
-
-        name = line[2:].rstrip()
-        games = parse_game_name(name)
-
-        # Теперь, осталось добавить игру
-        if found_pc:
-            # Пройденные игры
-            if line.startswith('  '):
-                finished_game_list += games
-
-            # Просмотренные игры
-            elif line.startswith('@ ') or line.startswith(' @'):
-                finished_watched_game_list += games
+    # Просмотренные игры
+    finished_watched_game_list = platforms['PC']['FINISHED_WATCHED']
 
     return finished_game_list, finished_watched_game_list
 
@@ -537,51 +623,6 @@ def fill_price_of_games(connect):
 
         import time
         time.sleep(3)
-
-
-# Регулярка вытаскивает выражения вида: 1, 2, 3 или 1-3, или римские цифры: III, IV
-import re
-PARSE_GAME_NAME_PATTERN = re.compile(r'(\d+(, ?\d+)+)|(\d+ *?- *?\d+)|([MDCLXVI]+(, ?[MDCLXVI]+)+)',
-                                     flags=re.IGNORECASE)
-
-
-def parse_game_name(game_name):
-    """
-    Функция принимает название игры и пытается разобрать его, после возвращает список названий.
-    Т.к. в названии игры может находиться указание ее частей, то функция разберет их.
-
-    Пример:
-        "Resident Evil 4, 5, 6" станет:
-            ["Resident Evil 4", "Resident Evil 5", "Resident Evil 6"]
-
-        "Resident Evil 1-3" станет:
-            ["Resident Evil", "Resident Evil 2", "Resident Evil 3"]
-
-    """
-
-    match = PARSE_GAME_NAME_PATTERN.search(game_name)
-    if match is None:
-        return [game_name]
-
-    seq_str = match.group(0)
-    short_name = game_name.replace(seq_str, '').strip()
-
-    if ',' in seq_str:
-        seq = seq_str.replace(' ', '').split(',')
-
-    elif '-' in seq_str:
-        seq = seq_str.replace(' ', '').split('-')
-        if len(seq) > 2:
-            log_common.debug('Unknown seq str = "{}".'.format(seq_str))
-        else:
-            seq = tuple(map(int, seq))
-            seq = tuple(range(seq[0], seq[1] + 1))
-    else:
-        log_common.debug('Unknown seq str = "{}".'.format(seq_str))
-        return [game_name]
-
-    # Сразу проверяем номер игры в серии и если она первая, то не добавляем в названии ее номер
-    return [short_name if str(num) == '1' else '{} {}'.format(short_name, num) for num in seq]
 
 
 def steam_search_game_price_list(name):

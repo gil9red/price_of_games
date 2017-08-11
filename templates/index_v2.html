@@ -673,7 +673,12 @@
         var all_rows_number = table.find('.game_row').length;
         var number_price_rows = all_rows_number - price_is_none_rows_number;
         var percent = all_rows_number > 0 ? (number_price_rows / all_rows_number * 100) : 0;
-        percent = Math.round(percent);
+
+        // 99.065 -> 99.1
+        percent = percent.toFixed(1);
+
+        // 100.0 -> 100
+        percent = percent.toString().replace('.0', '')
 
         return `(${number_price_rows} / ${all_rows_number} (${percent}%))`
     }

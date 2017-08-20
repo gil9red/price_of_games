@@ -283,16 +283,6 @@
                 <p>Название игры:<br><input id="form__delete_game__name" type="text" name="name" required></p>
                 <p><input type="submit" value="Удалить"/></p>
             </form>
-
-{#
-
-            <br><br>
-            <hr>
-            <form id="form__set_null_price" method="post" action="/set_null_price">
-                <p>Название:<br><input type="text" name="name" required/></p>
-                <p><input type="submit" value="Убрать цену игры"/></p>
-            </form>
-#}
         </div>
     </div>
 
@@ -313,30 +303,6 @@
            <col span="1" style="width: 80%;">
            <col span="1" style="width: 20%;">
         </colgroup>
-
-        <tbody>
-            <tr>
-            {% for header in headers %}
-                <th>{{ header }}</th>
-            {% endfor %}
-            </tr>
-
-        {% for id, name, price in finished_games %}
-            {% if price %}
-                <tr game_id="{{ id }}" class="game_row">
-                    <td>{{ name }}</td>
-                    <td class="price price_cell">{{ price }}</td>
-                </tr>
-            {% else %}
-                <tr game_id="{{ id }}" class="game_row price_is_none">
-                    <td>{{ name }}</td>
-                    <td class="price_cell">{{ UNKNOWN_PRICE_TITLE }}</td>
-                </tr>
-            {% endif %}
-        {% endfor %}
-
-            <tr><td align="right">Итого:</td><td class="total_price_finished_games"></td></tr>
-        </tbody>
     </table>
     <br><br><br>
 
@@ -351,30 +317,6 @@
            <col span="1" style="width: 80%;">
            <col span="1" style="width: 20%;">
         </colgroup>
-
-        <tbody>
-            <tr>
-            {% for header in headers %}
-                <th>{{ header }}</th>
-            {% endfor %}
-            </tr>
-
-            {% for id, name, price in finished_watched_games %}
-                {% if price %}
-                    <tr game_id="{{ id }}" class="game_row">
-                        <td>{{ name }}</td>
-                        <td class="price price_cell">{{ price }}</td>
-                    </tr>
-                {% else %}
-                    <tr game_id="{{ id }}" class="game_row price_is_none">
-                        <td>{{ name }}</td>
-                        <td class="price_cell">{{ UNKNOWN_PRICE_TITLE }}</td>
-                    </tr>
-                {% endif %}
-            {% endfor %}
-
-            <tr><td align="right">Итого:</td><td class="total_price_finished_watched_games"></td></tr>
-        </tbody>
     </table>
 
     <script>

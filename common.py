@@ -74,6 +74,47 @@ def create_connect():
     return sqlite3.connect(DB_FILE_NAME)
 
 
+def init_db():
+    # Создание базы и таблицы
+    with create_connect() as connect:
+        connect.execute('''
+            CREATE TABLE IF NOT EXISTS Game (
+                id INTEGER PRIMARY KEY,
+    
+                name TEXT NOT NULL,
+                price TEXT DEFAULT NULL,
+                modify_date TIMESTAMP DEFAULT NULL,
+                kind TEXT NOT NULL,
+                check_steam BOOLEAN NOT NULL DEFAULT 0
+            );
+        ''')
+
+        connect.commit()
+
+        # NOTE: когда нужно в таблице подправить схему:
+        # cursor.executescript('''
+        # DROP TABLE Game2;
+        #
+        # CREATE TABLE IF NOT EXISTS Game2 (
+        #     id INTEGER PRIMARY KEY,
+        #
+        #     name TEXT NOT NULL,
+        #     price TEXT DEFAULT NULL,
+        #     modify_date TIMESTAMP DEFAULT NULL,
+        #     kind TEXT NOT NULL,
+        #     check_steam BOOLEAN NOT NULL DEFAULT 0
+        # );
+        #
+        # INSERT INTO Game2 SELECT * FROM Game;
+        #
+        # DROP TABLE Game;
+        # ALTER TABLE Game2 RENAME TO Game;
+        #
+        # ''')
+        #
+        # connect.commit()
+
+
 def db_create_backup():
     for path in BACKUP_DIR_LIST:
         from datetime import datetime

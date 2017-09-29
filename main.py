@@ -5,8 +5,8 @@ __author__ = 'ipetrash'
 
 
 """
-Этот скрипт анализирует файл с списком игр, заполняет sqlite базу пройденными и просмотренными играми, ищет цену
-этим играм и заполняет указывает их играм.
+Этот скрипт анализирует файл с списком игр, заполняет sqlite базу пройденными и просмотренными играми, 
+ищет и заполняет цену.
 
 """
 
@@ -23,42 +23,7 @@ cursor = connect.cursor()
 
 settings = Settings(connect=connect)
 
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS Game (
-    id INTEGER PRIMARY KEY,
-
-    name TEXT NOT NULL,
-    price TEXT DEFAULT NULL,
-    modify_date TIMESTAMP DEFAULT NULL,
-    kind TEXT NOT NULL,
-    check_steam BOOLEAN NOT NULL DEFAULT 0
-);
-''')
-
-connect.commit()
-
-# NOTE: когда нужно в таблице подправить схему:
-# cursor.executescript('''
-# DROP TABLE Game2;
-#
-# CREATE TABLE IF NOT EXISTS Game2 (
-#     id INTEGER PRIMARY KEY,
-#
-#     name TEXT NOT NULL,
-#     price TEXT DEFAULT NULL,
-#     modify_date TIMESTAMP DEFAULT NULL,
-#     kind TEXT NOT NULL,
-#     check_steam BOOLEAN NOT NULL DEFAULT 0
-# );
-#
-# INSERT INTO Game2 SELECT * FROM Game;
-#
-# DROP TABLE Game;
-# ALTER TABLE Game2 RENAME TO Game;
-#
-# ''')
-#
-# connect.commit()
+init_db()
 
 
 log = get_logger('main__price_of_games', file='main.log')

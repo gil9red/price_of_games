@@ -824,3 +824,17 @@ if __name__ == '__main__':
 
         print(FINISHED, connect.execute(sql_text, (FINISHED,)).fetchone()[0])
         print(FINISHED_WATCHED, connect.execute(sql_text, (FINISHED_WATCHED,)).fetchone()[0])
+
+    # # Print statistic from backup database
+    # import sqlite3
+    #
+    # from glob import glob
+    # for file_name in glob('backup/*.sqlite'):
+    #     print(file_name)
+    #
+    #     with sqlite3.connect(file_name) as connect:
+    #         sql_text = 'SELECT count(*) FROM Game WHERE kind = ?'
+    #
+    #         print('   ', FINISHED, connect.execute(sql_text, (FINISHED,)).fetchone()[0])
+    #         print('   ', FINISHED_WATCHED, connect.execute(sql_text, (FINISHED_WATCHED,)).fetchone()[0])
+    #         print()

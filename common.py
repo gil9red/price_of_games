@@ -819,5 +819,8 @@ class Settings:
 
 
 if __name__ == '__main__':
-    connect = create_connect()
+    with create_connect() as connect:
+        sql_text = 'SELECT count(*) FROM Game WHERE kind = ?'
 
+        print(FINISHED, connect.execute(sql_text, (FINISHED,)).fetchone()[0])
+        print(FINISHED_WATCHED, connect.execute(sql_text, (FINISHED_WATCHED,)).fetchone()[0])

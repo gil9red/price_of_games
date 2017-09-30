@@ -83,7 +83,7 @@ def init_db():
     
                 name  TEXT NOT NULL,
                 price TEXT DEFAULT NULL,
-                kind TEXT NOT NULL,
+                kind  TEXT NOT NULL,
                 
                 append_date       DATETIME DEFAULT CURRENT_TIMESTAMP,
                 modify_price_date DATETIME DEFAULT CURRENT_TIMESTAMP,

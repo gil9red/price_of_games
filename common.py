@@ -81,13 +81,13 @@ def init_db():
             CREATE TABLE IF NOT EXISTS Game (
                 id INTEGER PRIMARY KEY,
     
-                name TEXT NOT NULL,
+                name  TEXT NOT NULL,
                 price TEXT DEFAULT NULL,
+                kind TEXT NOT NULL,
                 
-                append_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                append_date       DATETIME DEFAULT CURRENT_TIMESTAMP,
                 modify_price_date DATETIME DEFAULT CURRENT_TIMESTAMP,
                 
-                kind TEXT NOT NULL,
                 check_steam BOOLEAN NOT NULL DEFAULT 0
             );
         ''')

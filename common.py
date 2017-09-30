@@ -83,7 +83,10 @@ def init_db():
     
                 name TEXT NOT NULL,
                 price TEXT DEFAULT NULL,
-                modify_date TIMESTAMP DEFAULT NULL,
+                
+                append_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                modify_price_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                
                 kind TEXT NOT NULL,
                 check_steam BOOLEAN NOT NULL DEFAULT 0
             );
@@ -91,25 +94,29 @@ def init_db():
 
         connect.commit()
 
-        # NOTE: когда нужно в таблице подправить схему:
-        # cursor.executescript('''
-        # DROP TABLE Game2;
+        # # NOTE: когда нужно в таблице подправить схему:
+        # connect.executescript('''
+        #     DROP TABLE IF EXISTS Game2;
         #
-        # CREATE TABLE IF NOT EXISTS Game2 (
-        #     id INTEGER PRIMARY KEY,
+        #     CREATE TABLE IF NOT EXISTS Game2 (
+        #         id INTEGER PRIMARY KEY,
         #
-        #     name TEXT NOT NULL,
-        #     price TEXT DEFAULT NULL,
-        #     modify_date TIMESTAMP DEFAULT NULL,
-        #     kind TEXT NOT NULL,
-        #     check_steam BOOLEAN NOT NULL DEFAULT 0
-        # );
+        #         name TEXT NOT NULL,
+        #         price TEXT DEFAULT NULL,
         #
-        # INSERT INTO Game2 SELECT * FROM Game;
+        #         append_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+        #         modify_price_date DATETIME DEFAULT CURRENT_TIMESTAMP,
         #
-        # DROP TABLE Game;
-        # ALTER TABLE Game2 RENAME TO Game;
+        #         kind TEXT NOT NULL,
+        #         check_steam BOOLEAN NOT NULL DEFAULT 0
+        #     );
         #
+        #     -- INSERT INTO Game2 SELECT * FROM Game;
+        #     INSERT INTO Game2 (id, name, price, append_date, modify_price_date, kind, check_steam)
+        #                 SELECT id, name, price, append_date, modify_date, kind, check_steam FROM Game;
+        #
+        #     DROP TABLE Game;
+        #     ALTER TABLE Game2 RENAME TO Game;
         # ''')
         #
         # connect.commit()
@@ -201,7 +208,7 @@ def set_price_game(game: str, price: str) -> list:
     connect = create_connect()
     try:
         cursor = connect.cursor()
-        cursor.execute("UPDATE Game SET price = ?, modify_date = date('now') WHERE name = ?", (price, game))
+        cursor.execute("UPDATE Game SET price = ?, modify_price_date = CURRENT_TIMESTAMP WHERE name = ?", (price, game))
         connect.commit()
 
         # Получение id игр с указанным названием
@@ -809,3 +816,8 @@ class Settings:
 
     def items(self):
         return self._cursor.execute('SELECT key, value FROM Settings').fetchall()
+
+
+if __name__ == '__main__':
+    connect = create_connect()
+

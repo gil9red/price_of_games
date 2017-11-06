@@ -58,16 +58,6 @@ def get_logger(name, file='log.txt', encoding='utf-8', log_stdout=True, log_file
 log_common = get_logger('log_common', 'common.log')
 log_append_game = get_logger('log_append_game', 'append_game.log', log_stdout=False)
 
-# TODO: вынести код в main, т.к. бекапы относятся только к нему
-if BACKUP_GIST:
-    for path in BACKUP_DIR_LIST:
-        if not os.path.exists(path):
-            try:
-                os.mkdir(path)
-
-            except FileNotFoundError as e:
-                log_common.exception("Error:")
-
 
 def create_connect():
     import sqlite3
@@ -511,12 +501,29 @@ def get_games_list() -> (list, list):
     # Скрипт может сохранять скачанные гисты
     if BACKUP_GIST:
         for path in BACKUP_DIR_LIST:
-            from datetime import datetime
-            file_name = str(datetime.today().date()) + '.txt'
-            file_name = os.path.join(path, file_name)
+            # Если папка не существует, попытаемся создать
+            if not os.path.exists(path):
+                try:
+                    os.mkdir(path)
 
-            with open(file_name, 'w', encoding='utf-8') as f:
-                f.write(content_gist)
+                except Exception:
+                    log_common.exception("Error:")
+
+                    # Если при создании папки возникла ошибка, пытаться сохранить в нее
+                    # файл уже бесполезно
+                    continue
+
+            # Сохранение файла гиста в папку бекапа
+            try:
+                from datetime import datetime
+                file_name = str(datetime.today().date()) + '.txt'
+                file_name = os.path.join(path, file_name)
+
+                with open(file_name, 'w', encoding='utf-8') as f:
+                    f.write(content_gist)
+
+            except Exception:
+                log_common.exception("Error:")
 
     platforms = parse_played_games(content_gist)
 
@@ -819,11 +826,18 @@ class Settings:
 
 
 if __name__ == '__main__':
+    # print(get_games_list())
+    # print()
+
     with create_connect() as connect:
         sql_text = 'SELECT count(*) FROM Game WHERE kind = ?'
 
-        print(FINISHED, connect.execute(sql_text, (FINISHED,)).fetchone()[0])
-        print(FINISHED_WATCHED, connect.execute(sql_text, (FINISHED_WATCHED,)).fetchone()[0])
+        finished_number = connect.execute(sql_text, (FINISHED,)).fetchone()[0]
+        finished_watched_number = connect.execute(sql_text, (FINISHED_WATCHED,)).fetchone()[0]
+
+        print(FINISHED, finished_number)
+        print(FINISHED_WATCHED, finished_watched_number)
+        print('Total', finished_number + finished_watched_number)
 
     # # Print statistic from backup database
     # import sqlite3

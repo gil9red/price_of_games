@@ -58,7 +58,7 @@ def get_logger(name, file='log.txt', encoding='utf-8', log_stdout=True, log_file
 log_common = get_logger('log_common', 'common.log')
 log_append_game = get_logger('log_append_game', 'append_game.log', log_stdout=False)
 
-
+# TODO: вынести код в main, т.к. бекапы относятся только к нему
 if BACKUP_GIST:
     for path in BACKUP_DIR_LIST:
         if not os.path.exists(path):

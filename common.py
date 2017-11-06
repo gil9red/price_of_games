@@ -25,6 +25,8 @@ make_backslashreplace_console()
 
 
 import os
+from typing import List, Dict, Any
+
 from config import BACKUP_DIR_LIST, DB_FILE_NAME, BACKUP_GIST
 
 
@@ -68,9 +70,14 @@ log_common = get_logger('log_common', 'common.log')
 log_append_game = get_logger('log_append_game', 'append_game.log', log_stdout=False)
 
 
-def create_connect():
+def create_connect(fields_as_dict=False):
     import sqlite3
-    return sqlite3.connect(DB_FILE_NAME)
+    connect = sqlite3.connect(DB_FILE_NAME)
+
+    if fields_as_dict:
+        connect.row_factory = sqlite3.Row
+
+    return connect
 
 
 def init_db():
@@ -131,30 +138,30 @@ def db_create_backup():
         shutil.copy(DB_FILE_NAME, file_name)
 
 
-def get_games_by_kind(kind: str) -> [(int, str, str)]:
+def get_games_by_kind(kind: str) -> List[Dict[str, Any]]:
     """
     Функция возвращает список игр как кортеж из (id, name, price)
 
     """
 
-    connect = create_connect()
+    connect = create_connect(fields_as_dict=True)
 
     try:
         cursor = connect.cursor()
 
         get_game_sql = '''
-            SELECT id, name, price
+            SELECT id, name, price, append_date
             FROM game
             WHERE kind = ?
             ORDER BY name
         '''
-        return cursor.execute(get_game_sql, (kind,)).fetchall()
+        return list(map(dict, cursor.execute(get_game_sql, (kind,)).fetchall()))
 
     finally:
         connect.close()
 
 
-def get_finished_games() -> [(int, str, str)]:
+def get_finished_games() -> List[Dict[str, Any]]:
     """
     Функция возвращает список завершенных игр как кортеж из (id, name, price)
 
@@ -163,7 +170,7 @@ def get_finished_games() -> [(int, str, str)]:
     return get_games_by_kind(FINISHED)
 
 
-def get_finished_watched_games() -> [(int, str, str)]:
+def get_finished_watched_games() -> List[Dict[str, Any]]:
     """
     Функция возвращает список просмотренных игр как кортеж из (id, name, price)
 

@@ -300,8 +300,9 @@
     </div>
     <table id="finished_game">
         <colgroup>
-           <col span="1" style="width: 80%;">
-           <col span="1" style="width: 20%;">
+           <col span="1" style="width: 60%;">
+           <col span="1" style="width: 15%;">
+           <col span="1" style="width: 10%;">
         </colgroup>
     </table>
     <br><br><br>
@@ -314,8 +315,9 @@
     </div>
     <table id="finished_watched_game">
         <colgroup>
-           <col span="1" style="width: 80%;">
-           <col span="1" style="width: 20%;">
+           <col span="1" style="width: 60%;">
+           <col span="1" style="width: 15%;">
+           <col span="1" style="width: 10%;">
         </colgroup>
     </table>
 
@@ -540,19 +542,28 @@
         // Очищение содержимого таблицы
         $(tableId + ' > tbody').remove();
 
-        var tbody = $('<tbody><tr><th>Название</th><th>Цена (руб.)</th></tr></tbody>');
+        var tbody = $('<tbody><tr><th>Название</th><th>Дата добавления</th><th>Цена (руб.)</th></tr></tbody>');
 
         for (var i = 0; i < items.length; i++) {
             var item = items[i];
 
-            var id = item[0];
-            var name = item[1];
-            var price = item[2];
+            var id = item.id;
+            var name = item.name;
+            var price = item.price;
+            var append_date = item.append_date;
+
+            // 2017-06-03 21:21:17 -> 03/06/2017 21:21:17
+            var parts = append_date.split(' ')
+            var date_parts = parts[0].split('-');
+            append_date = date_parts[2] + '/' + date_parts[1] + '/' + date_parts[0] + ' ' + parts[1];
 
             var tr = $('<tr class="game_row"></tr>');
             tr.attr("game_id", id);
 
+            // TODO: tdName -> td_name
+
             var tdName = $('<td class="name"></td>').text(name);
+            var td_append_date = $('<td class="append_date"></td>').text(append_date);
             var tdPrice = $('<td class="price_cell"></td>').text(price);
 
             if (price == null) {
@@ -596,12 +607,13 @@
             }
 
             tr.append(tdName);
+            tr.append(td_append_date);
             tr.append(tdPrice);
 
             tbody.append(tr);
         }
 
-        tbody.append('<tr><td align="right">Итого:</td><td class="' + totalClass + '"></td></tr>');
+        tbody.append('<tr><td align="right" colspan="2">Итого:</td><td class="' + totalClass + '"></td></tr>');
 
         $(tableId).append(tbody);
     }

@@ -4,15 +4,24 @@
 __author__ = 'ipetrash'
 
 
-# TODO: костыль для винды, для исправления проблем с исключениями
-# при выводе юникодных символов в консоль винды
-# Возможно, не только для винды, но и для любой платформы стоит использовать
-# эту настройку -- мало какие проблемы могут встретиться
-import sys
-if sys.platform == 'win32':
-    import codecs
-    sys.stdout = codecs.getwriter(sys.stdout.encoding)(sys.stdout.detach(), 'backslashreplace')
-    sys.stderr = codecs.getwriter(sys.stderr.encoding)(sys.stderr.detach(), 'backslashreplace')
+def make_backslashreplace_console():
+    # При выводе юникодных символов в консоль винды
+    # Возможно, не только для винды, но и для любой платформы стоит использовать
+    # эту настройку -- мало какие проблемы могут встретиться
+    import sys
+    if sys.platform == 'win32':
+        import codecs
+
+        try:
+            sys.stdout = codecs.getwriter(sys.stdout.encoding)(sys.stdout.detach(), 'backslashreplace')
+            sys.stderr = codecs.getwriter(sys.stderr.encoding)(sys.stderr.detach(), 'backslashreplace')
+
+        except AttributeError:
+            # ignore "AttributeError: '_io.BufferedWriter' object has no attribute 'encoding'"
+            pass
+
+
+make_backslashreplace_console()
 
 
 import os

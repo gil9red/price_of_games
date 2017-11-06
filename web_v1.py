@@ -4,6 +4,8 @@
 __author__ = 'ipetrash'
 
 
+raise DeprecationWarning('Use web_v2.py')
+
 # # Тестовый режим
 # import os
 # os.environ['TEST_MODE'] = 'True'

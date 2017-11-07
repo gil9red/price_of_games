@@ -14,7 +14,6 @@ import common
 
 
 # TODO: добавить возможность сортировки таблиц (например забить radiobuttons)
-# TODO: окну фильтра добавить кнопку очищения его
 # TODO: добавить возможность выполнить sql запрос
 # TODO: нарисовать график указания цен на игры:
 #     modify_date_list = connect.execute("SELECT modify_date "

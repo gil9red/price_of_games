@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta content='text/html; charset=UTF-8' http-equiv='Content-Type'/>
@@ -8,6 +7,9 @@
 
     <!-- noty -->
     <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.noty.packaged.min.js') }}"></script>
+
+    <!-- clearsearch -->
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.clearsearch.js') }}"></script>
 
     <style type="text/css">
         /* Увеличим заголовок таблиц */
@@ -295,7 +297,7 @@
     <div id="finished_game_caption_table" class="block_caption_search">
         <div class="table_caption">Пройденные игры <div class="finished_game_statistic" style="display:inline-block;"></div></div>
         <div>
-            <input type="search" id="input_finished_game" class="input_search" onkeyup="common_filter()" placeholder="Поиск игр...">
+            <input type="text" id="input_finished_game" class="input_search clearable" onkeyup="common_filter()" placeholder="Поиск игр...">
         </div>
     </div>
     <table id="finished_game">
@@ -310,7 +312,7 @@
     <div id="finished_watched_game_caption_table" class="block_caption_search">
         <div class="table_caption">Просмотренные игры <div class="finished_watched_game_statistic" style="display:inline-block;;"></div></div>
         <div>
-            <input type="search" id="input_finished_watched_game" class="input_search" onkeyup="common_filter()" placeholder="Поиск игр...">
+            <input type="text" id="input_finished_watched_game" class="input_search clearable" onkeyup="common_filter()" placeholder="Поиск игр...">
         </div>
     </div>
     <table id="finished_watched_game">
@@ -322,6 +324,9 @@
     </table>
 
     <script>
+        // init plugin clearsearch
+        $('.clearable').clearSearch();
+
         function show_more_actions(button) {
             var more_actions = $('#top_right_fixed_panel .more_actions');
 

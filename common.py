@@ -812,7 +812,6 @@ class Settings:
         self._connect.commit()
 
     def __setattr__(self, key, value):
-        # TODO: так то нужно по другому проверять, что атрибут не является атрибутом самого класса
         # Для обработки внутренних полей
         if key.startswith("_"):
             return super().__setattr__(key, value)
@@ -821,7 +820,6 @@ class Settings:
         self._connect.commit()
 
     def __getattr__(self, key):
-        # TODO: так то нужно по другому проверять, что атрибут не является атрибутом самого класса
         # Для обработки внутренних полей
         if key.startswith("_"):
             return super().__getattr__(key)

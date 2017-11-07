@@ -272,7 +272,7 @@ def check_price_all_non_price_games():
     return jsonify(data)
 
 
-# # NOTE: функция нужна только для тестирования
+# # функция нужна только для тестирования
 # @app.route("/set_null_price", methods=['POST'])
 # def set_null_price():
 #     """

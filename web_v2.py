@@ -431,7 +431,7 @@ if __name__ == '__main__':
     # app.debug = True
 
     app.run(
-        port=55000,
+        port=5500,
 
         # Включение поддержки множества подключений
         threaded=True,

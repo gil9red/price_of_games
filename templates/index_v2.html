@@ -288,11 +288,33 @@
         </div>
     </div>
 
-    <form>
-        <input id="radio_show_all_games" name="radio_show_game" type="radio" onclick="common_filter()" checked> Показывать все игры</input><br>
-        <input id="radio_show_games_with_price" name="radio_show_game" type="radio" onclick="common_filter()"> Показывать игры с ценой</input><br>
-        <input id="radio_show_games_without_price" name="radio_show_game" type="radio" onclick="common_filter()"> Показывать игры без цены</input>
-    </form>
+    <table id="table_sort_filter">
+        <!--<tr>-->
+            <!--<th>Фильтрация</th><th>Сортировка</th>-->
+        <!--</tr>-->
+
+        <tr>
+            <td>
+                <form>
+                    <input id="radio_show_all_games" name="radio_show_game" type="radio" onclick="common_filter()" checked/> Показывать все игры<br>
+                    <input id="radio_show_games_with_price" name="radio_show_game" type="radio" onclick="common_filter()"/> Показывать игры с ценой<br>
+                    <input id="radio_show_games_without_price" name="radio_show_game" type="radio" onclick="common_filter()"/> Показывать игры без цены<br>
+                </form>
+            </td>
+
+            <!-- TODO: Разделить на две колонки: обычная и обратная сортировка -->
+            <!--<td>-->
+                <!--<form>-->
+                    <!--<input id="radio_sort_by_name" name="radio_sort_by" type="radio" checked/> По названию-->
+                    <!--<input id="radio_sort_by_name__desc" name="radio_sort_by" type="radio"/> По названию (убыванию)<br>-->
+                    <!--<input id="radio_sort_by_append_date" name="radio_sort_by" type="radio"/> По дате добавления-->
+                    <!--<input id="radio_sort_by_append_date__desc" name="radio_sort_by" type="radio"/> По дате добавления (убыванию)<br>-->
+                    <!--<input id="radio_sort_by_price" name="radio_sort_by" type="radio"/> По цене-->
+                    <!--<input id="radio_sort_by_price__desc" name="radio_sort_by" type="radio"/> По цене (убыванию)<br>-->
+                <!--</form>-->
+            <!--</td>-->
+        </tr>
+    </table>
 
     <div id="finished_game_caption_table" class="block_caption_search">
         <div class="table_caption">Пройденные игры <div class="finished_game_statistic" style="display:inline-block;"></div></div>
@@ -570,7 +592,7 @@
     function fillTable(tableId, totalClass, items) {
         console.log("fillTable from " + tableId + ", totalClass=" + totalClass + ", items: " + JSON.stringify(items));
 
-/* # TODO: добавить возможность сортировки таблиц (например забить radiobuttons)
+/* <!-- TODO: добавить возможность сортировки таблиц (например забить radiobuttons) -->
         // Сначала отсортируем по дате добавления
         items.sortBy(function(item) {
             return new Date(item.append_date)

@@ -17,7 +17,7 @@
             font-size: 150%;
         }
 
-        th {
+        #finished_game th, #finished_watched_game th {
             font-size: 120%;
         }
 
@@ -25,7 +25,7 @@
             width: 70%;
             border-collapse: collapse; /* Убираем двойные линии между ячейками */
         }
-            #finished_game td, th, #finished_watched_game td, th {
+            #finished_game td, #finished_game th, #finished_watched_game td, #finished_game th {
                 border: 1px double #333; /* Рамка таблицы */
             }
 
@@ -50,6 +50,10 @@
                 padding: 1px; /* Поля вокруг текста */
                 border: 0px; /* Граница вокруг ячеек */
             }
+
+        #table_sort_filter th {
+             text-align: left;
+        }
 
         /* Небольшой отступ внутри ячеек */
         td, th {
@@ -289,32 +293,40 @@
     </div>
 
     <table id="table_sort_filter">
-        <!--<tr>-->
-            <!--<th>Фильтрация</th><th>Сортировка</th>-->
-        <!--</tr>-->
+        <colgroup>
+           <col span="1" style="width: 350px;">
+        </colgroup>
 
+        <!--<tr><th>Фильтрация</th><th>Сортировка</th></tr>-->
+        <tr><th>Фильтрация</th></tr>
         <tr>
             <td>
-                <form>
-                    <input id="radio_show_all_games" name="radio_show_game" type="radio" onclick="common_filter()" checked/> Показывать все игры<br>
-                    <input id="radio_show_games_with_price" name="radio_show_game" type="radio" onclick="common_filter()"/> Показывать игры с ценой<br>
-                    <input id="radio_show_games_without_price" name="radio_show_game" type="radio" onclick="common_filter()"/> Показывать игры без цены<br>
-                </form>
+                <table>
+                    <tr><td><input id="radio_show_all_games" name="radio_show_game" type="radio" onclick="common_filter()" checked/> Показывать все игры</td></tr>
+                    <tr><td><input id="radio_show_games_with_price" name="radio_show_game" type="radio" onclick="common_filter()"/> Показывать игры с ценой</td></tr>
+                    <tr><td><input id="radio_show_games_without_price" name="radio_show_game" type="radio" onclick="common_filter()"/> Показывать игры без цены</td></tr>
+                </table>
             </td>
 
-            <!-- TODO: Разделить на две колонки: обычная и обратная сортировка -->
             <!--<td>-->
-                <!--<form>-->
-                    <!--<input id="radio_sort_by_name" name="radio_sort_by" type="radio" checked/> По названию-->
-                    <!--<input id="radio_sort_by_name__desc" name="radio_sort_by" type="radio"/> По названию (убыванию)<br>-->
-                    <!--<input id="radio_sort_by_append_date" name="radio_sort_by" type="radio"/> По дате добавления-->
-                    <!--<input id="radio_sort_by_append_date__desc" name="radio_sort_by" type="radio"/> По дате добавления (убыванию)<br>-->
-                    <!--<input id="radio_sort_by_price" name="radio_sort_by" type="radio"/> По цене-->
-                    <!--<input id="radio_sort_by_price__desc" name="radio_sort_by" type="radio"/> По цене (убыванию)<br>-->
-                <!--</form>-->
+                <!--<table>-->
+                    <!--<tr>-->
+                        <!--<td><input id="radio_sort_by_name" name="radio_sort_by" type="radio" checked/> По названию</td>-->
+                        <!--<td><input id="radio_sort_by_name__desc" name="radio_sort_by" type="radio"/> По названию (по убыванию)</td>-->
+                    <!--</tr>-->
+                    <!--<tr>-->
+                        <!--<td><input id="radio_sort_by_append_date" name="radio_sort_by" type="radio"/> По дате добавления</td>-->
+                        <!--<td><input id="radio_sort_by_append_date__desc" name="radio_sort_by" type="radio"/> По дате добавления (по убыванию)</td>-->
+                    <!--</tr>-->
+                    <!--<tr>-->
+                        <!--<td><input id="radio_sort_by_price" name="radio_sort_by" type="radio"/> По цене</td>-->
+                        <!--<td><input id="radio_sort_by_price__desc" name="radio_sort_by" type="radio"/> По цене (по убыванию)</td>-->
+                    <!--</tr>-->
+                <!--</table>-->
             <!--</td>-->
         </tr>
     </table>
+    <hr><br><br>
 
     <div id="finished_game_caption_table" class="block_caption_search">
         <div class="table_caption">Пройденные игры <div class="finished_game_statistic" style="display:inline-block;"></div></div>
@@ -589,8 +601,8 @@
       }
     })();
 
-    function fillTable(tableId, totalClass, items) {
-        console.log("fillTable from " + tableId + ", totalClass=" + totalClass + ", items: " + JSON.stringify(items));
+    function fillTable(table_id, total_class, items) {
+        console.log("fillTable from " + table_id + ", total_class=" + total_class + ", items: " + JSON.stringify(items));
 
 /* <!-- TODO: добавить возможность сортировки таблиц (например забить radiobuttons) -->
         // Сначала отсортируем по дате добавления
@@ -601,7 +613,7 @@
 */
 
         // Очищение содержимого таблицы
-        $(tableId + ' > tbody').remove();
+        $(table_id + ' > tbody').remove();
 
         var tbody = $('<tbody><tr><th>Название</th><th>Дата добавления</th><th>Цена (руб.)</th></tr></tbody>');
 
@@ -621,15 +633,13 @@
             var tr = $('<tr class="game_row"></tr>');
             tr.attr("game_id", id);
 
-            // TODO: tdName -> td_name
-
-            var tdName = $('<td class="name"></td>').text(name);
+            var td_name = $('<td class="name"></td>').text(name);
             var td_append_date = $('<td class="append_date"></td>').text(append_date);
-            var tdPrice = $('<td class="price_cell"></td>').text(price);
+            var td_price = $('<td class="price_cell"></td>').text(price);
 
             if (price == null) {
                 tr.addClass('price_is_none');
-                tdPrice.text('Цена не задана');
+                td_price.text('Цена не задана');
 
                 // Добавление иконки для поиска игры в стиме
                 var img_steam_search = $(`<img src="{{ url_for('static', filename='images/steam_favicon.ico') }}" width="16" height="16"/>`);
@@ -661,22 +671,22 @@
                 buttons_div.append("&nbsp;");
                 buttons_div.append(img_google_search);
 
-                tdPrice.append(buttons_div);
+                td_price.append(buttons_div);
 
             } else {
-                tdPrice.addClass('price');
+                td_price.addClass('price');
             }
 
-            tr.append(tdName);
+            tr.append(td_name);
             tr.append(td_append_date);
-            tr.append(tdPrice);
+            tr.append(td_price);
 
             tbody.append(tr);
         }
 
-        tbody.append('<tr><td align="right" colspan="2">Итого:</td><td class="' + totalClass + '"></td></tr>');
+        tbody.append('<tr><td align="right" colspan="2">Итого:</td><td class="' + total_class + '"></td></tr>');
 
-        $(tableId).append(tbody);
+        $(table_id).append(tbody);
     }
 
     // Функция возвращает строку с статистикой: сколько всего игр, сколько имеют цены, и процент.

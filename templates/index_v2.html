@@ -66,7 +66,7 @@
 
         #top_right_fixed_panel {
             position: fixed; /* Фиксированное положение */
-            right: 10px; /* Расстояние от правого края окна браузера */
+            right: 5px; /* Расстояние от правого края окна браузера */
             top: 10px; /* Расстояние сверху */
             bottom: 10px;  /* Расстояние снизу */
 
@@ -297,8 +297,7 @@
            <col span="1" style="width: 350px;">
         </colgroup>
 
-        <!--<tr><th>Фильтрация</th><th>Сортировка</th></tr>-->
-        <tr><th>Фильтрация</th></tr>
+        <tr><th>Фильтрация</th><th>Сортировка</th></tr>
         <tr>
             <td>
                 <table>
@@ -308,22 +307,22 @@
                 </table>
             </td>
 
-            <!--<td>-->
-                <!--<table>-->
-                    <!--<tr>-->
-                        <!--<td><input id="radio_sort_by_name" name="radio_sort_by" type="radio" checked/> По названию</td>-->
-                        <!--<td><input id="radio_sort_by_name__desc" name="radio_sort_by" type="radio"/> По названию (по убыванию)</td>-->
-                    <!--</tr>-->
-                    <!--<tr>-->
-                        <!--<td><input id="radio_sort_by_append_date" name="radio_sort_by" type="radio"/> По дате добавления</td>-->
-                        <!--<td><input id="radio_sort_by_append_date__desc" name="radio_sort_by" type="radio"/> По дате добавления (по убыванию)</td>-->
-                    <!--</tr>-->
-                    <!--<tr>-->
-                        <!--<td><input id="radio_sort_by_price" name="radio_sort_by" type="radio"/> По цене</td>-->
-                        <!--<td><input id="radio_sort_by_price__desc" name="radio_sort_by" type="radio"/> По цене (по убыванию)</td>-->
-                    <!--</tr>-->
-                <!--</table>-->
-            <!--</td>-->
+            <td>
+                <table>
+                    <tr>
+                        <td><input id="radio_sort_by_name" name="radio_sort_by" value="sort_by_name" type="radio" onclick="fillGameTables()" checked/> По названию</td>
+                        <td><input id="radio_sort_by_name__desc" name="radio_sort_by" value="sort_by_name_desc" type="radio" onclick="fillGameTables()"/> По названию (по убыванию)</td>
+                    </tr>
+                    <tr>
+                        <td><input id="radio_sort_by_append_date" name="radio_sort_by" value="sort_by_append_date" type="radio" onclick="fillGameTables()"/> По дате добавления</td>
+                        <td><input id="radio_sort_by_append_date__desc" name="radio_sort_by" value="sort_by_append_date_desc" type="radio" onclick="fillGameTables()"/> По дате добавления (по убыванию)</td>
+                    </tr>
+                    <tr>
+                        <td><input id="radio_sort_by_price" name="radio_sort_by" value="sort_by_price" type="radio" onclick="fillGameTables()"/> По цене</td>
+                        <td><input id="radio_sort_by_price__desc" name="radio_sort_by" value="sort_by_price_desc" type="radio" onclick="fillGameTables()"/> По цене (по убыванию)</td>
+                    </tr>
+                </table>
+            </td>
         </tr>
     </table>
     <hr><br><br>
@@ -602,15 +601,54 @@
     })();
 
     function fillTable(table_id, total_class, items) {
-        console.log("fillTable from " + table_id + ", total_class=" + total_class + ", items: " + JSON.stringify(items));
+        //console.log("fillTable from " + table_id + ", total_class=" + total_class + ", items: " + JSON.stringify(items));
 
-/* <!-- TODO: добавить возможность сортировки таблиц (например забить radiobuttons) -->
-        // Сначала отсортируем по дате добавления
-        items.sortBy(function(item) {
-            return new Date(item.append_date)
-        });
-        items.reverse();
-*/
+        var current_sort = $('input[name=radio_sort_by]:checked').val();
+        console.log('current_sort: ' + current_sort);
+
+        // Выполнение сортировки
+        switch (current_sort) {
+            case 'sort_by_name':
+                items.sortBy(function(item) {
+                    return item.name;
+                });
+                break;
+
+            case 'sort_by_name_desc':
+                items.sortBy(function(item) {
+                    return item.name;
+                });
+                items.reverse();
+                break;
+
+            case 'sort_by_append_date':
+                items.sortBy(function(item) {
+                    return new Date(item.append_date);
+                });
+                break;
+
+            case 'sort_by_append_date_desc':
+                items.sortBy(function(item) {
+                    return new Date(item.append_date);
+                });
+                items.reverse();
+                break;
+
+            case 'sort_by_price':
+                items.sortBy(function(item) {
+                    return parseFloat(item.price);
+                });
+                break;
+
+            case 'sort_by_price_desc':
+                items.sortBy(function(item) {
+                    return parseFloat(item.price);
+                });
+                items.reverse();
+                break;
+        }
+
+        console.log("sorted items: " + table_id + ", total_class=" + total_class + ", items: " + JSON.stringify(items));
 
         // Очищение содержимого таблицы
         $(table_id + ' > tbody').remove();
@@ -713,6 +751,14 @@
         $('.finished_watched_game_statistic').html(statistic_for_table("#finished_watched_game"));
     }
 
+    function fillGameTables() {
+        fillTable('#finished_game', 'total_price_finished_games', window.finished_games);
+        fillTable('#finished_watched_game', 'total_price_finished_watched_games', window.finished_watched_games);
+
+        // Функция для подсчета итоговых сумм всех игр
+        update_total_price_all_tables();
+    }
+
     // Функция загружает все игры, перезаполняет таблицы игр, подсчитывает итого и статистику
     function load_tables() {
         $.ajax({
@@ -725,11 +771,10 @@
                 var FINISHED = 'Finished';
                 var FINISHED_WATCHED = 'Finished watched';
 
-                var finished_games = data[FINISHED];
-                var finished_watched_games = data[FINISHED_WATCHED];
+                window.finished_games = data[FINISHED];
+                window.finished_watched_games = data[FINISHED_WATCHED];
 
-                fillTable('#finished_game', 'total_price_finished_games', finished_games);
-                fillTable('#finished_watched_game', 'total_price_finished_watched_games', finished_watched_games);
+                fillGameTables();
 
                 // Добавление статистики о играх в таблице
                 fill_statistics();
@@ -738,9 +783,6 @@
                 $('.number_finished_games').text(finished_games.length);
                 $('.number_finished_watched_games').text(finished_watched_games.length);
                 $('.sum_number_games').text(finished_games.length + finished_watched_games.length);
-
-                // Функция для подсчета итоговых сумм всех игр
-                update_total_price_all_tables();
 
                 // Применение текущего фильтра таблиц
                 common_filter();

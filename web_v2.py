@@ -13,7 +13,6 @@ import config
 import common
 
 
-# TODO: добавить возможность сортировки таблиц (например забить radiobuttons)
 # TODO: добавить возможность выполнить sql запрос
 # TODO: нарисовать график указания цен на игры:
 #     modify_date_list = connect.execute("SELECT modify_date "
@@ -432,7 +431,7 @@ if __name__ == '__main__':
     # app.debug = True
 
     app.run(
-        port=5500,
+        port=55000,
 
         # Включение поддержки множества подключений
         threaded=True,

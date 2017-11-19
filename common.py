@@ -741,7 +741,7 @@ def steam_search_game_price_list(name):
     for div in root.select('.search_result_row'):
         name = div.select_one('.title').text.strip()
 
-        # Ищем тег скидки
+        # Ищем тег скидки, чтобы вытащить оригинальную цены, а не ту, что получилась со скидкой
         if div.select_one('.search_discount > span'):
             price = div.select_one('.search_price > span > strike').text.strip()
         else:

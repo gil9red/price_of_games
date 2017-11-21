@@ -239,9 +239,16 @@
     <br>
 
     <div id="top_right_fixed_panel">
-        <!--<input id="checkbox_visible_finished_games" type="checkbox" checked/><label for="checkbox_visible_finished_games"> {{ TITLE_FINISHED }}</label>-->
-        <!--<input id="checkbox_visible_finished_watched_games" type="checkbox" checked/><label for="checkbox_visible_finished_watched_games"> {{ TITLE_FINISHED_WATCHED }}</label>-->
-        <!--<hr>-->
+        <div>
+            <input id="checkbox_visible_finished_games" type="checkbox" onclick="set_visible_finished_game($(this).is(':checked'))" checked/>
+            <label for="checkbox_visible_finished_games"> {{ TITLE_FINISHED }}</label>
+        </div>
+
+        <div>
+            <input id="checkbox_visible_finished_watched_games" type="checkbox" onclick="set_visible_finished_watched_game($(this).is(':checked'))" checked/>
+            <label for="checkbox_visible_finished_watched_games"> {{ TITLE_FINISHED_WATCHED }}</label>
+        </div>
+        <hr>
 
         <form id="form__set_price" method="post" action="/set_price">
             <b>Установка цены у игры:</b>
@@ -361,8 +368,34 @@
     </table>
 
     <script>
+        function set_visible_finished_game(visible) {
+            if (visible) {
+                $('#finished_game').show();
+                $('#input_finished_game').show();
+
+            } else {
+                $('#finished_game').hide();
+                $('#input_finished_game').hide();
+            }
+        }
+
+        function set_visible_finished_watched_game(visible) {
+            if (visible) {
+                $('#finished_watched_game').show();
+                $('#input_finished_watched_game').show();
+
+            } else {
+                $('#finished_watched_game').hide();
+                $('#input_finished_watched_game').hide();
+            }
+        }
+
         // init plugin clearsearch
-        $('.clearable').clearSearch();
+        $('.clearable').clearSearch({
+            callback: function() {
+                common_filter();
+            }
+        });
 
         function show_more_actions(button) {
             var more_actions = $('#top_right_fixed_panel .more_actions');
@@ -802,6 +835,10 @@
     }
 
     $(document).ready(function() {
+        // По умолчанию, флаги всегда стоят
+        $('#checkbox_visible_finished_games').prop('checked', true);
+        $('#checkbox_visible_finished_watched_games').prop('checked', true);
+
         load_tables();
 
         // Обработка изменения цены конкретной игры

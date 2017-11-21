@@ -239,6 +239,10 @@
     <br>
 
     <div id="top_right_fixed_panel">
+        <!--<input id="checkbox_visible_finished_games" type="checkbox" checked/><label for="checkbox_visible_finished_games"> {{ TITLE_FINISHED }}</label>-->
+        <!--<input id="checkbox_visible_finished_watched_games" type="checkbox" checked/><label for="checkbox_visible_finished_watched_games"> {{ TITLE_FINISHED_WATCHED }}</label>-->
+        <!--<hr>-->
+
         <form id="form__set_price" method="post" action="/set_price">
             <b>Установка цены у игры:</b>
             <p>Название:<br><input id="form_name" type="text" name="name" required></p>
@@ -282,8 +286,8 @@
                 <b>Удаление игры:</b>
                 <p>
                     <select name="kind">
-                        <option value="{{ FINISHED }}">Пройденные игры</option>
-                        <option value="{{ FINISHED_WATCHED }}">Просмотренные игры</option>
+                        <option value="{{ FINISHED }}">{{ TITLE_FINISHED }}</option>
+                        <option value="{{ FINISHED_WATCHED }}">{{ TITLE_FINISHED_WATCHED }}</option>
                    </select>
                 </p>
                 <p>Название игры:<br><input id="form__delete_game__name" type="text" name="name" required></p>
@@ -301,25 +305,25 @@
         <tr>
             <td>
                 <table>
-                    <tr><td><input id="radio_show_all_games" name="radio_show_game" type="radio" onclick="common_filter()" checked/> Показывать все игры</td></tr>
-                    <tr><td><input id="radio_show_games_with_price" name="radio_show_game" type="radio" onclick="common_filter()"/> Показывать игры с ценой</td></tr>
-                    <tr><td><input id="radio_show_games_without_price" name="radio_show_game" type="radio" onclick="common_filter()"/> Показывать игры без цены</td></tr>
+                    <tr><td><input id="radio_show_all_games" name="radio_show_game" type="radio" onclick="common_filter()" checked/><label for="radio_show_all_games"> Показывать все игры</label></td></tr>
+                    <tr><td><input id="radio_show_games_with_price" name="radio_show_game" type="radio" onclick="common_filter()"/><label for="radio_show_games_with_price"> Показывать игры с ценой</label></td></tr>
+                    <tr><td><input id="radio_show_games_without_price" name="radio_show_game" type="radio" onclick="common_filter()"/><label for="radio_show_games_without_price"> Показывать игры без цены</label></td></tr>
                 </table>
             </td>
 
             <td>
                 <table>
                     <tr>
-                        <td><input id="radio_sort_by_name" name="radio_sort_by" value="sort_by_name" type="radio" onclick="fillGameTables()" checked/> По названию</td>
-                        <td><input id="radio_sort_by_name__desc" name="radio_sort_by" value="sort_by_name_desc" type="radio" onclick="fillGameTables()"/> По названию (по убыванию)</td>
+                        <td><input id="radio_sort_by_name" name="radio_sort_by" value="sort_by_name" type="radio" onclick="fillGameTables()" checked/><label for="radio_sort_by_name"> По названию</label></td>
+                        <td><input id="radio_sort_by_name__desc" name="radio_sort_by" value="sort_by_name_desc" type="radio" onclick="fillGameTables()"/><label for="radio_sort_by_name__desc"> По названию (по убыванию)</label></td>
                     </tr>
                     <tr>
-                        <td><input id="radio_sort_by_append_date" name="radio_sort_by" value="sort_by_append_date" type="radio" onclick="fillGameTables()"/> По дате добавления</td>
-                        <td><input id="radio_sort_by_append_date__desc" name="radio_sort_by" value="sort_by_append_date_desc" type="radio" onclick="fillGameTables()"/> По дате добавления (по убыванию)</td>
+                        <td><input id="radio_sort_by_append_date" name="radio_sort_by" value="sort_by_append_date" type="radio" onclick="fillGameTables()"/><label for="radio_sort_by_append_date"> По дате добавления</label></td>
+                        <td><input id="radio_sort_by_append_date__desc" name="radio_sort_by" value="sort_by_append_date_desc" type="radio" onclick="fillGameTables()"/><label for="radio_sort_by_append_date__desc"> По дате добавления (по убыванию)</label></td>
                     </tr>
                     <tr>
-                        <td><input id="radio_sort_by_price" name="radio_sort_by" value="sort_by_price" type="radio" onclick="fillGameTables()"/> По цене</td>
-                        <td><input id="radio_sort_by_price__desc" name="radio_sort_by" value="sort_by_price_desc" type="radio" onclick="fillGameTables()"/> По цене (по убыванию)</td>
+                        <td><input id="radio_sort_by_price" name="radio_sort_by" value="sort_by_price" type="radio" onclick="fillGameTables()"/><label for="radio_sort_by_price"> По цене</label></td>
+                        <td><input id="radio_sort_by_price__desc" name="radio_sort_by" value="sort_by_price_desc" type="radio" onclick="fillGameTables()"/><label for="radio_sort_by_price__desc"> По цене (по убыванию)</label></td>
                     </tr>
                 </table>
             </td>
@@ -328,7 +332,7 @@
     <hr><br><br>
 
     <div id="finished_game_caption_table" class="block_caption_search">
-        <div class="table_caption">Пройденные игры <div class="finished_game_statistic" style="display:inline-block;"></div></div>
+        <div class="table_caption">{{ TITLE_FINISHED }} <div class="finished_game_statistic" style="display:inline-block;"></div></div>
         <div>
             <input type="text" id="input_finished_game" class="input_search clearable" onkeyup="common_filter()" placeholder="Поиск игр...">
         </div>
@@ -343,7 +347,7 @@
     <br><br><br>
 
     <div id="finished_watched_game_caption_table" class="block_caption_search">
-        <div class="table_caption">Просмотренные игры <div class="finished_watched_game_statistic" style="display:inline-block;;"></div></div>
+        <div class="table_caption">{{ TITLE_FINISHED_WATCHED }} <div class="finished_watched_game_statistic" style="display:inline-block;;"></div></div>
         <div>
             <input type="text" id="input_finished_watched_game" class="input_search clearable" onkeyup="common_filter()" placeholder="Поиск игр...">
         </div>

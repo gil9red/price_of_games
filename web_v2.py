@@ -61,6 +61,9 @@ def index():
 
         FINISHED=common.FINISHED,
         FINISHED_WATCHED=common.FINISHED_WATCHED,
+
+        TITLE_FINISHED='Пройденные игры',
+        TITLE_FINISHED_WATCHED='Просмотренные игры',
     )
 
 

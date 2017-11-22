@@ -843,6 +843,7 @@ if __name__ == '__main__':
     # print(get_games_list())
     # print()
 
+    # Вывести счетчик игр
     with create_connect() as connect:
         sql_text = 'SELECT count(*) FROM Game WHERE kind = ?'
 
@@ -852,6 +853,7 @@ if __name__ == '__main__':
         print(FINISHED, finished_number)
         print(FINISHED_WATCHED, finished_watched_number)
         print('Total', finished_number + finished_watched_number)
+        print()
 
     # # Print statistic from backup database
     # import sqlite3
@@ -866,3 +868,49 @@ if __name__ == '__main__':
     #         print('   ', FINISHED, connect.execute(sql_text, (FINISHED,)).fetchone()[0])
     #         print('   ', FINISHED_WATCHED, connect.execute(sql_text, (FINISHED_WATCHED,)).fetchone()[0])
     #         print()
+
+    # # Получение списка дат добавления игры и рисование по нему графика
+    # append_date_list = connect.execute("SELECT append_date "
+    #                                    "FROM Game "
+    #                                    "WHERE append_date IS NOT NULL "
+    #                                    "ORDER BY append_date").fetchall()
+    #
+    # from datetime import datetime
+    #
+    # def to_datetime(date_str: str) -> datetime:
+    #     return datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+    #
+    # append_date_month_list = []
+    #
+    # for (item,) in append_date_list:
+    #     date = to_datetime(item)
+    #     date = datetime(date.year, date.month, 1)
+    #
+    #     append_date_month_list.append(date)
+    #
+    # from collections import Counter
+    # append_date_month_by_counter = Counter(append_date_month_list)
+    # append_date_month_by_counter_list = sorted(append_date_month_by_counter.items(), key=lambda x: x[0])
+    # for date, counter in append_date_month_by_counter_list:
+    #     print(date, counter)
+    #
+    # append_date_month_list = [x[0] for x in append_date_month_by_counter_list]
+    # counter_list = [x[1] for x in append_date_month_by_counter_list]
+    #
+    # import matplotlib.pyplot as plt
+    #
+    # fig = plt.figure(1)
+    # fig.suptitle('Price of games', fontsize=14, fontweight='bold')
+    # ax = fig.add_subplot(111)
+    #
+    # ax.plot(append_date_month_list, counter_list, label='Games')
+    #
+    # ax.legend()
+    # ax.grid()
+    # ax.set_title('Append date')
+    # ax.set_xlabel('Date')
+    # ax.set_ylabel('Count')
+    #
+    # plt.gcf().autofmt_xdate()
+    #
+    # plt.show()

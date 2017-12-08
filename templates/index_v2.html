@@ -75,12 +75,15 @@
 
             background: #555; /* Цвет фона */
             border: #666; /* Параметры рамки */
-            color: #ffffff; /* Цвет текста */
+            color: white; /* Цвет текста */
 
             overflow-y: auto; /* Добавление вертикального скрола */
         }
             #top_right_fixed_panel input[type="text"], .button_show_more_actions {
                 width: 320px;
+            }
+            #top_right_fixed_panel label {
+                color: white; /* Цвет текста */
             }
 
         .button_show_more_actions {
@@ -239,15 +242,28 @@
     <br>
 
     <div id="top_right_fixed_panel">
-        <div>
-            <input id="checkbox_visible_finished_games" type="checkbox" onclick="set_visible_finished_game($(this).is(':checked'))" checked/>
-            <label for="checkbox_visible_finished_games"> {{ TITLE_FINISHED }}</label>
-        </div>
+        <table>
+            <tr>
+                <td>
+                    <input id="checkbox_visible_finished_games" type="checkbox" onclick="set_visible_finished_game($(this).is(':checked'))" checked/>
+                    <label for="checkbox_visible_finished_games"> {{ TITLE_FINISHED }}</label>
+                </td>
+                <td>
+                    <button onclick="document.location.href='#finished_game_caption_table'">Перейти</button>
+                </td>
+            </tr>
 
-        <div>
-            <input id="checkbox_visible_finished_watched_games" type="checkbox" onclick="set_visible_finished_watched_game($(this).is(':checked'))" checked/>
-            <label for="checkbox_visible_finished_watched_games"> {{ TITLE_FINISHED_WATCHED }}</label>
-        </div>
+            <tr>
+                <td>
+                    <input id="checkbox_visible_finished_watched_games" type="checkbox" onclick="set_visible_finished_watched_game($(this).is(':checked'))" checked/>
+                    <label for="checkbox_visible_finished_watched_games"> {{ TITLE_FINISHED_WATCHED }}</label>
+                </td>
+                <td>
+                    <button onclick="document.location.href='#finished_watched_game_caption_table'">Перейти</button>
+                </td>
+            </tr>
+        </table>
+
         <hr>
 
         <form id="form__set_price" method="post" action="/set_price">
@@ -266,8 +282,6 @@
         </form>
 
         <hr>
-        <button onclick="document.location.href='#finished_game_caption_table'">Перейти к таблице пройденных игр</button>
-        <button onclick="document.location.href='#finished_watched_game_caption_table'">Перейти к таблице просмотренных игр</button>
 
         <br><br>
         <div class="button_show_more_actions noselect" onclick="show_more_actions(this);" is_checked="0">Показать больше действий</div>

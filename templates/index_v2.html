@@ -241,6 +241,41 @@
     </table>
     <br>
 
+    <table id="table_sort_filter">
+        <colgroup>
+           <col span="1" style="width: 350px;">
+        </colgroup>
+
+        <tr><th>Фильтрация</th><th>Сортировка</th></tr>
+        <tr>
+            <td>
+                <table>
+                    <tr><td><input id="radio_show_all_games" name="radio_show_game" type="radio" onclick="common_filter()" checked/><label for="radio_show_all_games"> Показывать все игры</label></td></tr>
+                    <tr><td><input id="radio_show_games_with_price" name="radio_show_game" type="radio" onclick="common_filter()"/><label for="radio_show_games_with_price"> Показывать игры с ценой</label></td></tr>
+                    <tr><td><input id="radio_show_games_without_price" name="radio_show_game" type="radio" onclick="common_filter()"/><label for="radio_show_games_without_price"> Показывать игры без цены</label></td></tr>
+                </table>
+            </td>
+
+            <td>
+                <table>
+                    <tr>
+                        <td><input id="radio_sort_by_name" name="radio_sort_by" value="sort_by_name" type="radio" onclick="fillGameTables()" checked/><label for="radio_sort_by_name"> По названию</label></td>
+                        <td><input id="radio_sort_by_name__desc" name="radio_sort_by" value="sort_by_name_desc" type="radio" onclick="fillGameTables()"/><label for="radio_sort_by_name__desc"> По названию (по убыванию)</label></td>
+                    </tr>
+                    <tr>
+                        <td><input id="radio_sort_by_append_date" name="radio_sort_by" value="sort_by_append_date" type="radio" onclick="fillGameTables()"/><label for="radio_sort_by_append_date"> По дате добавления</label></td>
+                        <td><input id="radio_sort_by_append_date__desc" name="radio_sort_by" value="sort_by_append_date_desc" type="radio" onclick="fillGameTables()"/><label for="radio_sort_by_append_date__desc"> По дате добавления (по убыванию)</label></td>
+                    </tr>
+                    <tr>
+                        <td><input id="radio_sort_by_price" name="radio_sort_by" value="sort_by_price" type="radio" onclick="fillGameTables()"/><label for="radio_sort_by_price"> По цене</label></td>
+                        <td><input id="radio_sort_by_price__desc" name="radio_sort_by" value="sort_by_price_desc" type="radio" onclick="fillGameTables()"/><label for="radio_sort_by_price__desc"> По цене (по убыванию)</label></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+    <hr><br><br>
+
     <div id="top_right_fixed_panel">
         <table>
             <tr>
@@ -316,41 +351,6 @@
             </form>
         </div>
     </div>
-
-    <table id="table_sort_filter">
-        <colgroup>
-           <col span="1" style="width: 350px;">
-        </colgroup>
-
-        <tr><th>Фильтрация</th><th>Сортировка</th></tr>
-        <tr>
-            <td>
-                <table>
-                    <tr><td><input id="radio_show_all_games" name="radio_show_game" type="radio" onclick="common_filter()" checked/><label for="radio_show_all_games"> Показывать все игры</label></td></tr>
-                    <tr><td><input id="radio_show_games_with_price" name="radio_show_game" type="radio" onclick="common_filter()"/><label for="radio_show_games_with_price"> Показывать игры с ценой</label></td></tr>
-                    <tr><td><input id="radio_show_games_without_price" name="radio_show_game" type="radio" onclick="common_filter()"/><label for="radio_show_games_without_price"> Показывать игры без цены</label></td></tr>
-                </table>
-            </td>
-
-            <td>
-                <table>
-                    <tr>
-                        <td><input id="radio_sort_by_name" name="radio_sort_by" value="sort_by_name" type="radio" onclick="fillGameTables()" checked/><label for="radio_sort_by_name"> По названию</label></td>
-                        <td><input id="radio_sort_by_name__desc" name="radio_sort_by" value="sort_by_name_desc" type="radio" onclick="fillGameTables()"/><label for="radio_sort_by_name__desc"> По названию (по убыванию)</label></td>
-                    </tr>
-                    <tr>
-                        <td><input id="radio_sort_by_append_date" name="radio_sort_by" value="sort_by_append_date" type="radio" onclick="fillGameTables()"/><label for="radio_sort_by_append_date"> По дате добавления</label></td>
-                        <td><input id="radio_sort_by_append_date__desc" name="radio_sort_by" value="sort_by_append_date_desc" type="radio" onclick="fillGameTables()"/><label for="radio_sort_by_append_date__desc"> По дате добавления (по убыванию)</label></td>
-                    </tr>
-                    <tr>
-                        <td><input id="radio_sort_by_price" name="radio_sort_by" value="sort_by_price" type="radio" onclick="fillGameTables()"/><label for="radio_sort_by_price"> По цене</label></td>
-                        <td><input id="radio_sort_by_price__desc" name="radio_sort_by" value="sort_by_price_desc" type="radio" onclick="fillGameTables()"/><label for="radio_sort_by_price__desc"> По цене (по убыванию)</label></td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
-    <hr><br><br>
 
     <div id="finished_game_caption_table" class="block_caption_search">
         <div class="table_caption">{{ TITLE_FINISHED }} <div class="finished_game_statistic" style="display:inline-block;"></div></div>

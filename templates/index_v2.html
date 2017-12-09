@@ -742,7 +742,7 @@
 
 
                 // Добавление иконки для поиска игры в яндексе
-                var img_yandex_search = $(`<img src="https://yandex.ru/favicon.ico" width="16" height="16"/>`);
+                var img_yandex_search = $(`<img src="{{ url_for('static', filename='images/yandex_favicon.ico') }}" width="16" height="16"/>`);
                 img_yandex_search.attr('game_id', id);
                 img_yandex_search.attr('onclick', 'open_tab_with_yandex_search_from_game_id($(this).attr("game_id"))');
                 img_yandex_search.attr('alt', 'yandex');
@@ -750,7 +750,7 @@
 
 
                 // Добавление иконки для поиска игры в гугле
-                var img_google_search = $(`<img src="https://google.com/favicon.ico" width="16" height="16"/>`);
+                var img_google_search = $(`<img src="{{ url_for('static', filename='images/google_favicon.ico') }}" width="16" height="16"/>`);
                 img_google_search.attr('game_id', id);
                 img_google_search.attr('onclick', 'open_tab_with_google_search_from_game_id($(this).attr("game_id"))');
                 img_google_search.attr('alt', 'google');

@@ -158,38 +158,6 @@
         <a href="#top"><span></span>Наверх</a>
     </p>
 
-    <script>
-        $.noty.defaults.theme = 'defaultTheme';
-        $.noty.defaults.layout = 'bottomRight';
-        $.noty.defaults.timeout = 6000;
-
-
-        $(document).ready(function() {
-            // hide #back-top first
-            $("#back-top").hide();
-
-            // fade in #back-top
-            $(function () {
-                $(window).scroll(function () {
-                    if ($(this).scrollTop() > 250) {
-                        $('#back-top').fadeIn();
-                    } else {
-                        $('#back-top').fadeOut();
-                    }
-                });
-
-                // scroll body to 0px on click
-                $('#back-top a').click(function () {
-                    $('body,html').animate({
-                        scrollTop: 0
-                    }, 800);
-                    return false;
-                });
-            });
-        });
-    </script>
-
-
     {% if has_duplicates %}
     <p><font size="20" color="red">АХТУНГ! Найдены дубликаты!</font></p>
     {% endif %}
@@ -250,25 +218,25 @@
         <tr>
             <td>
                 <table>
-                    <tr><td><input id="radio_show_all_games" name="radio_show_game" type="radio" onclick="common_filter()" checked/><label for="radio_show_all_games"> Показывать все игры</label></td></tr>
-                    <tr><td><input id="radio_show_games_with_price" name="radio_show_game" type="radio" onclick="common_filter()"/><label for="radio_show_games_with_price"> Показывать игры с ценой</label></td></tr>
-                    <tr><td><input id="radio_show_games_without_price" name="radio_show_game" type="radio" onclick="common_filter()"/><label for="radio_show_games_without_price"> Показывать игры без цены</label></td></tr>
+                    <tr><td><input id="radio_show_all_games" class="on_common_filter_click" name="radio_show_game" type="radio" checked/><label for="radio_show_all_games"> Показывать все игры</label></td></tr>
+                    <tr><td><input id="radio_show_games_with_price" class="on_common_filter_click" name="radio_show_game" type="radio"/><label for="radio_show_games_with_price"> Показывать игры с ценой</label></td></tr>
+                    <tr><td><input id="radio_show_games_without_price" class="on_common_filter_click" name="radio_show_game" type="radio"/><label for="radio_show_games_without_price"> Показывать игры без цены</label></td></tr>
                 </table>
             </td>
 
             <td>
                 <table>
                     <tr>
-                        <td><input id="radio_sort_by_name" name="radio_sort_by" value="sort_by_name" type="radio" onclick="fillGameTables()" checked/><label for="radio_sort_by_name"> По названию</label></td>
-                        <td><input id="radio_sort_by_name__desc" name="radio_sort_by" value="sort_by_name_desc" type="radio" onclick="fillGameTables()"/><label for="radio_sort_by_name__desc"> По названию (по убыванию)</label></td>
+                        <td><input id="radio_sort_by_name" class="on_common_filter_click" name="radio_sort_by" value="sort_by_name" type="radio" checked/><label for="radio_sort_by_name"> По названию</label></td>
+                        <td><input id="radio_sort_by_name__desc" class="on_common_filter_click" name="radio_sort_by" value="sort_by_name_desc" type="radio"/><label for="radio_sort_by_name__desc"> По названию (по убыванию)</label></td>
                     </tr>
                     <tr>
-                        <td><input id="radio_sort_by_append_date" name="radio_sort_by" value="sort_by_append_date" type="radio" onclick="fillGameTables()"/><label for="radio_sort_by_append_date"> По дате добавления</label></td>
-                        <td><input id="radio_sort_by_append_date__desc" name="radio_sort_by" value="sort_by_append_date_desc" type="radio" onclick="fillGameTables()"/><label for="radio_sort_by_append_date__desc"> По дате добавления (по убыванию)</label></td>
+                        <td><input id="radio_sort_by_append_date" class="on_common_filter_click" name="radio_sort_by" value="sort_by_append_date" type="radio"/><label for="radio_sort_by_append_date"> По дате добавления</label></td>
+                        <td><input id="radio_sort_by_append_date__desc" class="on_common_filter_click" name="radio_sort_by" value="sort_by_append_date_desc" type="radio"/><label for="radio_sort_by_append_date__desc"> По дате добавления (по убыванию)</label></td>
                     </tr>
                     <tr>
-                        <td><input id="radio_sort_by_price" name="radio_sort_by" value="sort_by_price" type="radio" onclick="fillGameTables()"/><label for="radio_sort_by_price"> По цене</label></td>
-                        <td><input id="radio_sort_by_price__desc" name="radio_sort_by" value="sort_by_price_desc" type="radio" onclick="fillGameTables()"/><label for="radio_sort_by_price__desc"> По цене (по убыванию)</label></td>
+                        <td><input id="radio_sort_by_price" class="on_common_filter_click" name="radio_sort_by" value="sort_by_price" type="radio"/><label for="radio_sort_by_price"> По цене</label></td>
+                        <td><input id="radio_sort_by_price__desc" class="on_common_filter_click" name="radio_sort_by" value="sort_by_price_desc" type="radio"/><label for="radio_sort_by_price__desc"> По цене (по убыванию)</label></td>
                     </tr>
                 </table>
             </td>
@@ -382,6 +350,39 @@
     </table>
 
     <script>
+        $.noty.defaults.theme = 'defaultTheme';
+        $.noty.defaults.layout = 'bottomRight';
+        $.noty.defaults.timeout = 6000;
+
+
+        $(document).ready(function() {
+            // hide #back-top first
+            $("#back-top").hide();
+
+            // fade in #back-top
+            $(function () {
+                $(window).scroll(function () {
+                    if ($(this).scrollTop() > 250) {
+                        $('#back-top').fadeIn();
+                    } else {
+                        $('#back-top').fadeOut();
+                    }
+                });
+
+                // scroll body to 0px on click
+                $('#back-top a').click(function () {
+                    $('body,html').animate({
+                        scrollTop: 0
+                    }, 800);
+                    return false;
+                });
+            });
+
+            $(".on_common_filter_click").click(function() {
+                common_filter();
+            });
+        });
+
         function set_visible_finished_game(visible) {
             if (visible) {
                 $('#finished_game').show();
@@ -509,6 +510,8 @@
         }
 
         function common_filter() {
+            fillGameTables();
+
             var finished_game_table = document.getElementById('finished_game');
             var finished_watched_game_table = document.getElementById('finished_watched_game');
 
@@ -825,7 +828,8 @@
                 window.finished_games = data[FINISHED];
                 window.finished_watched_games = data[FINISHED_WATCHED];
 
-                fillGameTables();
+                // Применение текущего фильтра таблиц
+                common_filter();
 
                 // Добавление статистики о играх в таблице
                 fill_statistics();
@@ -834,9 +838,6 @@
                 $('.number_finished_games').text(finished_games.length);
                 $('.number_finished_watched_games').text(finished_watched_games.length);
                 $('.sum_number_games').text(finished_games.length + finished_watched_games.length);
-
-                // Применение текущего фильтра таблиц
-                common_filter();
             },
 
             error: function(data) {

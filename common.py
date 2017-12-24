@@ -779,15 +779,12 @@ def smart_comparing_names(name_1, name_2):
     name_1 = name_1.lower()
     name_2 = name_2.lower()
 
+    # Удаление символов кроме буквенных, цифр и _: "the witcher®3:___ вася! wild hunt" -> "thewitcher3___васяwildhunt"
     def clear_name(name):
         import re
-        return re.sub(r'[^\w]', '', name).replace('_', '')
+        return re.sub(r'\W', '', name)
 
-    # Удаление символов кроме буквенных и цифр: "the witcher®3:___ вася! wild hunt" -> "thewitcher3васяwildhunt"
-    name_1 = clear_name(name_1)
-    name_2 = clear_name(name_2)
-
-    return name_1 == name_2
+    return clear_name(name_1) == clear_name(name_2)
 
 
 class Settings:

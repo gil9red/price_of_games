@@ -91,8 +91,8 @@ def init_db():
                 price TEXT DEFAULT NULL,
                 kind  TEXT NOT NULL,
                 
-                append_date       DATETIME DEFAULT DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME'),
-                modify_price_date DATETIME DEFAULT DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME'),
+                append_date       DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')),
+                modify_price_date DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')),
                 
                 check_steam BOOLEAN NOT NULL DEFAULT 0
             );
@@ -110,8 +110,8 @@ def init_db():
         #         name TEXT NOT NULL,
         #         price TEXT DEFAULT NULL,
         #
-        #         append_date DATETIME DEFAULT DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME'),
-        #         modify_price_date DATETIME DEFAULT DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME'),
+        #         append_date DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')),
+        #         modify_price_date DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')),
         #
         #         kind TEXT NOT NULL,
         #         check_steam BOOLEAN NOT NULL DEFAULT 0

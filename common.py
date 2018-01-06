@@ -91,8 +91,8 @@ def init_db():
                 price TEXT DEFAULT NULL,
                 kind  TEXT NOT NULL,
                 
-                append_date       DATETIME DEFAULT CURRENT_TIMESTAMP,
-                modify_price_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                append_date       DATETIME DEFAULT DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME'),
+                modify_price_date DATETIME DEFAULT DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME'),
                 
                 check_steam BOOLEAN NOT NULL DEFAULT 0
             );
@@ -110,8 +110,8 @@ def init_db():
         #         name TEXT NOT NULL,
         #         price TEXT DEFAULT NULL,
         #
-        #         append_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-        #         modify_price_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+        #         append_date DATETIME DEFAULT DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME'),
+        #         modify_price_date DATETIME DEFAULT DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME'),
         #
         #         kind TEXT NOT NULL,
         #         check_steam BOOLEAN NOT NULL DEFAULT 0
@@ -213,8 +213,8 @@ def set_price_game(game: str, price: str) -> list:
 
     connect = create_connect()
     try:
-        cursor = connect.cursor()
-        cursor.execute("UPDATE Game SET price = ?, modify_price_date = CURRENT_TIMESTAMP WHERE name = ?", (price, game))
+        sql = "UPDATE Game SET price = ?, modify_price_date = DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME') WHERE name = ?"
+        connect.execute(sql, (price, game))
         connect.commit()
 
         # Получение id игр с указанным названием

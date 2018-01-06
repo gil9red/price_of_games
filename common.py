@@ -85,16 +85,13 @@ def init_db():
     with create_connect() as connect:
         connect.execute('''
             CREATE TABLE IF NOT EXISTS Game (
-                id INTEGER PRIMARY KEY,
-    
-                name  TEXT NOT NULL,
-                price TEXT DEFAULT NULL,
-                kind  TEXT NOT NULL,
-                
+                id                INTEGER  PRIMARY KEY,
+                name              TEXT     NOT NULL,
+                price             TEXT     DEFAULT NULL,
                 append_date       DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')),
                 modify_price_date DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')),
-                
-                check_steam BOOLEAN NOT NULL DEFAULT 0
+                kind              TEXT     NOT NULL,
+                check_steam       BOOLEAN  NOT NULL DEFAULT 0
             );
         ''')
 
@@ -102,27 +99,31 @@ def init_db():
 
         # # NOTE: когда нужно в таблице подправить схему:
         # connect.executescript('''
-        #     DROP TABLE IF EXISTS Game2;
+        #     PRAGMA foreign_keys = 0;
         #
-        #     CREATE TABLE IF NOT EXISTS Game2 (
-        #         id INTEGER PRIMARY KEY,
-        #
-        #         name TEXT NOT NULL,
-        #         price TEXT DEFAULT NULL,
-        #
-        #         append_date DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')),
-        #         modify_price_date DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')),
-        #
-        #         kind TEXT NOT NULL,
-        #         check_steam BOOLEAN NOT NULL DEFAULT 0
-        #     );
-        #
-        #     -- INSERT INTO Game2 SELECT * FROM Game;
-        #     INSERT INTO Game2 (id, name, price, append_date, modify_price_date, kind, check_steam)
-        #                 SELECT id, name, price, append_date, modify_date, kind, check_steam FROM Game;
+        #     CREATE TABLE temp_table AS SELECT * FROM Game;
         #
         #     DROP TABLE Game;
-        #     ALTER TABLE Game2 RENAME TO Game;
+        #
+        #     CREATE TABLE Game (
+        #         id                INTEGER  PRIMARY KEY,
+        #         name              TEXT     NOT NULL,
+        #         price             TEXT     DEFAULT NULL,
+        #         append_date       DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')),
+        #         modify_price_date DATETIME DEFAULT (DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME')),
+        #         kind              TEXT     NOT NULL,
+        #         check_steam       BOOLEAN  NOT NULL DEFAULT 0,
+        #
+        #         NEW_COLUMN        TEXT     DEFAULT 'FOO'
+        #     );
+        #
+        #     INSERT INTO Game (id, name, price, append_date, modify_price_date, kind, check_steam)
+        #                SELECT id, name, price, append_date, modify_price_date, kind, check_steam
+        #                FROM temp_table;
+        #
+        #     DROP TABLE temp_table;
+        #
+        #     PRAGMA foreign_keys = 1;
         # ''')
         #
         # connect.commit()

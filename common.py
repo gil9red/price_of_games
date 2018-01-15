@@ -863,10 +863,18 @@ if __name__ == '__main__':
     #     print(file_name)
     #
     #     with sqlite3.connect(file_name) as connect:
-    #         sql_text = 'SELECT count(*) FROM Game WHERE kind = ?'
+    #         sql_text = 'SELECT count(*), sum(price) FROM Game WHERE kind = ?'
     #
-    #         print('   ', FINISHED, connect.execute(sql_text, (FINISHED,)).fetchone()[0])
-    #         print('   ', FINISHED_WATCHED, connect.execute(sql_text, (FINISHED_WATCHED,)).fetchone()[0])
+    #         finished_number, finished_sum_price = connect.execute(sql_text, (FINISHED,)).fetchone()
+    #         finished_watched_number, finished_watched_sum_price = connect.execute(sql_text,
+    #                                                                               (FINISHED_WATCHED,)).fetchone()
+    #         total_number = finished_number + finished_watched_number
+    #         total_price = finished_sum_price + finished_watched_sum_price
+    #
+    #         print('    {}: {}, total price: {}'.format(FINISHED, finished_number, finished_sum_price))
+    #         print('    {}: {}, total price: {}'.format(FINISHED_WATCHED, finished_watched_number,
+    #                                                    finished_watched_sum_price))
+    #         print('    Total {}, total price: {}'.format(total_number, total_price))
     #         print()
 
     # # Получение списка дат добавления игры и рисование по нему графика

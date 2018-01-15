@@ -843,14 +843,16 @@ if __name__ == '__main__':
 
     # Вывести счетчик игр
     with create_connect() as connect:
-        sql_text = 'SELECT count(*) FROM Game WHERE kind = ?'
+        sql_text = 'SELECT count(*), sum(price) FROM Game WHERE kind = ?'
 
-        finished_number = connect.execute(sql_text, (FINISHED,)).fetchone()[0]
-        finished_watched_number = connect.execute(sql_text, (FINISHED_WATCHED,)).fetchone()[0]
+        finished_number, finished_sum_price = connect.execute(sql_text, (FINISHED,)).fetchone()
+        finished_watched_number, finished_watched_sum_price = connect.execute(sql_text, (FINISHED_WATCHED,)).fetchone()
+        total_number = finished_number + finished_watched_number
+        total_price = finished_sum_price + finished_watched_sum_price
 
-        print(FINISHED, finished_number)
-        print(FINISHED_WATCHED, finished_watched_number)
-        print('Total', finished_number + finished_watched_number)
+        print('{}: {}, total price: {}'.format(FINISHED, finished_number, finished_sum_price))
+        print('{}: {}, total price: {}'.format(FINISHED_WATCHED, finished_watched_number, finished_watched_sum_price))
+        print('Total {}, total price: {}'.format(total_number, total_price))
         print()
 
     # # Print statistic from backup database

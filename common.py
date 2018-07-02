@@ -506,7 +506,7 @@ def get_games_list() -> (list, list):
     rs = requests.get('https://gist.github.com/gil9red/2f80a34fb601cd685353')
 
     from bs4 import BeautifulSoup
-    root = BeautifulSoup(rs.content, 'lxml')
+    root = BeautifulSoup(rs.content, 'html.parser')
     href = root.select_one('.file-actions > a')['href']
 
     from urllib.parse import urljoin
@@ -719,8 +719,6 @@ def steam_search_game_price_list(name):
     # TODO: проверить http://store.steampowered.com/search/suggest?term=Dig+or+Die&f=games&cc=RU&l=russian&no_violence=0&no_sex=0&v=2651658
     # По идеи, это вариант запроса рабочий, но нужно потестить на разные ситуации: игры, DLC, как выглядят игры со скидкой и без
 
-    game_price_list = list()
-
     # Из цикла не выйти, пока не получится скачать и распарсить страницу
     while True:
         try:
@@ -728,7 +726,7 @@ def steam_search_game_price_list(name):
             rs = requests.get(url)
 
             from bs4 import BeautifulSoup
-            root = BeautifulSoup(rs.content, 'lxml')
+            root = BeautifulSoup(rs.content, 'html.parser')
 
             break
 
@@ -738,6 +736,8 @@ def steam_search_game_price_list(name):
             # Если произошла какая-то ошибка попытаемся через 5 минут попробовать снова
             import time
             time.sleep(5 * 60)
+
+    game_price_list = []
 
     for div in root.select('.search_result_row'):
         name = div.select_one('.title').text.strip()
@@ -754,17 +754,19 @@ def steam_search_game_price_list(name):
         else:
             # Если в цене нет цифры считаем что это "Free To Play" или что-то подобное
             import re
-            match = re.search(r'\d', price)
+            match = re.search('\d', price)
             if not match:
                 price = '0'
             else:
                 # Только значение цены
                 if 'pуб' not in price:
-                    log_common.debug('АХТУНГ! Неизвестный формат цены: "{}".'.format(price))
+                    log_common.debug('АХТУНГ! Неизвестный формат цены: "%s".', price)
 
                 price = price.replace(' pуб.', '').strip()
 
         game_price_list.append((name, price))
+
+    log_common.debug('game_price_list (%s): %s', len(game_price_list), game_price_list)
 
     return game_price_list
 

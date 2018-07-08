@@ -847,8 +847,12 @@
                 fill_statistics();
 
                 // Добавление статистики о количестве игр в таблицах
-                $('.number_finished_games').text(finished_games.length);
-                $('.number_finished_watched_games').text(finished_watched_games.length);
+                $('.number_finished_games').text(
+                    finished_games.length + " " + statistic_for_table("#finished_game")
+                );
+                $('.number_finished_watched_games').text(
+                    finished_watched_games.length + " " + statistic_for_table("#finished_watched_game")
+                );
                 $('.sum_number_games').text(finished_games.length + finished_watched_games.length);
             },
 

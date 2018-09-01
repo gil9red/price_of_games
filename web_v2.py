@@ -75,9 +75,8 @@ def set_price():
 
     try:
         if 'name' not in request.form or 'price' not in request.form:
-            status = 'warning'
             text = 'В запросе должны присутствовать параметры "name" и "price"'
-            result = None
+            raise common.WebUserAlertException(text)
 
         else:
             name = request.form['name'].strip()
@@ -130,9 +129,8 @@ def rename_game():
 
     try:
         if 'old_name' not in request.form or 'new_name' not in request.form:
-            status = 'warning'
             text = 'В запросе должны присутствовать параметры "old_name" и "new_name"'
-            result = None
+            raise common.WebUserAlertException(text)
 
         else:
             old_name = request.form['old_name'].strip()
@@ -185,9 +183,8 @@ def check_price():
 
     try:
         if 'name' not in request.form:
-            status = 'warning'
             text = 'В запросе должен присутствовать параметр "name"'
-            result = None
+            raise common.WebUserAlertException(text)
 
         else:
             name = request.form['name'].strip()

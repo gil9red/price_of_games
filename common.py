@@ -145,21 +145,14 @@ def get_games_by_kind(kind: str) -> List[Dict[str, Any]]:
 
     """
 
-    connect = create_connect(fields_as_dict=True)
-
-    try:
-        cursor = connect.cursor()
-
+    with create_connect(fields_as_dict=True) as connect:
         get_game_sql = '''
             SELECT id, name, price, append_date
             FROM game
             WHERE kind = ?
             ORDER BY name
         '''
-        return list(map(dict, cursor.execute(get_game_sql, (kind,)).fetchall()))
-
-    finally:
-        connect.close()
+        return list(map(dict, connect.execute(get_game_sql, (kind,)).fetchall()))
 
 
 def get_finished_games() -> List[Dict[str, Any]]:
@@ -180,24 +173,19 @@ def get_finished_watched_games() -> List[Dict[str, Any]]:
     return get_games_by_kind(FINISHED_WATCHED)
 
 
-def get_id_games_by_name(game_name: str) -> list:
+def get_id_games_by_name(game_name: str) -> List[int]:
     """
     Функция возвращает список id игр.
 
     """
 
-    connect = create_connect()
-    try:
-        cursor = connect.cursor()
-
+    with create_connect() as connect:
         # Получение id игр с указанным названием
-        return [id_ for (id_,) in cursor.execute("SELECT id FROM Game WHERE name = ?", (game_name,)).fetchall()]
-
-    finally:
-        connect.close()
+        sql = "SELECT id FROM Game WHERE name = ?"
+        return [id_ for (id_,) in connect.execute(sql, (game_name,)).fetchall()]
 
 
-def set_price_game(game: str, price: str) -> list:
+def set_price_game(game: str, price: str) -> List[int]:
     """
     Функция найдет игры с указанным названием и изменит их цену в базе.
     Возвращает список id игр с измененной ценой.
@@ -212,17 +200,13 @@ def set_price_game(game: str, price: str) -> list:
         log_common.debug(error_text)
         raise WebUserAlertException(error_text)
 
-    connect = create_connect()
-    try:
+    with create_connect() as connect:
         sql = "UPDATE Game SET price = ?, modify_price_date = DATETIME(CURRENT_TIMESTAMP, 'LOCALTIME') WHERE name = ?"
         connect.execute(sql, (price, game))
         connect.commit()
 
         # Получение id игр с указанным названием
         return get_id_games_by_name(game)
-
-    finally:
-        connect.close()
 
 
 def rename_game(old_name: str, new_name: str) -> dict:
@@ -239,8 +223,7 @@ def rename_game(old_name: str, new_name: str) -> dict:
         log_common.debug(error_text)
         raise WebUserAlertException(error_text)
 
-    connect = create_connect()
-    try:
+    with create_connect() as connect:
         has = connect.execute("SELECT 1 FROM Game WHERE name = ?", (old_name,)).fetchone()
         if not has:
             error_text = 'Игры с названием "{}" не существует'.format(old_name)
@@ -276,9 +259,6 @@ def rename_game(old_name: str, new_name: str) -> dict:
         }
         return result
 
-    finally:
-        connect.close()
-
 
 def delete_game(name: str, kind: str) -> int:
     """
@@ -293,19 +273,18 @@ def delete_game(name: str, kind: str) -> int:
         log_common.debug(error_text)
         raise WebUserAlertException(error_text)
 
-    connect = create_connect()
-
     try:
-        id_game = connect.execute("SELECT id FROM Game WHERE kind = ? AND name = ?", (kind, name)).fetchone()
-        if not id_game:
-            error_text = 'Не получилось найти игру с name ( = "{}") и kind ( = "{}")'.format(name, kind)
-            log_common.debug(error_text)
-            raise WebUserAlertException(error_text)
+        with create_connect() as connect:
+            id_game = connect.execute("SELECT id FROM Game WHERE kind = ? AND name = ?", (kind, name)).fetchone()
+            if not id_game:
+                error_text = 'Не получилось найти игру с name ( = "{}") и kind ( = "{}")'.format(name, kind)
+                log_common.debug(error_text)
+                raise WebUserAlertException(error_text)
 
-        id_game = id_game[0]
+            id_game = id_game[0]
 
-        connect.execute("DELETE FROM Game WHERE id = ?", (id_game,))
-        connect.commit()
+            connect.execute("DELETE FROM Game WHERE id = ?", (id_game,))
+            connect.commit()
 
         return id_game
 
@@ -316,34 +295,22 @@ def delete_game(name: str, kind: str) -> int:
         error_text = 'При удалении игры "{}" ({}) произошла ошибка: {}'.format(name, kind, e)
         raise WebUserAlertException(error_text)
 
-    finally:
-        connect.close()
-
 
 def set_check_game_by_steam(game: str, check=1):
     game = game.strip()
 
-    connect = create_connect()
-    try:
-        cursor = connect.cursor()
-        cursor.execute("UPDATE Game SET check_steam = ? WHERE name = ?", (check, game))
+    with create_connect() as connect:
+        connect.execute("UPDATE Game SET check_steam = ? WHERE name = ?", (check, game))
         connect.commit()
-
-    finally:
-        connect.close()
 
 
 def get_duplicates() -> list:
     from collections import defaultdict
     name_kind_by_id_dict = defaultdict(list)
 
-    connect = create_connect()
-    try:
-        for id_, name, kind in connect.cursor().execute('SELECT id, name, kind FROM game').fetchall():
+    with create_connect() as connect:
+        for id_, name, kind in connect.execute('SELECT id, name, kind FROM game').fetchall():
             name_kind_by_id_dict[(name, kind)].append(id_)
-
-    finally:
-        connect.close()
 
     return list(filter(lambda item: len(item[1]) > 1, name_kind_by_id_dict.items()))
 
@@ -355,12 +322,11 @@ def check_price_all_non_price_games() -> list:
 
     """
 
-    connect = create_connect()
-    try:
+    with create_connect() as connect:
         # Список игр с измененной ценой
         games_with_changed_price = list()
 
-        games = connect.cursor().execute('SELECT name FROM game WHERE price IS NULL').fetchall()
+        games = connect.execute('SELECT name FROM game WHERE price IS NULL').fetchall()
 
         # Удаление дубликатов (игры могут повторяться для категорий пройденных и просмотренных)
         games = {name for (name,) in games}
@@ -375,9 +341,6 @@ def check_price_all_non_price_games() -> list:
             time.sleep(3)
 
         return games_with_changed_price
-
-    finally:
-        connect.close()
 
 
 # Parser from https://github.com/gil9red/played_games/blob/master/mini_played_games_parser.py
@@ -597,13 +560,9 @@ def get_game_list_with_price(game: str) -> [int, str, str]:
 
     """
 
-    connect = create_connect()
-    try:
+    with create_connect() as connect:
         sql = "SELECT id, kind, price from Game WHERE name = ? and price is not null"
         return connect.execute(sql, (game,)).fetchall()
-
-    finally:
-        connect.close()
 
 
 def check_and_fill_price_of_game(game: str, cache=True) -> (list, str):

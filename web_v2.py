@@ -25,6 +25,7 @@ import common
 #
 # Ось X -- дата
 # Ось Y -- количество игр в текущей дате
+# TODO: сделать общий метод проверки обязательных параметров
 
 
 from app import app, logger
@@ -78,26 +79,25 @@ def set_price():
             text = 'В запросе должны присутствовать параметры "name" и "price"'
             raise common.WebUserAlertException(text)
 
+        name = request.form['name'].strip()
+        price = request.form['price'].strip()
+        logger.debug('%s %s', name, price)
+
+        from common import set_price_game
+        modify_id_games = set_price_game(name, price)
+
+        if modify_id_games:
+            status = 'ok'
+            text = 'Игре "{}" установлена цена "{}"'.format(name, price)
+            result = {
+                'new_price': price,
+                'modify_id_games': modify_id_games,
+            }
+
         else:
-            name = request.form['name'].strip()
-            price = request.form['price'].strip()
-            logger.debug('%s %s', name, price)
-
-            from common import set_price_game
-            modify_id_games = set_price_game(name, price)
-
-            if modify_id_games:
-                status = 'ok'
-                text = 'Игре "{}" установлена цена "{}"'.format(name, price)
-                result = {
-                    'new_price': price,
-                    'modify_id_games': modify_id_games,
-                }
-
-            else:
-                status = 'warning'
-                text = 'Игры с названием "{}" не существует'.format(name)
-                result = None
+            status = 'warning'
+            text = 'Игры с названием "{}" не существует'.format(name)
+            result = None
 
     except common.WebUserAlertException as e:
         status = 'warning'
@@ -132,28 +132,27 @@ def rename_game():
             text = 'В запросе должны присутствовать параметры "old_name" и "new_name"'
             raise common.WebUserAlertException(text)
 
-        else:
-            old_name = request.form['old_name'].strip()
-            new_name = request.form['new_name'].strip()
-            logger.debug('%s %s', old_name, new_name)
+        old_name = request.form['old_name'].strip()
+        new_name = request.form['new_name'].strip()
+        logger.debug('%s %s', old_name, new_name)
 
-            status = 'ok'
-            text = 'Игра "{}" переименована в "{}"'.format(old_name, new_name)
+        status = 'ok'
+        text = 'Игра "{}" переименована в "{}"'.format(old_name, new_name)
 
-            from common import rename_game
-            result_rename = rename_game(old_name, new_name)
+        from common import rename_game
+        result_rename = rename_game(old_name, new_name)
 
-            # Возможно, после переименования игры мы смогли найти ее цену...
-            price = result_rename['price']
-            if price is not None:
-                text += ' и найдена ее цена: "{}"'.format(price)
+        # Возможно, после переименования игры мы смогли найти ее цену...
+        price = result_rename['price']
+        if price is not None:
+            text += ' и найдена ее цена: "{}"'.format(price)
 
-            # Просто без напряга возвращаем весь список и на странице заменяем все игры
-            from common import FINISHED, FINISHED_WATCHED, get_finished_games, get_finished_watched_games
-            result = {
-                FINISHED: get_finished_games(),
-                FINISHED_WATCHED: get_finished_watched_games(),
-            }
+        # Просто без напряга возвращаем весь список и на странице заменяем все игры
+        from common import FINISHED, FINISHED_WATCHED, get_finished_games, get_finished_watched_games
+        result = {
+            FINISHED: get_finished_games(),
+            FINISHED_WATCHED: get_finished_watched_games(),
+        }
 
     except common.WebUserAlertException as e:
         status = 'warning'
@@ -186,25 +185,24 @@ def check_price():
             text = 'В запросе должен присутствовать параметр "name"'
             raise common.WebUserAlertException(text)
 
+        name = request.form['name'].strip()
+        logger.debug(name)
+
+        from common import check_and_fill_price_of_game
+        id_games_with_changed_price, price = check_and_fill_price_of_game(name, cache=False)
+
+        if price is None:
+            status = 'ok'
+            text = 'Не получилось найти цену для игры "{}"'.format(name)
+            result = None
+
         else:
-            name = request.form['name'].strip()
-            logger.debug(name)
-
-            from common import check_and_fill_price_of_game
-            id_games_with_changed_price, price = check_and_fill_price_of_game(name, cache=False)
-
-            if price is None:
-                status = 'ok'
-                text = 'Не получилось найти цену для игры "{}"'.format(name)
-                result = None
-
-            else:
-                status = 'ok'
-                text = 'Для игры "{}" найдена и установлена цена: "{}"'.format(name, price)
-                result = {
-                    'new_price': price,
-                    'id_games_with_changed_price': id_games_with_changed_price,
-                }
+            status = 'ok'
+            text = 'Для игры "{}" найдена и установлена цена: "{}"'.format(name, price)
+            result = {
+                'new_price': price,
+                'id_games_with_changed_price': id_games_with_changed_price,
+            }
 
     except common.WebUserAlertException as e:
         status = 'warning'

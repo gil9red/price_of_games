@@ -25,7 +25,7 @@ make_backslashreplace_console()
 
 
 import os
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
 
 from config import BACKUP_DIR_LIST, DB_FILE_NAME, BACKUP_GIST
 
@@ -185,6 +185,28 @@ def get_id_games_by_name(game_name: str) -> List[int]:
         return [id_ for (id_,) in connect.execute(sql, (game_name,)).fetchall()]
 
 
+def get_price(game_name: str) -> Union[str, None]:
+    """
+    Функция возвращает цену игры.
+    Если такой игры нет, вернется None.
+
+    """
+
+    with create_connect() as connect:
+        sql = "SELECT price FROM Game WHERE name = ?"
+        price = connect.execute(sql, (game_name,)).fetchone()
+        if price:
+            return price[0]
+
+        return price
+
+
+def has_game(game_name: str) -> bool:
+    with create_connect() as connect:
+        has = connect.execute("SELECT 1 FROM Game WHERE name = ?", (game_name,)).fetchone()
+        return bool(has)
+
+
 def set_price_game(game: str, price: str) -> List[int]:
     """
     Функция найдет игры с указанным названием и изменит их цену в базе.
@@ -224,14 +246,12 @@ def rename_game(old_name: str, new_name: str) -> dict:
         raise WebUserAlertException(error_text)
 
     with create_connect() as connect:
-        has = connect.execute("SELECT 1 FROM Game WHERE name = ?", (old_name,)).fetchone()
-        if not has:
+        if not has_game(old_name):
             error_text = 'Игры с названием "{}" не существует'.format(old_name)
             log_common.debug(error_text)
             raise WebUserAlertException(error_text)
 
-        has = connect.execute("SELECT 1 FROM Game WHERE name = ?", (new_name,)).fetchone()
-        if has:
+        if has_game(new_name):
             error_text = 'Нельзя переименовать "{}", т.к. имя "{}" уже занято'.format(old_name, new_name)
             log_common.debug(error_text)
             raise WebUserAlertException(error_text)
@@ -827,6 +847,9 @@ if __name__ == '__main__':
         print('{}: {}, total price: {}'.format(FINISHED_WATCHED, finished_watched_number, finished_watched_sum_price))
         print('Total {}, total price: {}'.format(total_number, total_price))
         print()
+
+    print(get_price('A Story About My Uncle'))
+    print(get_price('A Story About My '))
 
     # # Print statistic from backup database
     # import sqlite3

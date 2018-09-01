@@ -764,6 +764,9 @@ def steam_search_game_price_list(name):
 
                 price = price.replace(' pуб.', '').strip()
 
+                # "799,99" -> "799.99"
+                price = price.replace(',', '.')
+
         game_price_list.append((name, price))
 
     log_common.debug('game_price_list (%s): %s', len(game_price_list), game_price_list)

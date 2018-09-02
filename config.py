@@ -21,13 +21,20 @@ TEST_MODE = bool(os.environ.get('TEST_MODE', ''))
 # TEST_MODE = False
 print('TEST_MODE:', TEST_MODE)
 
-if not TEST_MODE:
-    DB_FILE_NAME = 'games.sqlite'
-    BACKUP_GIST = True
-
-else:
+if TEST_MODE:
     DB_FILE_NAME = 'test_games.sqlite'
     BACKUP_GIST = False
+    LOG_COMMON = 'test__common.log'
+    LOG_APPEND_GAME = 'test__append_game.log'
+    LOG_FILENAME = 'test__web.log'
+
+else:
+    DB_FILE_NAME = 'games.sqlite'
+    BACKUP_GIST = True
+    LOG_COMMON = 'common.log'
+    LOG_APPEND_GAME = 'append_game.log'
+    LOG_FILENAME = 'web.log'
+
 
 BACKUP_DIR_LIST = [
     'backup',

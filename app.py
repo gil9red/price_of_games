@@ -4,7 +4,7 @@
 __author__ = 'ipetrash'
 
 
-LOG_FILENAME = 'web.log'
+from config import LOG_FILENAME
 
 
 from flask import Flask

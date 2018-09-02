@@ -27,7 +27,7 @@ make_backslashreplace_console()
 import os
 from typing import List, Dict, Any, Union
 
-from config import BACKUP_DIR_LIST, DB_FILE_NAME, BACKUP_GIST
+from config import BACKUP_DIR_LIST, DB_FILE_NAME, BACKUP_GIST, LOG_COMMON, LOG_APPEND_GAME
 
 
 class WebUserAlertException(Exception):
@@ -66,8 +66,8 @@ def get_logger(name, file='log.txt', encoding='utf-8', log_stdout=True, log_file
     return log
 
 
-log_common = get_logger('log_common', 'common.log')
-log_append_game = get_logger('log_append_game', 'append_game.log', log_stdout=False)
+log_common = get_logger('log_common', LOG_COMMON)
+log_append_game = get_logger('log_append_game', LOG_APPEND_GAME, log_stdout=False)
 
 
 def create_connect(fields_as_dict=False):

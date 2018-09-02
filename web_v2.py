@@ -85,6 +85,10 @@ def set_price():
         if old_price is None:
             old_price = '<не задана>'
 
+        if old_price == price:
+            text = 'У игры "{}" уже такая цена!'.format(name)
+            raise common.WebUserAlertException(text)
+
         # В modify_id_games будет список игр с названием <name>
         modify_id_games = common.set_price_game(name, price)
 
@@ -133,6 +137,10 @@ def rename_game():
 
         status = 'ok'
         text = 'Игра "{}" переименована в "{}"'.format(old_name, new_name)
+
+        if old_name == new_name:
+            text = 'У игры "{}" уже такое название!'.format(old_name)
+            raise common.WebUserAlertException(text)
 
         result_rename = common.rename_game(old_name, new_name)
 

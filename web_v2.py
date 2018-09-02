@@ -83,21 +83,23 @@ def set_price():
         price = request.form['price'].strip()
         logger.debug('%s %s', name, price)
 
-        from common import set_price_game
-        modify_id_games = set_price_game(name, price)
-
-        if modify_id_games:
-            status = 'ok'
-            text = 'Игре "{}" установлена цена "{}"'.format(name, price)
-            result = {
-                'new_price': price,
-                'modify_id_games': modify_id_games,
-            }
-
-        else:
-            status = 'warning'
+        if not common.has_game(name):
             text = 'Игры с названием "{}" не существует'.format(name)
-            result = None
+            raise common.WebUserAlertException(text)
+
+        old_price = common.get_price(name)
+        if old_price is None:
+            old_price = '<не задана>'
+
+        # В modify_id_games будет список игр с названием <name>
+        modify_id_games = common.set_price_game(name, price)
+
+        status = 'ok'
+        text = 'Игре "{}" установлена цена "{}" (предыдущая цена: {})'.format(name, price, old_price)
+        result = {
+            'new_price': price,
+            'modify_id_games': modify_id_games,
+        }
 
     except common.WebUserAlertException as e:
         status = 'warning'

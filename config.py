@@ -26,14 +26,14 @@ if TEST_MODE:
     BACKUP_GIST = False
     LOG_COMMON = 'test__common.log'
     LOG_APPEND_GAME = 'test__append_game.log'
-    LOG_FILENAME = 'test__web.log'
+    LOG_WEB = 'test__web.log'
 
 else:
     DB_FILE_NAME = 'games.sqlite'
     BACKUP_GIST = True
     LOG_COMMON = 'common.log'
     LOG_APPEND_GAME = 'append_game.log'
-    LOG_FILENAME = 'web.log'
+    LOG_WEB = 'web.log'
 
 
 BACKUP_DIR_LIST = [

@@ -4,7 +4,7 @@
 __author__ = 'ipetrash'
 
 
-from config import LOG_FILENAME
+from config import LOG_WEB
 
 
 from flask import Flask
@@ -16,7 +16,7 @@ import logging
 formatter = logging.Formatter('[%(asctime)s] %(filename)s:%(lineno)d %(levelname)-8s %(message)s')
 
 from logging.handlers import RotatingFileHandler
-file_handler = RotatingFileHandler(LOG_FILENAME, maxBytes=10000000, backupCount=5, encoding='utf-8')
+file_handler = RotatingFileHandler(LOG_WEB, maxBytes=10000000, backupCount=5, encoding='utf-8')
 file_handler.setLevel(logging.DEBUG)
 file_handler.setFormatter(formatter)
 

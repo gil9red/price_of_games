@@ -29,27 +29,21 @@ import common
 
 
 from app import app, logger
-from flask import render_template, request
+from flask import render_template, request, jsonify
 
 
 @app.route("/")
 def index():
     logger.debug('index')
 
-    from common import create_connect, Settings, get_duplicates
-    connect = create_connect()
-
-    try:
-        settings = Settings(connect=connect)
+    with common.create_connect() as connect:
+        settings = common.Settings(connect=connect)
         last_run_date = settings.last_run_date
-
-    finally:
-        connect.close()
 
     return render_template(
         'index_v2.html',
         last_run_date=last_run_date,
-        has_duplicates=bool(get_duplicates()),
+        has_duplicates=bool(common.get_duplicates()),
 
         TEST_MODE=config.TEST_MODE,
         DB_FILE_NAME=common.DB_FILE_NAME,
@@ -113,7 +107,6 @@ def set_price():
     }
     logger.debug(data)
 
-    from flask import jsonify
     return jsonify(data)
 
 
@@ -141,8 +134,7 @@ def rename_game():
         status = 'ok'
         text = 'Игра "{}" переименована в "{}"'.format(old_name, new_name)
 
-        from common import rename_game
-        result_rename = rename_game(old_name, new_name)
+        result_rename = common.rename_game(old_name, new_name)
 
         # Возможно, после переименования игры мы смогли найти ее цену...
         price = result_rename['price']
@@ -150,10 +142,9 @@ def rename_game():
             text += ' и найдена ее цена: "{}"'.format(price)
 
         # Просто без напряга возвращаем весь список и на странице заменяем все игры
-        from common import FINISHED, FINISHED_WATCHED, get_finished_games, get_finished_watched_games
         result = {
-            FINISHED: get_finished_games(),
-            FINISHED_WATCHED: get_finished_watched_games(),
+            common.FINISHED:         common.get_finished_games(),
+            common.FINISHED_WATCHED: common.get_finished_watched_games(),
         }
 
     except common.WebUserAlertException as e:
@@ -168,7 +159,6 @@ def rename_game():
     }
     logger.debug(data)
 
-    from flask import jsonify
     return jsonify(data)
 
 
@@ -190,8 +180,7 @@ def check_price():
         name = request.form['name'].strip()
         logger.debug(name)
 
-        from common import check_and_fill_price_of_game
-        id_games_with_changed_price, price = check_and_fill_price_of_game(name, cache=False)
+        id_games_with_changed_price, price = common.check_and_fill_price_of_game(name, cache=False)
 
         if price is None:
             status = 'ok'
@@ -218,7 +207,6 @@ def check_price():
     }
     logger.debug(data)
 
-    from flask import jsonify
     return jsonify(data)
 
 
@@ -232,8 +220,7 @@ def check_price_all_non_price_games():
     logger.debug('check_price_all_non_price_games')
 
     try:
-        from common import check_price_all_non_price_games
-        games_with_changed_price = check_price_all_non_price_games()
+        games_with_changed_price = common.check_price_all_non_price_games()
         logger.debug(games_with_changed_price)
 
         status = 'ok'
@@ -267,7 +254,6 @@ def check_price_all_non_price_games():
     }
     logger.debug(data)
 
-    from flask import jsonify
     return jsonify(data)
 
 
@@ -319,7 +305,6 @@ def check_price_all_non_price_games():
 #     }
 #     logger.debug(data)
 #
-#     from flask import jsonify
 #     return jsonify(data)
 
 
@@ -332,16 +317,17 @@ def get_games():
 
     logger.debug('get_games')
 
-    from common import FINISHED, FINISHED_WATCHED, get_finished_games, get_finished_watched_games
-    data = {
-        FINISHED: get_finished_games(),
-        FINISHED_WATCHED: get_finished_watched_games(),
-    }
-    logger.debug('Finished games: {}'.format(len(data[FINISHED])))
-    logger.debug('Watched games: {}'.format(len(data[FINISHED_WATCHED])))
-    logger.debug('Total games: {}'.format(len(data[FINISHED]) + len(data[FINISHED_WATCHED])))
+    finished_games = common.get_finished_games()
+    finished_watched_games = common.get_finished_watched_games()
 
-    from flask import jsonify
+    data = {
+        common.FINISHED:         finished_games,
+        common.FINISHED_WATCHED: finished_watched_games,
+    }
+    logger.debug('Finished games: {}'.format(len(finished_games)))
+    logger.debug('Watched games: {}'.format(len(finished_watched_games)))
+    logger.debug('Total games: {}'.format(len(finished_games) + len(finished_watched_games)))
+
     return jsonify(data)
 
 
@@ -354,11 +340,9 @@ def get_finished_games():
 
     logger.debug('get_finished_games')
 
-    from common import get_finished_games
-    data = get_finished_games()
+    data = common.get_finished_games()
     logger.debug('Finished games: {}'.format(len(data)))
 
-    from flask import jsonify
     return jsonify(data)
 
 
@@ -371,11 +355,9 @@ def get_finished_watched_games():
 
     logger.debug('get_finished_watched_games')
 
-    from common import get_finished_watched_games
-    data = get_finished_watched_games()
+    data = common.get_finished_watched_games()
     logger.debug('Watched games: {}'.format(len(data)))
 
-    from flask import jsonify
     return jsonify(data)
 
 
@@ -402,8 +384,7 @@ def delete_game():
         logger.debug(kind)
 
         try:
-            from common import delete_game
-            id_game = delete_game(name, kind)
+            id_game = common.delete_game(name, kind)
 
             status = 'ok'
             text = 'Удалена игра #{} "{}" ({})'.format(id_game, name, kind)
@@ -423,7 +404,6 @@ def delete_game():
     }
     logger.debug(data)
 
-    from flask import jsonify
     return jsonify(data)
 
 

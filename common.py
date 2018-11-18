@@ -698,13 +698,18 @@ def steam_search_game_price_list(name):
     # TODO: проверить http://store.steampowered.com/search/suggest?term=Dig+or+Die&f=games&cc=RU&l=russian&no_violence=0&no_sex=0&v=2651658
     # По идеи, это вариант запроса рабочий, но нужно потестить на разные ситуации: игры, DLC, как выглядят игры со скидкой и без
 
+    headers = {
+        # Думаю, это станет дополнитульной гарантией получения русскоязычной версии сайта
+        'Accept-Language': 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
+    }
+
+    import requests
+    from bs4 import BeautifulSoup
+
     # Из цикла не выйти, пока не получится скачать и распарсить страницу
     while True:
         try:
-            import requests
-            rs = requests.get(url)
-
-            from bs4 import BeautifulSoup
+            rs = requests.get(url, headers=headers)
             root = BeautifulSoup(rs.content, 'html.parser')
 
             break

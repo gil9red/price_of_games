@@ -642,11 +642,11 @@ def check_and_fill_price_of_game(game: str, cache=True) -> (list, str):
 
     if game_price == 0 or game_price is None:
         # TODO: заполнять вручную или искать на других сайтах цену
-        log_common.debug('Не получилось найти цену игры {}, price is {}'.format(game, game_price))
+        log_common.debug('Не получилось найти цену игры "{}", price is {}'.format(game, game_price))
         return list(), None
 
-    log_common.debug('Нашли игру: {} ({}) -> {}'.format(game, name, game_price))
-    log_append_game.debug('Нашли игру: {} ({}) -> {}'.format(game, name, game_price))
+    log_common.debug('Нашли игру: "{}" ({}) -> {}'.format(game, name, game_price))
+    log_append_game.debug('Нашли игру: "{}" ({}) -> {}'.format(game, name, game_price))
     return set_price_game(game, game_price), game_price
 
 

@@ -666,6 +666,14 @@
       }
     })();
 
+    function onTrClick(tr) {
+        // При клике на игру без цены ее название будет вставлено в поле формы "Установка цены у игры:"
+        if (tr.classList.contains('price_is_none')) {
+            var name = $(tr).children('.name').text();
+            $('#form__set_price #form_name').val(name);
+        }
+    }
+
     function fillTable(table_id, total_class, items) {
         //console.log("fillTable from " + table_id + ", total_class=" + total_class + ", items: " + JSON.stringify(items));
 
@@ -734,7 +742,7 @@
             var date_parts = parts[0].split('-');
             append_date = date_parts[2] + '/' + date_parts[1] + '/' + date_parts[0] + ' ' + parts[1];
 
-            var tr = $('<tr class="game_row"></tr>');
+            var tr = $('<tr class="game_row" onclick="onTrClick(this)"></tr>');
             tr.attr("game_id", id);
 
             var td_name = $('<td class="name"></td>').text(name);

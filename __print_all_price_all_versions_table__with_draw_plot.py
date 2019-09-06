@@ -14,7 +14,7 @@ if __name__ == '__main__':
         connect = sqlite3.connect(file_name)
 
         sqlite_text = 'SELECT price FROM Game WHERE price is not null'
-        price = sum(round(float(price)) for (price,) in connect.execute(sqlite_text).fetchall())
+        price = sum(round(float(price.replace(',', '.'))) for (price,) in connect.execute(sqlite_text).fetchall())
 
         if price not in price_by_date:
             price_by_date[price] = file_name.split('\\')[1].split('.')[0]

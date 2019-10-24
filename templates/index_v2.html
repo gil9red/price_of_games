@@ -300,7 +300,7 @@
     <div id="finished_game_caption_table" class="block_caption_search">
         <div class="table_caption">{{ TITLE_FINISHED }} <div class="finished_game_statistic" style="display:inline-block;"></div></div>
         <div>
-            <input type="text" id="input_finished_game" class="input_search clearable" onkeyup="common_filter()" placeholder="Поиск игр...">
+            <input type="text" id="input_finished_game" class="input_search clearable" placeholder="Поиск игр...">
         </div>
     </div>
     <table id="finished_game">
@@ -315,7 +315,7 @@
     <div id="finished_watched_game_caption_table" class="block_caption_search">
         <div class="table_caption">{{ TITLE_FINISHED_WATCHED }} <div class="finished_watched_game_statistic" style="display:inline-block;;"></div></div>
         <div>
-            <input type="text" id="input_finished_watched_game" class="input_search clearable" onkeyup="common_filter()" placeholder="Поиск игр...">
+            <input type="text" id="input_finished_watched_game" class="input_search clearable" placeholder="Поиск игр...">
         </div>
     </div>
     <table id="finished_watched_game">
@@ -333,6 +333,11 @@
 
 
         $(document).ready(function() {
+            // Вызов поиска
+            $('.input_search').on('input', function(){
+                common_filter();
+            });
+
             // hide #back-top first
             $("#back-top").hide();
 

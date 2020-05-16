@@ -536,7 +536,7 @@ def get_games_list() -> (list, list):
     return finished_game_list, finished_watched_game_list
 
 
-def append_games_to_database(connect, finished_game_list, finished_watched_game_list):
+def append_games_to_database(connect, finished_game_list, finished_watched_game_list) -> (int, int):
     """
     Функция для добавление игр в таблицу базы. Если игра уже есть в базе, то запрос игнорируется.
 
@@ -544,24 +544,28 @@ def append_games_to_database(connect, finished_game_list, finished_watched_game_
 
     cursor = connect.cursor()
 
-    def insert_game(name, kind):
+    def insert_game(name, kind) -> bool:
         # Для отсеивания дубликатов
         has = cursor.execute("SELECT 1 FROM Game WHERE name = ? and kind = ?", (name, kind)).fetchone()
         if has:
-            return
+            return False
 
         # print('Добавляю новую игру "{}" ({})'.format(name, kind))
         log_common.debug('Добавляю новую игру "{}" ({})'.format(name, kind))
         log_append_game.debug('Добавляю новую игру "{}" ({})'.format(name, kind))
         cursor.execute("INSERT INTO Game (name, kind) VALUES (?,?)", (name, kind))
 
+        return True
+
     # Добавлени в базу пройденных игр
+    added_finished_games = 0
     for name in finished_game_list:
-        insert_game(name, FINISHED)
+        added_finished_games += insert_game(name, FINISHED)
 
     # Добавлени в базу просмотренных игр
+    added_watched_games = 0
     for name in finished_watched_game_list:
-        insert_game(name, FINISHED_WATCHED)
+        added_watched_games + insert_game(name, FINISHED_WATCHED)
 
     # Сохранение изменений в базе
     connect.commit()
@@ -572,6 +576,8 @@ def append_games_to_database(connect, finished_game_list, finished_watched_game_
         log_common.debug("АХТУНГ! Найдены дубликаты:")
         for (name, kind), id_list in duplicates:
             log_common.debug('    {} / {} c id {}'.format(name, kind, id_list))
+
+    return added_finished_games, added_watched_games
 
 
 def get_game_list_with_price(game: str) -> [int, str, str]:
@@ -792,7 +798,10 @@ class Settings:
 
     """
 
-    def __init__(self, connect):
+    def __init__(self, connect=None):
+        if connect is None:
+            connect = create_connect()
+
         # Сохраняем для работы с нашей таблицей в базе
         self._connect = connect
         self._cursor = self._connect.cursor()

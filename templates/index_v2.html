@@ -242,6 +242,12 @@
                     <button onclick="document.location.href='#finished_watched_game_caption_table'">Перейти</button>
                 </td>
             </tr>
+
+            <tr>
+                <td colspan="2">
+                    <button onclick="run_check()">Запуск проверки новых игр</button>
+                </td>
+            </tr>
         </table>
 
         <hr>
@@ -331,6 +337,29 @@
         $.noty.defaults.layout = 'bottomRight';
         $.noty.defaults.timeout = 6000;
 
+        function run_check() {
+            $.ajax({
+                url: "/run_check",
+                method: "POST",
+                success: function(data) {
+                    console.log(data);
+                    console.log(JSON.stringify(data));
+
+                    let ok = data.status == 'ok';
+                    noty({
+                        text: data.text,
+                        type: ok ? 'success' : 'warning',
+                    });
+                },
+
+                error: function(data) {
+                    noty({
+                        text: 'На сервере произошла ошибка',
+                        type: 'error',
+                    });
+                }
+            });
+        }
 
         $(document).ready(function() {
             // Вызов поиска

@@ -30,6 +30,7 @@ import common
 
 from app import app, logger
 from flask import render_template, request, jsonify
+import requests
 
 
 @app.route("/")
@@ -207,6 +208,47 @@ def check_price():
         status = 'warning'
         text = str(e)
         result = None
+
+    data = {
+        'status': status,
+        'text': text,
+        'result': result,
+    }
+    logger.debug(data)
+
+    return jsonify(data)
+
+
+@app.route("/run_check", methods=['POST'])
+def run_check():
+    """
+    Функция запускает проверку новых игр у парсера в main.py
+
+    """
+
+    logger.debug('run_check')
+
+    status = 'ok'
+    result = None
+
+    rs = requests.post(f'http://127.0.0.1:{config.PORT_RUN_CHECK}')
+    if rs.ok:
+        json = rs.json()
+
+        text = '<b>Проверка новых игр завершена.</b>'
+        if json['added_finished_games'] or json['added_watched_games']:
+            text += '<br>' \
+                'Добавлено пройденных игр: {added_finished_games}<br>' \
+                'Добавлено просмотренных игр: {added_watched_games}<br>' \
+                '<button onclick="location.reload();"><b>ПЕРЕЗАГРУЗИТЬ СТРАНИЦУ</b></button>'
+        else:
+            text += '<br>Новый игр нет'
+
+        text.format(**json)
+
+    else:
+        status = 'warning'
+        text = '<b>Проверка новых игр завершена ошибкой.</b>'
 
     data = {
         'status': status,
@@ -420,7 +462,7 @@ if __name__ == '__main__':
     # app.debug = True
 
     app.run(
-        port=5500,
+        port=config.PORT_WEB,
 
         # Включение поддержки множества подключений
         threaded=True,

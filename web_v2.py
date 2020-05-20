@@ -240,11 +240,9 @@ def run_check():
             text += '<br>' \
                 'Добавлено пройденных игр: {added_finished_games}<br>' \
                 'Добавлено просмотренных игр: {added_watched_games}<br>' \
-                '<button onclick="location.reload();"><b>ПЕРЕЗАГРУЗИТЬ СТРАНИЦУ</b></button>'
+                '<button onclick="location.reload();"><b>ПЕРЕЗАГРУЗИТЬ СТРАНИЦУ</b></button>'.format(**json)
         else:
             text += '<br>Новый игр нет'
-
-        text.format(**json)
 
     else:
         status = 'warning'

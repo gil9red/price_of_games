@@ -565,7 +565,7 @@ def append_games_to_database(connect, finished_game_list, finished_watched_game_
     # Добавлени в базу просмотренных игр
     added_watched_games = 0
     for name in finished_watched_game_list:
-        added_watched_games + insert_game(name, FINISHED_WATCHED)
+        added_watched_games += insert_game(name, FINISHED_WATCHED)
 
     # Сохранение изменений в базе
     connect.commit()

@@ -350,6 +350,10 @@
                         text: data.text,
                         type: ok ? 'success' : 'warning',
                     });
+
+                    if (ok) {
+                        setTimeout(() => location.reload(true), 2000);
+                    }
                 },
 
                 error: function(data) {

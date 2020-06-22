@@ -230,6 +230,7 @@ def run_check():
 
     status = 'ok'
     result = None
+    added_data = None
 
     rs = requests.post(f'http://127.0.0.1:{config.PORT_RUN_CHECK}')
     if rs.ok:
@@ -239,8 +240,9 @@ def run_check():
         if json['added_finished_games'] or json['added_watched_games']:
             text += '<br>' \
                 'Добавлено пройденных игр: {added_finished_games}<br>' \
-                'Добавлено просмотренных игр: {added_watched_games}<br>' \
-                '<button onclick="location.reload();"><b>ПЕРЕЗАГРУЗИТЬ СТРАНИЦУ</b></button>'.format(**json)
+                'Добавлено просмотренных игр: {added_watched_games}'\
+                .format(**json)
+            added_data = json
         else:
             text += '<br>Новый игр нет'
 
@@ -252,6 +254,7 @@ def run_check():
         'status': status,
         'text': text,
         'result': result,
+        'data': added_data,
     }
     logger.debug(data)
 

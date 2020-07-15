@@ -138,13 +138,13 @@ def rename_game():
 
         old_name = request.form['old_name'].strip()
         new_name = request.form['new_name'].strip()
-        logger.debug('%s %s', old_name, new_name)
+        logger.debug(f'{old_name} {new_name}')
 
         status = 'ok'
-        text = 'Игра "{}" переименована в "{}"'.format(old_name, new_name)
+        text = f'Игра "{old_name}" переименована в "{new_name}"'
 
         if old_name == new_name:
-            text = 'У игры "{}" уже такое название!'.format(old_name)
+            text = f'У игры "{old_name}" уже такое название!'
             raise common.WebUserAlertException(text)
 
         result_rename = common.rename_game(old_name, new_name)
@@ -152,7 +152,7 @@ def rename_game():
         # Возможно, после переименования игры мы смогли найти ее цену...
         price = result_rename['price']
         if price is not None:
-            text += ' и найдена ее цена: "{}"'.format(price)
+            text += f' и найдена ее цена: "{price}"'
 
         # Просто без напряга возвращаем весь список и на странице заменяем все игры
         result = {
@@ -197,12 +197,12 @@ def check_price():
 
         if price is None:
             status = 'ok'
-            text = 'Не получилось найти цену для игры "{}"'.format(name)
+            text = f'Не получилось найти цену для игры "{name}"'
             result = None
 
         else:
             status = 'ok'
-            text = 'Для игры "{}" найдена и установлена цена: "{}"'.format(name, price)
+            text = f'Для игры "{name}" найдена и установлена цена: "{price}"'
             result = {
                 'new_price': price,
                 'id_games_with_changed_price': id_games_with_changed_price,
@@ -281,7 +281,7 @@ def check_price_all_non_price_games():
         status = 'ok'
 
         if games_with_changed_price:
-            text = 'Цена найдена для {} игр'.format(len(games_with_changed_price))
+            text = f'Цена найдена для {len(games_with_changed_price)} игр'
 
             # NOTE: если будет много игр, все не влезут
             # text = 'Цена найдена для {} игр:<br>'.format(len(games_with_changed_price))
@@ -379,9 +379,9 @@ def get_games():
         common.FINISHED:         finished_games,
         common.FINISHED_WATCHED: finished_watched_games,
     }
-    logger.debug('Finished games: {}'.format(len(finished_games)))
-    logger.debug('Watched games: {}'.format(len(finished_watched_games)))
-    logger.debug('Total games: {}'.format(len(finished_games) + len(finished_watched_games)))
+    logger.debug(f'Finished games: {len(finished_games)}')
+    logger.debug(f'Watched games: {len(finished_watched_games)}')
+    logger.debug(f'Total games: {len(finished_games) + len(finished_watched_games)}')
 
     return jsonify(data)
 
@@ -396,7 +396,7 @@ def get_finished_games():
     logger.debug('get_finished_games')
 
     data = common.get_finished_games()
-    logger.debug('Finished games: {}'.format(len(data)))
+    logger.debug(f'Finished games: {len(data)}')
 
     return jsonify(data)
 
@@ -411,7 +411,7 @@ def get_finished_watched_games():
     logger.debug('get_finished_watched_games')
 
     data = common.get_finished_watched_games()
-    logger.debug('Watched games: {}'.format(len(data)))
+    logger.debug(f'Watched games: {len(data)}')
 
     return jsonify(data)
 
@@ -442,7 +442,7 @@ def delete_game():
             id_game = common.delete_game(name, kind)
 
             status = 'ok'
-            text = 'Удалена игра #{} "{}" ({})'.format(id_game, name, kind)
+            text = f'Удалена игра #{id_game} "{name}" ({kind})'
             result = {
                 'id_game': id_game,
             }

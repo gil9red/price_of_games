@@ -9,6 +9,8 @@ __author__ = 'ipetrash'
 # os.environ['TEST_MODE'] = 'True'
 
 
+import re
+
 import config
 import common
 
@@ -76,10 +78,12 @@ def set_price():
 
         name = request.form['name'].strip()
         price = request.form['price'].strip()
-        logger.debug('%s %s', name, price)
+        price = re.sub(r'[^\d.,]', '', price)
+
+        logger.debug(f'{name} {price}')
 
         if not common.has_game(name):
-            text = 'Игры с названием "{}" не существует'.format(name)
+            text = f'Игры с названием "{name}" не существует'
             raise common.WebUserAlertException(text)
 
         old_price = common.get_price(name)
@@ -87,14 +91,14 @@ def set_price():
             old_price = '<не задана>'
 
         if old_price == price:
-            text = 'У игры "{}" уже такая цена!'.format(name)
+            text = f'У игры "{name}" уже такая цена!'
             raise common.WebUserAlertException(text)
 
         # В modify_id_games будет список игр с названием <name>
         modify_id_games = common.set_price_game(name, price)
 
         status = 'ok'
-        text = 'Игре "{}" установлена цена "{}" (предыдущая цена: {})'.format(name, price, old_price)
+        text = f'Игре "{name}" установлена цена "{price}" (предыдущая цена: {old_price})'
         result = {
             'new_price': price,
             'modify_id_games': modify_id_games,

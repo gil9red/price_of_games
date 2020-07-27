@@ -243,8 +243,10 @@ def run_check():
         text = '<b>Проверка новых игр завершена.</b>'
         if json['added_finished_games'] or json['added_watched_games']:
             text += '<br>' \
-                'Добавлено пройденных игр: {added_finished_games}<br>' \
-                'Добавлено просмотренных игр: {added_watched_games}'\
+                '<table border="0">' \
+                '<tr><td>Добавлено пройденных игр:</td><td>{added_finished_games}</td></tr>' \
+                '<tr><td>Добавлено просмотренных игр:</td><td>{added_watched_games}</td></tr>' \
+                '</table>'\
                 .format(**json)
             added_data = json
         else:

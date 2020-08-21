@@ -264,7 +264,7 @@ def rename_game(old_name: str, new_name: str) -> dict:
 
         # Если у игры нет цены, попытаемся ее найти, т.к. после переименования что-то
         # могло поменяться
-        id_games_with_changed_price = list()
+        id_games_with_changed_price = []
         price = None
 
         has = connect.execute("SELECT 1 FROM Game WHERE name = ? AND price is null", (new_name,)).fetchone()
@@ -344,7 +344,7 @@ def check_price_all_non_price_games() -> list:
 
     with create_connect() as connect:
         # Список игр с измененной ценой
-        games_with_changed_price = list()
+        games_with_changed_price = []
 
         games = connect.execute('SELECT name FROM game WHERE price IS NULL').fetchall()
 
@@ -601,7 +601,7 @@ def check_and_fill_price_of_game(game: str, cache=True) -> (list, str):
 
     if not game:
         log_common.debug(f'Не указано game ( = "{game}")')
-        return list(), None
+        return [], None
 
     game_price = None
 
@@ -648,7 +648,7 @@ def check_and_fill_price_of_game(game: str, cache=True) -> (list, str):
     if game_price == 0 or game_price is None:
         # TODO: заполнять вручную или искать на других сайтах цену
         log_common.debug(f'Не получилось найти цену игры "{game}", price is {game_price}')
-        return list(), None
+        return [], None
 
     log_common.debug(f'Нашли игру: "{game}" ({name}) -> {game_price}')
     log_append_game.debug(f'Нашли игру: "{game}" ({name}) -> {game_price}')
@@ -672,6 +672,11 @@ def fill_price_of_games(connect):
 
     cursor = connect.cursor()
     games_list = set(game for (game,) in cursor.execute(sql_text).fetchall())
+
+    if not games_list:
+        log_common.debug("Игр без указанных цен нет")
+        return
+
     log_common.debug(f"Нужно найти цену {len(games_list)} играм")
 
     for game in games_list:

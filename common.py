@@ -674,7 +674,7 @@ def fill_price_of_games(connect):
     games_list = set(game for (game,) in cursor.execute(sql_text).fetchall())
 
     if not games_list:
-        log_common.debug("Игр без указанных цен нет")
+        log_common.debug("У всех игр установлены цены")
         return
 
     log_common.debug(f"Нужно найти цену {len(games_list)} играм")

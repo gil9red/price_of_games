@@ -218,7 +218,7 @@ def set_price_game(game: str, price: str) -> List[int]:
     price = price.strip()
 
     if not game or not price:
-        error_text = 'Не указано game ( = "{}") или price ( = "{}")'.format(game, price)
+        error_text = f'Не указано game ( = "{game}") или price ( = "{price}")'
         log_common.debug(error_text)
         raise WebUserAlertException(error_text)
 
@@ -241,18 +241,18 @@ def rename_game(old_name: str, new_name: str) -> dict:
     new_name = new_name.strip()
 
     if not old_name or not new_name:
-        error_text = 'Не указано old_name ( = "{}") или new_name ( = "{}")'.format(old_name, new_name)
+        error_text = f'Не указано old_name ( = "{old_name}") или new_name ( = "{new_name}")'
         log_common.debug(error_text)
         raise WebUserAlertException(error_text)
 
     with create_connect() as connect:
         if not has_game(old_name):
-            error_text = 'Игры с названием "{}" не существует'.format(old_name)
+            error_text = f'Игры с названием "{old_name}" не существует'
             log_common.debug(error_text)
             raise WebUserAlertException(error_text)
 
         if has_game(new_name):
-            error_text = 'Нельзя переименовать "{}", т.к. имя "{}" уже занято'.format(old_name, new_name)
+            error_text = f'Нельзя переименовать "{old_name}", т.к. имя "{new_name}" уже занято'
             log_common.debug(error_text)
             raise WebUserAlertException(error_text)
 
@@ -288,8 +288,8 @@ def delete_game(name: str, kind: str) -> int:
     """
 
     if not name or not kind or (kind != FINISHED and kind != FINISHED_WATCHED):
-        error_text = 'Не указано name ( = "{}") или kind ( = "{}"), ' \
-                     'или kind неправильный (может быть {} или {}).'.format(name, kind, FINISHED, FINISHED_WATCHED)
+        error_text = f'Не указано name ( = "{name}") или kind ( = "{kind}"), ' \
+                     f'или kind неправильный (может быть {FINISHED} или {FINISHED_WATCHED}).'
         log_common.debug(error_text)
         raise WebUserAlertException(error_text)
 
@@ -297,7 +297,7 @@ def delete_game(name: str, kind: str) -> int:
         with create_connect() as connect:
             id_game = connect.execute("SELECT id FROM Game WHERE kind = ? AND name = ?", (kind, name)).fetchone()
             if not id_game:
-                error_text = 'Не получилось найти игру с name ( = "{}") и kind ( = "{}")'.format(name, kind)
+                error_text = f'Не получилось найти игру с name ( = "{name}") и kind ( = "{kind}")'
                 log_common.debug(error_text)
                 raise WebUserAlertException(error_text)
 
@@ -312,7 +312,7 @@ def delete_game(name: str, kind: str) -> int:
         raise e
 
     except Exception as e:
-        error_text = 'При удалении игры "{}" ({}) произошла ошибка: {}'.format(name, kind, e)
+        error_text = f'При удалении игры "{name}" ({kind}) произошла ошибка: {e}'
         raise WebUserAlertException(error_text)
 
 
@@ -350,7 +350,7 @@ def check_price_all_non_price_games() -> list:
 
         # Удаление дубликатов (игры могут повторяться для категорий пройденных и просмотренных)
         games = {name for (name,) in games}
-        log_common.debug('Игр без цены: {}'.format(len(games)))
+        log_common.debug(f'Игр без цены: {len(games)}')
 
         for name in games:
             id_games, price = check_and_fill_price_of_game(name)
@@ -462,7 +462,7 @@ def parse_played_games(text: str, silence: bool=False) -> dict:
         category_name = FLAG_BY_CATEGORY.get(flag)
         if not category_name:
             if not silence:
-                print('Странный формат строки: "{}"'.format(line))
+                print(f'Странный формат строки: "{line}"')
             continue
 
         category = platform[category_name]
@@ -471,7 +471,7 @@ def parse_played_games(text: str, silence: bool=False) -> dict:
         for game in parse_game_name(game_name):
             if game in category:
                 if not silence:
-                    print('Предотвращено добавление дубликата игры "{}"'.format(game))
+                    print(f'Предотвращено добавление дубликата игры "{game}"')
                 continue
 
             category.append(game)
@@ -550,9 +550,8 @@ def append_games_to_database(connect, finished_game_list, finished_watched_game_
         if has:
             return False
 
-        # print('Добавляю новую игру "{}" ({})'.format(name, kind))
-        log_common.debug('Добавляю новую игру "{}" ({})'.format(name, kind))
-        log_append_game.debug('Добавляю новую игру "{}" ({})'.format(name, kind))
+        log_common.debug(f'Добавляю новую игру "{name}" ({kind})')
+        log_append_game.debug(f'Добавляю новую игру "{name}" ({kind})')
         cursor.execute("INSERT INTO Game (name, kind) VALUES (?,?)", (name, kind))
 
         return True
@@ -575,7 +574,7 @@ def append_games_to_database(connect, finished_game_list, finished_watched_game_
     if duplicates:
         log_common.debug("АХТУНГ! Найдены дубликаты:")
         for (name, kind), id_list in duplicates:
-            log_common.debug('    {} / {} c id {}'.format(name, kind, id_list))
+            log_common.debug(f'    {name} / {kind} c id {id_list}')
 
     return added_finished_games, added_watched_games
 
@@ -601,7 +600,7 @@ def check_and_fill_price_of_game(game: str, cache=True) -> (list, str):
     game = game.strip()
 
     if not game:
-        log_common.debug('Не указано game ( = "{}")'.format(game))
+        log_common.debug(f'Не указано game ( = "{game}")')
         return list(), None
 
     game_price = None
@@ -648,11 +647,11 @@ def check_and_fill_price_of_game(game: str, cache=True) -> (list, str):
 
     if game_price == 0 or game_price is None:
         # TODO: заполнять вручную или искать на других сайтах цену
-        log_common.debug('Не получилось найти цену игры "{}", price is {}'.format(game, game_price))
+        log_common.debug(f'Не получилось найти цену игры "{game}", price is {game_price}')
         return list(), None
 
-    log_common.debug('Нашли игру: "{}" ({}) -> {}'.format(game, name, game_price))
-    log_append_game.debug('Нашли игру: "{}" ({}) -> {}'.format(game, name, game_price))
+    log_common.debug(f'Нашли игру: "{game}" ({name}) -> {game_price}')
+    log_append_game.debug(f'Нашли игру: "{game}" ({name}) -> {game_price}')
     return set_price_game(game, game_price), game_price
 
 
@@ -673,7 +672,7 @@ def fill_price_of_games(connect):
 
     cursor = connect.cursor()
     games_list = set(game for (game,) in cursor.execute(sql_text).fetchall())
-    log_common.debug("Нужно найти цену {} играм".format(len(games_list)))
+    log_common.debug(f"Нужно найти цену {len(games_list)} играм")
 
     for game in games_list:
         check_and_fill_price_of_game(game)
@@ -857,15 +856,15 @@ if __name__ == '__main__':
         total_number = finished_number + finished_watched_number
         total_price = finished_sum_price + finished_watched_sum_price
 
-        print('{}: {}, total price: {}'.format(FINISHED, finished_number, finished_sum_price))
-        print('{}: {}, total price: {}'.format(FINISHED_WATCHED, finished_watched_number, finished_watched_sum_price))
-        print('Total {}, total price: {}'.format(total_number, total_price))
+        print(f'{FINISHED}: {finished_number}, total price: {finished_sum_price}')
+        print(f'{FINISHED_WATCHED}: {finished_watched_number}, total price: {finished_watched_sum_price}')
+        print(f'Total {total_number}, total price: {total_price}')
         print()
 
     print(get_price('A Story About My Uncle'))
     print(get_price('A Story About My '))
 
-    # # Print statistic from backup database
+    # # Print statistic from backup databases
     # import sqlite3
     #
     # from glob import glob

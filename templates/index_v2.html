@@ -351,7 +351,7 @@
                         type: ok ? 'success' : 'warning',
                     });
 
-                    if (ok) {
+                    if (ok && data.data != null) {
                         setTimeout(() => location.reload(true), 2000);
                     }
                 },

@@ -107,3 +107,7 @@ docs/_build/
 # PyBuilder
 target/
 
+# For the current project
+games.sqlite
+backup/
+logs/

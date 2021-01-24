@@ -60,16 +60,6 @@ def get_finished_watched_games() -> List[Dict[str, Any]]:
     return get_games_by_kind(FINISHED_WATCHED)
 
 
-def get_id_games_by_name(game_name: str) -> List[int]:
-    """
-    Функция возвращает список id игр.
-
-    """
-
-    query = Game.select(Game.id).where(Game.name == game_name)
-    return [game.id for game in query]
-
-
 def get_price(game_name: str) -> Optional[str]:
     """
     Функция возвращает цену игры.

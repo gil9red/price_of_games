@@ -85,7 +85,7 @@ def steam_search_game_price_list(name: str) -> List[Tuple[str, str]]:
     url = 'http://store.steampowered.com/search/?term=' + name
 
     headers = {
-        # Думаю, это станет дополнитульной гарантией получения русскоязычной версии сайта
+        # Думаю, это станет дополнительной гарантией получения русскоязычной версии сайта
         'Accept-Language': 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
     }
 
@@ -94,7 +94,6 @@ def steam_search_game_price_list(name: str) -> List[Tuple[str, str]]:
         try:
             rs = requests.get(url, headers=headers)
             root = BeautifulSoup(rs.content, 'html.parser')
-
             break
 
         except Exception:

@@ -288,8 +288,10 @@ function fill_table(table_selector, total_class, items) {
 
     $(table_selector).on('click', 'tbody tr', function () {
         let row = table.row($(this)).data();
-//        $('#form_name').val(row.name);
-//        $('#form_old_name').val(row.name);
+
+        if (row.price == null) {
+            $('#form_name').val(row.name);
+        }
 
         if ($(this).hasClass('selected') ) {
             $(this).removeClass('selected');

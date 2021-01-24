@@ -98,7 +98,7 @@ def set_price_game(game_name: str, price: str) -> List[int]:
 
     if not game_name or not price:
         error_text = f'Не указано game ( = {game_name!r}) или price ( = {price!r})'
-        log_common.debug(error_text)
+        log_common.error(error_text)
         raise WebUserAlertException(error_text)
 
     ids = []
@@ -123,17 +123,17 @@ def rename_game(old_name: str, new_name: str) -> Dict[str, Any]:
 
     if not old_name or not new_name:
         error_text = f'Не указано old_name ( = {old_name!r}) или new_name ( = {new_name!r})'
-        log_common.debug(error_text)
+        log_common.error(error_text)
         raise WebUserAlertException(error_text)
 
     if not has_game(old_name):
         error_text = f'Игры с названием {old_name!r} не существует'
-        log_common.debug(error_text)
+        log_common.error(error_text)
         raise WebUserAlertException(error_text)
 
     if has_game(new_name):
         error_text = f'Нельзя переименовать {old_name!r}, т.к. имя {new_name!r} уже занято'
-        log_common.debug(error_text)
+        log_common.error(error_text)
         raise WebUserAlertException(error_text)
 
     id_games_with_changed_name = []
@@ -171,14 +171,14 @@ def delete_game(game_name: str, kind: str) -> int:
             f'Не указано name ( = {game_name!r}) или kind ( = {kind!r}), '
             f'или kind неправильный (может быть {FINISHED!r} или {FINISHED_WATCHED!r}).'
         )
-        log_common.debug(error_text)
+        log_common.error(error_text)
         raise WebUserAlertException(error_text)
 
     try:
         game = Game.get_or_none(Game.name == game_name, Game.kind == kind)
         if not game:
             error_text = f'Не получилось найти игру с name={game_name!r}) и kind={kind!r}'
-            log_common.debug(error_text)
+            log_common.error(error_text)
             raise WebUserAlertException(error_text)
 
         id_game = game.id
@@ -238,8 +238,8 @@ def append_games_to_database(finished_game_list: List[str], finished_watched_gam
         if has:
             return False
 
-        log_common.debug(f'Добавляю новую игру {name!r} ({kind})')
-        log_append_game.debug(f'Добавляю новую игру {name!r} ({kind})')
+        log_common.info(f'Добавляю новую игру {name!r} ({kind})')
+        log_append_game.info(f'Добавляю новую игру {name!r} ({kind})')
 
         Game.create(name=name, kind=kind)
         return True
@@ -276,7 +276,7 @@ def check_and_fill_price_of_game(game_name: str, cache=True) -> Tuple[List[int],
 
     game_name = game_name.strip()
     if not game_name:
-        log_common.debug(f'Не указано game ( = {game_name!r})')
+        log_common.warn(f'Не указано game ( = {game_name!r})')
         return [], None
 
     other_price = None
@@ -290,7 +290,7 @@ def check_and_fill_price_of_game(game_name: str, cache=True) -> Tuple[List[int],
             # Вытащим id, kind и price найденной игры
             other_id, other_kind, other_price = game_list[0]
 
-            log_common.debug(
+            log_common.info(
                 f'Для игры {game_name!r} удалось найти цену {other_price!r} '
                 f'из базы, взяв ее из аналога c id={other_id} в категории {other_kind!r}'
             )
@@ -298,8 +298,8 @@ def check_and_fill_price_of_game(game_name: str, cache=True) -> Tuple[List[int],
             # Отметим что игра искалась в стиме (чтобы она не искалась в нем, если будет вызвана проверка)
             set_check_game_by_steam(game_name)
 
-            log_common.debug(f'Нашли игру: {game_name!r} -> {other_price}')
-            log_append_game.debug(f'Нашли игру: {game_name!r} -> {other_price}')
+            log_common.info(f'Нашли игру: {game_name!r} -> {other_price}')
+            log_append_game.info(f'Нашли игру: {game_name!r} -> {other_price}')
 
             return set_price_game(game_name, other_price), other_price
 
@@ -325,11 +325,11 @@ def check_and_fill_price_of_game(game_name: str, cache=True) -> Tuple[List[int],
                 break
 
     if other_price == 0 or other_price is None:
-        log_common.debug(f'Не получилось найти цену игры {game_name!r}, price is {other_price}')
+        log_common.info(f'Не получилось найти цену игры {game_name!r}, price is {other_price}')
         return [], None
 
-    log_common.debug(f'Нашли игру: {game_name!r} ({name}) -> {other_price}')
-    log_append_game.debug(f'Нашли игру: {game_name!r} ({name}) -> {other_price}')
+    log_common.info(f'Нашли игру: {game_name!r} ({name}) -> {other_price}')
+    log_append_game.info(f'Нашли игру: {game_name!r} ({name}) -> {other_price}')
 
     return set_price_game(game_name, other_price), other_price
 
@@ -352,10 +352,10 @@ def fill_price_of_games():
     )
     games_list = list(query)
     if not games_list:
-        log_common.debug("У всех игр установлены цены")
+        log_common.info("У всех игр установлены цены")
         return
 
-    log_common.debug(f"Нужно найти цену {len(games_list)} играм")
+    log_common.info(f"Нужно найти цену {len(games_list)} играм")
 
     for game in games_list:
         check_and_fill_price_of_game(game.name)

@@ -181,6 +181,7 @@ def delete_game(game_name: str, kind: str) -> int:
 
     except Exception as e:
         error_text = f'При удалении игры {game_name!r} ({kind!r}) произошла ошибка: {e}'
+        log_common.error(error_text)
         raise WebUserAlertException(error_text)
 
 

@@ -237,8 +237,9 @@ function fill_table(table_selector, total_class, items) {
 
     let table = $(table_selector).DataTable({
         // Теперь поле поиска будет занимать 9/12 места, вместо 6/12
-        dom: "<'row'<'col-sm-12 col-md-3'l><'col-sm-12 col-md-9'f>>",
-
+        dom: "<'row'<'col-sm-12 col-md-3'l><'col-sm-12 col-md-9'f>>" +
+             "<'row'<'col-sm-12'tr>>" +
+             "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
         data: items,
         lengthMenu: [ [10, 25, 50, -1], ["10 записей", "25 записей", "50 записей", "Все записи"] ],
         columns: [

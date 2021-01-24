@@ -265,12 +265,12 @@ def check_and_fill_price_of_game(game_name: str, cache=True) -> Tuple[List[int],
 
     """
 
+    other_price = None
+
     game_name = game_name.strip()
     if not game_name:
         log_common.warn(f'Не указано game ( = {game_name!r})')
-        return [], None
-
-    other_price = None
+        return [], other_price
 
     # Попробуем найти цену игры в базе -- возможно игра уже есть, но в другой категории
     if cache:
@@ -317,7 +317,7 @@ def check_and_fill_price_of_game(game_name: str, cache=True) -> Tuple[List[int],
 
     if other_price is None:
         log_common.info(f'Не получилось найти цену игры {game_name!r}, price is {other_price}')
-        return [], None
+        return [], other_price
 
     log_common.info(f'Нашли игру: {game_name!r} ({name}) -> {other_price}')
     log_append_game.info(f'Нашли игру: {game_name!r} ({name}) -> {other_price}')

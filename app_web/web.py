@@ -4,57 +4,36 @@
 __author__ = 'ipetrash'
 
 
-# # Тестовый режим
-# import os
-# os.environ['TEST_MODE'] = 'True'
-
-
 import re
+import os.path
+import sys
+from pathlib import Path
+
+# Папка выше
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
+from app_web.app import app, log
+from flask import render_template, request, jsonify, send_from_directory
+import requests
 
 import config
-import common
-
-
-# TODO: обновить скриншот
-# TODO: добавить возможность выполнить sql запрос
-# TODO: нарисовать график указания цен на игры:
-#     modify_date_list = connect.execute("SELECT modify_date "
-#                                        "FROM Game "
-#                                        "WHERE modify_date IS NOT NULL "
-#                                        "ORDER BY modify_date").fetchall()
-#     modify_date_list = [item for (item,) in modify_date_list]
-#     print(modify_date_list)
-#
-# Ось X -- дата
-# Ось Y -- количество игр в текущей дате
-# TODO: сделать общий метод проверки обязательных параметров
-
-
-from app import app, logger
-from flask import render_template, request, jsonify
-import requests
+from db import Settings
+from common import WebUserAlertException, FINISHED, FINISHED_WATCHED
+from app_parser import logic
 
 
 @app.route("/")
 def index():
-    logger.debug('index')
-
-    with common.create_connect() as connect:
-        settings = common.Settings(connect=connect)
-        last_run_date = settings.last_run_date
+    log.debug('Call index')
 
     return render_template(
-        'index_v2.html',
-        last_run_date=last_run_date,
-        has_duplicates=bool(common.get_duplicates()),
+        'index.html',
+        last_run_date=Settings.get_value('last_run_date'),
+        DB_FILE_NAME=config.DB_FILE_NAME,
+        BACKUP_DIR_LIST=list(map(str, config.BACKUP_DIR_LIST)),
 
-        TEST_MODE=config.TEST_MODE,
-        DB_FILE_NAME=common.DB_FILE_NAME,
-        BACKUP_GIST=common.BACKUP_GIST,
-        BACKUP_DIR_LIST=common.BACKUP_DIR_LIST,
-
-        FINISHED=common.FINISHED,
-        FINISHED_WATCHED=common.FINISHED_WATCHED,
+        FINISHED=FINISHED,
+        FINISHED_WATCHED=FINISHED_WATCHED,
 
         TITLE_FINISHED='Пройденные игры',
         TITLE_FINISHED_WATCHED='Просмотренные игры',
@@ -68,43 +47,43 @@ def set_price():
 
     """
 
-    logger.debug('set_price')
-    logger.debug(request.form)
+    log.debug('Call set_price')
+    log.debug('request.form: %s', request.form)
 
     try:
         if 'name' not in request.form or 'price' not in request.form:
             text = 'В запросе должны присутствовать параметры "name" и "price"'
-            raise common.WebUserAlertException(text)
+            raise WebUserAlertException(text)
 
         name = request.form['name'].strip()
         price = request.form['price'].strip()
         price = re.sub(r'[^\d.,]', '', price)
 
-        logger.debug(f'{name} {price}')
+        log.debug(f'name={name!r} price={price!r}')
 
-        if not common.has_game(name):
-            text = f'Игры с названием "{name}" не существует'
-            raise common.WebUserAlertException(text)
+        if not logic.has_game(name):
+            text = f'Игры с названием {name!r} не существует'
+            raise WebUserAlertException(text)
 
-        old_price = common.get_price(name)
+        old_price = logic.get_price(name)
         if old_price is None:
             old_price = '<не задана>'
 
         if old_price == price:
-            text = f'У игры "{name}" уже такая цена!'
-            raise common.WebUserAlertException(text)
+            text = f'У игры {name!r} уже такая цена!'
+            raise WebUserAlertException(text)
 
         # В modify_id_games будет список игр с названием <name>
-        modify_id_games = common.set_price_game(name, price)
+        modify_id_games = logic.set_price_game(name, price)
 
         status = 'ok'
-        text = f'Игре "{name}" установлена цена "{price}" (предыдущая цена: {old_price})'
+        text = f'Игре {name!r} установлена цена {price!r} (предыдущая цена: {old_price!r})'
         result = {
             'new_price': price,
             'modify_id_games': modify_id_games,
         }
 
-    except common.WebUserAlertException as e:
+    except WebUserAlertException as e:
         status = 'warning'
         text = str(e)
         result = None
@@ -114,7 +93,7 @@ def set_price():
         'text': text,
         'result': result,
     }
-    logger.debug(data)
+    log.debug(data)
 
     return jsonify(data)
 
@@ -127,40 +106,40 @@ def rename_game():
 
     """
 
-    logger.debug('rename_game')
-    logger.debug(request.form)
-    logger.debug(request.args)
+    log.debug('Call rename_game')
+    log.debug('request.form: %s', request.form)
+    log.debug('request.args: %s', request.args)
 
     try:
         if 'old_name' not in request.form or 'new_name' not in request.form:
             text = 'В запросе должны присутствовать параметры "old_name" и "new_name"'
-            raise common.WebUserAlertException(text)
+            raise WebUserAlertException(text)
 
         old_name = request.form['old_name'].strip()
         new_name = request.form['new_name'].strip()
-        logger.debug(f'{old_name} {new_name}')
+        log.debug(f'old_name={old_name!r}, new_name={new_name!r}')
 
         status = 'ok'
-        text = f'Игра "{old_name}" переименована в "{new_name}"'
+        text = f'Игра {old_name!r} переименована в {new_name!r}'
 
         if old_name == new_name:
-            text = f'У игры "{old_name}" уже такое название!'
-            raise common.WebUserAlertException(text)
+            text = f'У игры {old_name!r} уже такое название!'
+            raise WebUserAlertException(text)
 
-        result_rename = common.rename_game(old_name, new_name)
+        result_rename = logic.rename_game(old_name, new_name)
 
         # Возможно, после переименования игры мы смогли найти ее цену...
         price = result_rename['price']
-        if price is not None:
-            text += f' и найдена ее цена: "{price}"'
+        if price:
+            text += f' и найдена ее цена: {price!r}'
 
         # Просто без напряга возвращаем весь список и на странице заменяем все игры
         result = {
-            common.FINISHED:         common.get_finished_games(),
-            common.FINISHED_WATCHED: common.get_finished_watched_games(),
+            logic.FINISHED:         logic.get_finished_games(),
+            logic.FINISHED_WATCHED: logic.get_finished_watched_games(),
         }
 
-    except common.WebUserAlertException as e:
+    except WebUserAlertException as e:
         status = 'warning'
         text = str(e)
         result = None
@@ -170,7 +149,7 @@ def rename_game():
         'text': text,
         'result': result,
     }
-    logger.debug(data)
+    # log.debug(data)
 
     return jsonify(data)
 
@@ -182,33 +161,33 @@ def check_price():
 
     """
 
-    logger.debug('check_price')
-    logger.debug(request.form)
+    log.debug('Call check_price')
+    log.debug('request.form: %s', request.form)
 
     try:
         if 'name' not in request.form:
             text = 'В запросе должен присутствовать параметр "name"'
-            raise common.WebUserAlertException(text)
+            raise WebUserAlertException(text)
 
         name = request.form['name'].strip()
-        logger.debug(name)
+        log.debug(name)
 
-        id_games_with_changed_price, price = common.check_and_fill_price_of_game(name, cache=False)
+        id_games_with_changed_price, price = logic.check_and_fill_price_of_game(name, cache=False)
 
         if price is None:
             status = 'ok'
-            text = f'Не получилось найти цену для игры "{name}"'
+            text = f'Не получилось найти цену для игры {name!r}'
             result = None
 
         else:
             status = 'ok'
-            text = f'Для игры "{name}" найдена и установлена цена: "{price}"'
+            text = f'Для игры {name!r} найдена и установлена цена: {price!r}'
             result = {
                 'new_price': price,
                 'id_games_with_changed_price': id_games_with_changed_price,
             }
 
-    except common.WebUserAlertException as e:
+    except WebUserAlertException as e:
         status = 'warning'
         text = str(e)
         result = None
@@ -218,7 +197,7 @@ def check_price():
         'text': text,
         'result': result,
     }
-    logger.debug(data)
+    log.debug(data)
 
     return jsonify(data)
 
@@ -230,7 +209,7 @@ def run_check():
 
     """
 
-    logger.debug('run_check')
+    log.debug('Call run_check')
 
     status = 'ok'
     result = None
@@ -262,7 +241,7 @@ def run_check():
         'result': result,
         'data': added_data,
     }
-    logger.debug(data)
+    log.debug(data)
 
     return jsonify(data)
 
@@ -274,11 +253,11 @@ def check_price_all_non_price_games():
 
     """
 
-    logger.debug('check_price_all_non_price_games')
+    log.debug('Call check_price_all_non_price_games')
 
     try:
-        games_with_changed_price = common.check_price_all_non_price_games()
-        logger.debug(games_with_changed_price)
+        games_with_changed_price = logic.check_price_all_non_price_games()
+        log.debug(games_with_changed_price)
 
         status = 'ok'
 
@@ -299,7 +278,7 @@ def check_price_all_non_price_games():
             'games_with_changed_price': games_with_changed_price,
         }
 
-    except common.WebUserAlertException as e:
+    except WebUserAlertException as e:
         status = 'warning'
         text = str(e)
         result = None
@@ -309,60 +288,9 @@ def check_price_all_non_price_games():
         'text': text,
         'result': result,
     }
-    logger.debug(data)
+    log.debug(data)
 
     return jsonify(data)
-
-
-# # функция нужна только для тестирования
-# @app.route("/set_null_price", methods=['POST'])
-# def set_null_price():
-#     """
-#     Функция убирает у игры цену т.е. будет значение null.
-#
-#     """
-#
-#     logger.debug('set_null_price')
-#     logger.debug(request.form)
-#
-#     try:
-#         if 'name' not in request.form:
-#             status = 'warning'
-#             text = 'В запросе должен присутствовать параметр "name"'
-#             result = None
-#
-#         else:
-#             name = request.form['name']
-#             logger.debug(name)
-#
-#             from common import create_connect, get_id_games_by_name
-#             try:
-#                 connect = create_connect()
-#                 connect.execute("UPDATE Game SET price = ? WHERE name = ?", (None, name))
-#                 connect.commit()
-#
-#                 status = 'ok'
-#                 text = 'Для игры "{}" убрана цена'.format(name)
-#                 result = {
-#                     'id_games_with_changed_price': get_id_games_by_name(name),
-#                 }
-#
-#             finally:
-#                 connect.close()
-#
-#     except common.WebUserAlertException as e:
-#         status = 'warning'
-#         text = str(e)
-#         result = None
-#
-#     data = {
-#         'status': status,
-#         'text': text,
-#         'result': result,
-#     }
-#     logger.debug(data)
-#
-#     return jsonify(data)
 
 
 @app.route("/get_games")
@@ -372,18 +300,18 @@ def get_games():
 
     """
 
-    logger.debug('get_games')
+    log.debug('Call get_games')
 
-    finished_games = common.get_finished_games()
-    finished_watched_games = common.get_finished_watched_games()
+    finished_games = logic.get_finished_games()
+    finished_watched_games = logic.get_finished_watched_games()
 
     data = {
-        common.FINISHED:         finished_games,
-        common.FINISHED_WATCHED: finished_watched_games,
+        logic.FINISHED:         finished_games,
+        logic.FINISHED_WATCHED: finished_watched_games,
     }
-    logger.debug(f'Finished games: {len(finished_games)}')
-    logger.debug(f'Watched games: {len(finished_watched_games)}')
-    logger.debug(f'Total games: {len(finished_games) + len(finished_watched_games)}')
+    log.debug(f'Finished games: {len(finished_games)}')
+    log.debug(f'Watched games: {len(finished_watched_games)}')
+    log.debug(f'Total games: {len(finished_games) + len(finished_watched_games)}')
 
     return jsonify(data)
 
@@ -395,10 +323,10 @@ def get_finished_games():
 
     """
 
-    logger.debug('get_finished_games')
+    log.debug('Call get_finished_games')
 
-    data = common.get_finished_games()
-    logger.debug(f'Finished games: {len(data)}')
+    data = logic.get_finished_games()
+    log.debug(f'Finished games: {len(data)}')
 
     return jsonify(data)
 
@@ -410,10 +338,10 @@ def get_finished_watched_games():
 
     """
 
-    logger.debug('get_finished_watched_games')
+    log.debug('Call get_finished_watched_games')
 
-    data = common.get_finished_watched_games()
-    logger.debug(f'Watched games: {len(data)}')
+    data = logic.get_finished_watched_games()
+    log.debug(f'Watched games: {len(data)}')
 
     return jsonify(data)
 
@@ -425,8 +353,8 @@ def delete_game():
 
     """
 
-    logger.debug('delete_game')
-    logger.debug(request.form)
+    log.debug('Call delete_game')
+    log.debug('request.form: %s', request.form)
 
     if 'name' not in request.form or 'kind' not in request.form:
         status = 'warning'
@@ -435,21 +363,21 @@ def delete_game():
 
     else:
         name = request.form['name'].strip()
-        logger.debug(name)
+        log.debug(name)
 
         kind = request.form['kind'].strip()
-        logger.debug(kind)
+        log.debug(kind)
 
         try:
-            id_game = common.delete_game(name, kind)
+            id_game = logic.delete_game(name, kind)
 
             status = 'ok'
-            text = f'Удалена игра #{id_game} "{name}" ({kind})'
+            text = f'Удалена игра #{id_game} {name!r} ({kind!r})'
             result = {
                 'id_game': id_game,
             }
 
-        except common.WebUserAlertException as e:
+        except WebUserAlertException as e:
             status = 'warning'
             text = str(e)
             result = None
@@ -459,20 +387,24 @@ def delete_game():
         'text': text,
         'result': result,
     }
-    logger.debug(data)
+    log.debug(data)
 
     return jsonify(data)
 
 
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(
+        os.path.join(app.root_path, 'static/images'),
+        'favicon.png'
+    )
+
+
 if __name__ == '__main__':
-    # # Localhost
     # app.debug = True
 
     app.run(
-        port=config.PORT_WEB,
-
-        # Включение поддержки множества подключений
-        threaded=True,
+        port=config.PORT_WEB
     )
 
     # # Public IP

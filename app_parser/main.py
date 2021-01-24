@@ -12,47 +12,54 @@ __author__ = 'ipetrash'
 
 
 import datetime as DT
+import json
+import time
+import sys
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from typing import Tuple
+from threading import Thread
+from pathlib import Path
 
-from common import *
+# Папка выше
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 from config import PORT_RUN_CHECK
+from common import get_logger
 
-from third_party.wait import wait
 from db import Settings, db_create_backup
+from third_party.wait import wait
+from app_parser.utils import get_games_list
+from app_parser.logic import append_games_to_database, fill_price_of_games
 
 
-# Создание базы и таблицы
-init_db()
+log = get_logger('main')
 
 
-log = get_logger('main__price_of_games', file='main.log')
+def run() -> Tuple[int, int]:
+    # Перед выполнением, запоминаем дату и время, чтобы иметь потом представление когда
+    # в последний раз выполнялось заполнение списка
+    Settings.set_value('last_run_date', DT.datetime.now())
 
+    # Получение игр из файла gist
+    finished_game_list, finished_watched_game_list = get_games_list()
+    log.debug(
+        "Пройденных игр %s, просмотренных игр: %s",
+        len(finished_game_list),
+        len(finished_watched_game_list)
+    )
 
-def run() -> (int, int):
-    with create_connect() as connect:
-        # Перед выполнением, запоминаем дату и время, чтобы иметь потом представление когда
-        # в последний раз выполнялось заполнение списка
-        Settings.set_value('last_run_date', DT.datetime.now())
+    # Добавление в базу новых игр
+    added_finished_games, added_watched_games = append_games_to_database(
+        finished_game_list, finished_watched_game_list
+    )
+    if added_finished_games:
+        log.debug('Добавлено пройденных игр: %s', added_finished_games)
 
-        # Получение игр из файла gist
-        finished_game_list, finished_watched_game_list = get_games_list()
-        log.debug(
-            "Пройденных игр %s, просмотренных игр: %s",
-            len(finished_game_list),
-            len(finished_watched_game_list)
-        )
+    if added_watched_games:
+        log.debug('Добавлено просмотренных игр: %s', added_watched_games)
 
-        # Добавление в базу новых игр
-        added_finished_games, added_watched_games = append_games_to_database(
-            connect, finished_game_list, finished_watched_game_list
-        )
-        if added_finished_games:
-            log.debug('Добавлено пройденных игр: %s', added_finished_games)
-
-        if added_watched_games:
-            log.debug('Добавлено просмотренных игр: %s', added_watched_games)
-
-        # Заполнение цен игр
-        fill_price_of_games(connect)
+    # Заполнение цен игр
+    fill_price_of_games()
 
     # Создание дубликата базы
     db_create_backup(log)
@@ -61,10 +68,6 @@ def run() -> (int, int):
 
 
 def _async_run_server(port):
-    import json
-    from http.server import BaseHTTPRequestHandler, HTTPServer
-    from threading import Thread
-
     class HttpProcessor(BaseHTTPRequestHandler):
         def do_POST(self):
             code = 200
@@ -115,5 +118,4 @@ if __name__ == '__main__':
             log.debug('Через 5 минут попробую снова...')
 
             # Wait 5 minutes before next attempt
-            import time
             time.sleep(5 * 60)

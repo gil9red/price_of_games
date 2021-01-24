@@ -315,7 +315,7 @@ def check_and_fill_price_of_game(game_name: str, cache=True) -> Tuple[List[int],
                 other_price = price
                 break
 
-    if other_price == 0 or other_price is None:
+    if other_price is None:
         log_common.info(f'Не получилось найти цену игры {game_name!r}, price is {other_price}')
         return [], None
 

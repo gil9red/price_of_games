@@ -67,6 +67,16 @@
         .dataTables_length > label > select {
             width: 100% !important;
         }
+
+        #fixed_right_panel {
+            font-size: 0.9rem;
+        }
+            #fixed_right_panel .form-group > label {
+                margin-bottom: 0.1rem;
+            }
+            #fixed_right_panel hr {
+                background-color: #fff !important;
+            }
     </style>
 
     <script>
@@ -150,7 +160,7 @@
                 <br>
             </div>
 
-            <div class="col-3 p-0 bg-dark text-white" style="font-size: 0.9rem">
+            <div id="fixed_right_panel" class="col-3 p-0 bg-dark text-white">
                 <div class="sticky-top p-2 vh-100 overflow-auto">
                     <div class="custom-control custom-checkbox">
                         <input id="checkbox_visible_finished_games" class="custom-control-input" type="checkbox" onclick="set_visible_finished_game($(this).is(':checked'))" checked>
@@ -162,7 +172,7 @@
                         Перейти к таблице
                     </button>
 
-                    <hr class="bg-white">
+                    <hr>
 
                     <div class="custom-control custom-checkbox">
                         <input id="checkbox_visible_finished_watched_games" class="custom-control-input" type="checkbox" onclick="set_visible_finished_watched_game($(this).is(':checked'))" checked/>
@@ -174,11 +184,11 @@
                         Перейти к таблице
                     </button>
 
-                    <hr class="bg-white">
+                    <hr>
 
-                    <button class="btn btn-success btn-sm btn-block" onclick="run_check()">Запуск проверки новых игр</button>
+                    <button class="btn btn-outline-success btn-sm btn-block" onclick="run_check()">Запуск проверки новых игр</button>
 
-                    <hr class="bg-white">
+                    <hr>
 
                     <form id="form__set_price" method="post" action="/set_price">
                         <h6>Установка цены у игры:</h6>
@@ -190,10 +200,10 @@
                             <label for="form_price">Цена:</label>
                             <input id="form_price" class="form-control form-control-sm" type="text" name="price" required>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-sm btn-block">Установить цену</button>
+                        <button type="submit" class="btn btn-outline-primary btn-sm btn-block">Установить цену</button>
                     </form>
 
-                    <hr class="bg-white">
+                    <hr>
 
                     <form id="form__rename_game" method="post" action="/rename_game">
                         <h6>Изменение названия игры:</h6>
@@ -205,10 +215,10 @@
                             <label for="form_new_name">Новое название:</label>
                             <input id="form_new_name" class="form-control form-control-sm" type="text" name="new_name" required>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-sm btn-block">Изменить название</button>
+                        <button type="submit" class="btn btn-outline-primary btn-sm btn-block">Изменить название</button>
                     </form>
 
-                    <hr class="bg-white">
+                    <hr>
                     <br>
 
                     <div class="custom-control custom-switch">

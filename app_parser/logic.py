@@ -6,7 +6,7 @@ __author__ = 'ipetrash'
 
 import datetime as DT
 import time
-from typing import List, Tuple, Dict, Any, Optional
+from typing import List, Tuple, Dict, Any, Optional, Union
 
 from common import (
     FINISHED, FINISHED_WATCHED, WebUserAlertException,
@@ -34,7 +34,7 @@ def get_games_by_kind(kind: str) -> List[Dict[str, Any]]:
         {
             'id': game.id,
             'name': game.name,
-            'price': float(game.price),  # TODO: цены и так нужно как числа хранить
+            'price': game.price,
             'append_date': game.append_date_dt.strftime('%d/%m/%Y %H:%M:%S'),
             'append_date_timestamp': int(game.append_date_dt.timestamp()),
         }
@@ -60,7 +60,7 @@ def get_finished_watched_games() -> List[Dict[str, Any]]:
     return get_games_by_kind(FINISHED_WATCHED)
 
 
-def get_price(game_name: str) -> Optional[str]:
+def get_price(game_name: str) -> Optional[float]:
     """
     Функция возвращает цену игры.
     Если такой игры нет, вернется None.
@@ -76,7 +76,7 @@ def has_game(game_name: str) -> bool:
     return Game.select(Game.id).where(Game.name == game_name).exists()
 
 
-def set_price_game(game_name: str, price: str) -> List[int]:
+def set_price_game(game_name: str, price: Union[None, str, float]) -> List[int]:
     """
     Функция найдет игры с указанным названием и изменит их цену в базе.
     Возвращает список id игр с измененной ценой.
@@ -84,12 +84,17 @@ def set_price_game(game_name: str, price: str) -> List[int]:
     """
 
     game_name = game_name.strip()
-    price = price.strip()
 
-    if not game_name or not price:
+    if isinstance(price, str):
+        price = price.strip()
+
+    if not game_name or price == '' or price is None:
         error_text = f'Не указано game ( = {game_name!r}) или price ( = {price!r})'
         log_common.error(error_text)
         raise WebUserAlertException(error_text)
+
+    if isinstance(price, str):
+        price = float(price) if '.' in price else int(price)
 
     ids = []
     for game in Game.select().where(Game.name == game_name):
@@ -193,7 +198,7 @@ def set_check_game_by_steam(game_name: str, check=True):
         game.save()
 
 
-def check_price_all_non_price_games() -> List[Tuple[List[int], str, str]]:
+def check_price_all_non_price_games() -> List[Tuple[List[int], str, float]]:
     """
     Принудительная проверка цены у игр без цены. То, что цены игр уже проверялись для этой функции
     значение не имеет.
@@ -248,7 +253,7 @@ def append_games_to_database(finished_game_list: List[str], finished_watched_gam
     return added_finished_games, added_watched_games
 
 
-def get_game_list_with_price(game_name: str) -> List[Tuple[int, str, str]]:
+def get_game_list_with_price(game_name: str) -> List[Tuple[int, str, float]]:
     """
     Функция по названию игры вернет список игр с их id, kind и price
 
@@ -258,7 +263,7 @@ def get_game_list_with_price(game_name: str) -> List[Tuple[int, str, str]]:
     return [(game.id, game.kind, game.price) for game in query]
 
 
-def check_and_fill_price_of_game(game_name: str, cache=True) -> Tuple[List[int], Optional[str]]:
+def check_and_fill_price_of_game(game_name: str, cache=True) -> Tuple[List[int], Optional[Union[float, int]]]:
     """
     Функция ищет цену игры и при нахождении ее ставит ей цену в базе.
     Возвращает кортеж из списка id игр с измененной ценой и саму цену.
@@ -364,6 +369,9 @@ if __name__ == '__main__':
         Game.kind == FINISHED_WATCHED
     )
     finished_watched_number, finished_watched_sum_price = query.first()
+
+    finished_sum_price = int(finished_sum_price)
+    finished_watched_sum_price = int(finished_watched_sum_price)
 
     total_number = finished_number + finished_watched_number
     total_price = finished_sum_price + finished_watched_sum_price

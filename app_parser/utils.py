@@ -8,7 +8,7 @@ import datetime as DT
 import os
 import time
 import re
-from typing import List, Tuple
+from typing import List, Tuple, Union
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
@@ -70,8 +70,7 @@ def get_games_list() -> Tuple[List[str], List[str]]:
     return finished_game_list, finished_watched_game_list
 
 
-# TODO: как float вернуть
-def steam_search_game_price_list(name: str) -> List[Tuple[str, str]]:
+def steam_search_game_price_list(name: str) -> List[Tuple[str, Union[float, int]]]:
     """
     Функция принимает название игры, после ищет его в стиме и возвращает результат как список
     кортежей из (название игры, цена).
@@ -117,10 +116,10 @@ def steam_search_game_price_list(name: str) -> List[Tuple[str, str]]:
         if not price:
             price = None
         else:
-            # Если в цене нет цифры считаем что это "Free To Play" или что-то подобное
+            # Если в цене нет цифры считаем, что это "Free To Play" или что-то подобное
             match = re.search(r'\d', price)
             if not match:
-                price = '0'  # TODO: price = 0
+                price = 0
             else:
                 # Только значение цены
                 if 'pуб' not in price:
@@ -131,7 +130,9 @@ def steam_search_game_price_list(name: str) -> List[Tuple[str, str]]:
                 # "799,99" -> "799.99"
                 price = price.replace(',', '.')
 
-        # TODO: как float вернуть. Типа: if price is str: priec = float(price)
+        if isinstance(price, str):
+            price = float(price) if '.' in price else int(price)
+
         game_price_list.append((name, price))
 
     log_common.debug('game_price_list (%s): %s', len(game_price_list), game_price_list)

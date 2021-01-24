@@ -13,7 +13,7 @@ from typing import Any, Callable, Union, Optional
 # pip install peewee
 from peewee import (
     SqliteDatabase, Model, fn,
-    TextField, ForeignKeyField, DateTimeField, BooleanField
+    TextField, ForeignKeyField, DateTimeField, BooleanField, DoubleField
 )
 
 from config import BACKUP_DIR_LIST, DB_FILE_NAME
@@ -58,7 +58,7 @@ class BaseModel(Model):
 
 class Game(BaseModel):
     name = TextField()
-    price = TextField(null=True)  # TODO: как float / REAL
+    price = DoubleField(null=True)
     append_date = DateTimeField(default=DT.datetime.now)
     modify_price_date = DateTimeField(default=DT.datetime.now)
     kind = TextField()

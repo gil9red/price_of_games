@@ -131,14 +131,14 @@ function open_tab_with_steam_search_from_game_name(game_name) {
 }
 
 function open_tab_with_yandex_search_from_game_name(game_name) {
-    let url = 'https://yandex.ru/yandsearch?text=' + game_name;
+    let url = 'https://yandex.ru/yandsearch?text=' + game_name + ' цена купить';
     console.log(`open_tab_with_yandex_search("${game_name}") -> ${url}`);
 
     window.open(url);
 }
 
 function open_tab_with_google_search_from_game_name(game_name) {
-    let url = 'https://www.google.ru/#newwindow=1&q=' + game_name;
+    let url = 'https://www.google.com/search?q=' + game_name + ' цена купить';
     console.log(`open_tab_with_google_search("${game_name}") -> ${url}`);
 
     window.open(url);

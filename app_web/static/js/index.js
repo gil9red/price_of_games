@@ -149,7 +149,7 @@ function open_tab_with_google_search_from_game_name(game_name) {
 function statistic_for_table(items) {
     let price_is_none_rows_number = 0;
     for (let row of items) {
-        if (row == null) {
+        if (row.price == null) {
             price_is_none_rows_number++;
         }
     }

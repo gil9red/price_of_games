@@ -221,12 +221,19 @@ def run_check():
 
         text = '<b>Проверка новых игр завершена.</b>'
         if json['added_finished_games'] or json['added_watched_games']:
-            text += '<br>' \
-                '<table border="0">' \
-                '<tr><td>Добавлено пройденных игр:</td><td>{added_finished_games}</td></tr>' \
-                '<tr><td>Добавлено просмотренных игр:</td><td>{added_watched_games}</td></tr>' \
-                '</table>'\
-                .format(**json)
+            text += '''
+                <br>
+                <table border="0">
+                    <tr>
+                        <td>Добавлено пройденных игр:</td>
+                        <td align="right" style="width: 20px">{added_finished_games}</td>
+                    </tr>
+                    <tr>
+                        <td>Добавлено просмотренных игр:</td>
+                        <td align="right" style="width: 20px">{added_watched_games}</td>
+                    </tr>
+                </table>
+            '''.format(**json)
             added_data = json
         else:
             text += '<br>Новый игр нет'

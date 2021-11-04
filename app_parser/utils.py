@@ -5,7 +5,6 @@ __author__ = 'ipetrash'
 
 
 import datetime as DT
-import os
 import time
 import re
 from typing import List, Tuple, Union
@@ -15,9 +14,15 @@ from bs4 import BeautifulSoup
 import requests
 
 from config import BACKUP_DIR_LIST
+from common import log_common
 from third_party.mini_played_games_parser import parse_played_games
 
-from common import log_common
+
+session = requests.Session()
+session.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101 Firefox/91.0'
+
+# Думаю, это станет дополнительной гарантией получения русскоязычной версии сайта
+session.headers['Accept-Language'] = 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3'
 
 
 def get_games_list() -> Tuple[List[str], List[str]]:
@@ -26,28 +31,18 @@ def get_games_list() -> Tuple[List[str], List[str]]:
 
     """
 
-    rs = requests.get('https://gist.github.com/gil9red/2f80a34fb601cd685353')
+    rs = session.get('https://gist.github.com/gil9red/2f80a34fb601cd685353')
 
     root = BeautifulSoup(rs.content, 'html.parser')
     href = root.select_one('.file-actions > a')['href']
     raw_url = urljoin(rs.url, href)
 
-    rs = requests.get(raw_url)
+    rs = session.get(raw_url)
     content_gist = rs.text
 
     # Скрипт может сохранять скачанные гисты
     for path in BACKUP_DIR_LIST:
-        # Если папка не существует, попытаемся создать
-        if not os.path.exists(path):
-            try:
-                os.mkdir(path)
-
-            except Exception:
-                log_common.exception("Error:")
-
-                # Если при создании папки возникла ошибка, пытаться сохранить в нее
-                # файл уже бесполезно
-                continue
+        path.mkdir(parents=True, exist_ok=True)
 
         # Сохранение файла гиста в папку бекапа
         try:
@@ -81,17 +76,12 @@ def steam_search_game_price_list(name: str) -> List[Tuple[str, Union[float, int]
 
     # Дополнения с категорией Game не ищутся, например: "Pillars of Eternity: The White March Part I", поэтому url
     # был упрощен для поиска всего
-    url = 'http://store.steampowered.com/search/?term=' + name
-
-    headers = {
-        # Думаю, это станет дополнительной гарантией получения русскоязычной версии сайта
-        'Accept-Language': 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
-    }
+    url = 'https://store.steampowered.com/search/?term=' + name
 
     # Из цикла не выйти, пока не получится скачать и распарсить страницу
     while True:
         try:
-            rs = requests.get(url, headers=headers)
+            rs = session.get(url)
             root = BeautifulSoup(rs.content, 'html.parser')
             break
 
@@ -107,18 +97,16 @@ def steam_search_game_price_list(name: str) -> List[Tuple[str, Union[float, int]
         name = div.select_one('.title').text.strip()
 
         # Ищем тег скидки, чтобы вытащить оригинальную цену, а не ту, что получилась со скидкой
-        if div.select_one('.search_discount > span'):
-            price = div.select_one('.search_price > span > strike').text.strip()
-        else:
-            price = div.select_one('.search_price').text.strip()
+        price_el = div.select_one('.search_price > span > strike') or div.select_one('.search_price')
+        price = price_el.get_text(strip=True)
 
         # Если цены нет (например, игра еще не продается)
         if not price:
             price = None
         else:
             # Если в цене нет цифры считаем, что это "Free To Play" или что-то подобное
-            match = re.search(r'\d', price)
-            if not match:
+            m = re.search(r'\d', price)
+            if not m:
                 price = 0
             else:
                 # Только значение цены
@@ -131,6 +119,7 @@ def steam_search_game_price_list(name: str) -> List[Tuple[str, Union[float, int]
                 price = price.replace(',', '.')
 
         if isinstance(price, str):
+            price = re.sub(r'[^\d.]', '', price)
             price = float(price) if '.' in price else int(price)
 
         game_price_list.append((name, price))
@@ -151,14 +140,14 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
     name_1 = name_1.lower()
     name_2 = name_2.lower()
 
-    def remove_postfix(text):
+    def remove_postfix(text: str) -> str:
         for postfix in ('(dlc)', ' expansion'):
             if text.endswith(postfix):
                 return text[:-len(postfix)]
         return text
 
     # Удаление символов кроме буквенных, цифр и _: "the witcher®3:___ вася! wild hunt" -> "thewitcher3___васяwildhunt"
-    def clear_name(name):
+    def clear_name(name: str) -> str:
         return re.sub(r'\W', '', name)
 
     name_1 = remove_postfix(name_1)
@@ -169,4 +158,7 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
 
 if __name__ == '__main__':
     game_name = 'JUMP FORCE'
+    print(steam_search_game_price_list(game_name))
+
+    game_name = 'Alone in the Dark: Illumination'
     print(steam_search_game_price_list(game_name))

@@ -165,7 +165,7 @@ def get_price(game_name: str, log_common: Logger = None, log_append_game: Logger
         log_append_game and log_append_game.info(f'Нашли игру: {game_name!r} ({name_from_site}) -> {price}')
 
     # Поищем игру и ее цену в стиме
-    game_price_list = steam_search_game_price_list(game_name)
+    game_price_list = steam_search_game_price_list(game_name, log_common)
 
     # Сначала пытаемся найти игру по полному совпадению
     for name, price in game_price_list:

@@ -5,9 +5,9 @@ __author__ = 'ipetrash'
 
 
 import datetime as DT
-from logging import Logger
 import time
 import re
+from logging import Logger
 from typing import List, Tuple, Union, Optional
 from urllib.parse import urljoin
 

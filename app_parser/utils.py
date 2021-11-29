@@ -5,9 +5,10 @@ __author__ = 'ipetrash'
 
 
 import datetime as DT
+from logging import Logger
 import time
 import re
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Optional
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
@@ -156,9 +157,35 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
     return clear_name(name_1) == clear_name(name_2)
 
 
+def get_price(game_name: str, log_common: Logger = None, log_append_game: Logger = None) -> Optional[Union[int, float]]:
+    # Поищем игру и ее цену в стиме
+    game_price_list = steam_search_game_price_list(game_name)
+
+    # Сначала пытаемся найти игру по полному совпадению
+    for name, price in game_price_list:
+        if game_name == name:
+            log_common.info(f'Нашли игру: {game_name!r} ({name}) -> {price}')
+            log_append_game.info(f'Нашли игру: {game_name!r} ({name}) -> {price}')
+            return price
+
+    # Если по полному совпадению на нашли, пытаемся найти предварительно очищая названия игр от лишних символов
+    for name, price in game_price_list:
+        # Если нашли игру, запоминаем цену и прерываем сравнение с другими найденными играми
+        if smart_comparing_names(game_name, name):
+            log_common.info(f'Нашли игру: {game_name!r} ({name}) -> {price}')
+            log_append_game.info(f'Нашли игру: {game_name!r} ({name}) -> {price}')
+            return price
+
+    return
+
+
 if __name__ == '__main__':
     game_name = 'JUMP FORCE'
     print(steam_search_game_price_list(game_name))
+    print(get_price(game_name))
+
+    print()
 
     game_name = 'Alone in the Dark: Illumination'
     print(steam_search_game_price_list(game_name))
+    print(get_price(game_name))

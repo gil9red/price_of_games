@@ -14,7 +14,7 @@ from common import (
 )
 from db import Game, fn
 
-from app_parser.utils import steam_search_game_price_list, smart_comparing_names
+from app_parser.utils import get_price
 
 
 def get_games_by_kind(kind: str) -> List[Dict[str, Any]]:
@@ -300,32 +300,17 @@ def check_and_fill_price_of_game(game_name: str, cache=True) -> Tuple[List[int],
             return set_price_game(game_name, other_price), other_price
 
     # Поищем игру и ее цену в стиме
-    game_price_list = steam_search_game_price_list(game_name)
+    other_price = get_price(
+        game_name,
+        log_common, log_append_game
+    )
 
     # Отметим что игра искалась в стиме
     set_check_game_by_steam(game_name)
 
-    # Сначала пытаемся найти игру по полному совпадению
-    for name, price in game_price_list:
-        if game_name == name:
-            other_price = price
-            break
-
-    # Если по полному совпадению на нашли, пытаемся найти предварительно очищая названия игр
-    # от лишних символов
-    if other_price is None:
-        for name, price in game_price_list:
-            # Если нашли игру, запоминаем цену и прерываем сравнение с другими найденными играми
-            if smart_comparing_names(game_name, name):
-                other_price = price
-                break
-
     if other_price is None:
         log_common.info(f'Не получилось найти цену игры {game_name!r}, price is {other_price}')
         return [], other_price
-
-    log_common.info(f'Нашли игру: {game_name!r} ({name}) -> {other_price}')
-    log_append_game.info(f'Нашли игру: {game_name!r} ({name}) -> {other_price}')
 
     return set_price_game(game_name, other_price), other_price
 

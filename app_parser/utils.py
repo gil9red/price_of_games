@@ -66,14 +66,14 @@ def get_games_list() -> Tuple[List[str], List[str]]:
     return finished_game_list, finished_watched_game_list
 
 
-def steam_search_game_price_list(name: str) -> List[Tuple[str, Union[float, int]]]:
+def steam_search_game_price_list(name: str, log_common: Logger = None) -> List[Tuple[str, Union[float, int]]]:
     """
     Функция принимает название игры, после ищет его в стиме и возвращает результат как список
     кортежей из (название игры, цена).
 
     """
 
-    log_common.debug('Поиск в стиме "%s"', name)
+    log_common and log_common.debug(f'Поиск в стиме "{name}"')
 
     # Дополнения с категорией Game не ищутся, например: "Pillars of Eternity: The White March Part I", поэтому url
     # был упрощен для поиска всего
@@ -87,7 +87,7 @@ def steam_search_game_price_list(name: str) -> List[Tuple[str, Union[float, int]
             break
 
         except Exception:
-            log_common.exception('При поиске в стиме что-то пошло не так:')
+            log_common and log_common.exception('При поиске в стиме что-то пошло не так:')
 
             # Если произошла какая-то ошибка попытаемся через 5 минут попробовать снова
             time.sleep(5 * 60)
@@ -112,7 +112,7 @@ def steam_search_game_price_list(name: str) -> List[Tuple[str, Union[float, int]
             else:
                 # Только значение цены
                 if 'pуб' not in price:
-                    log_common.warn('АХТУНГ! Неизвестный формат цены: "%s".', price)
+                    log_common and log_common.warning(f'АХТУНГ! Неизвестный формат цены: "{price}".')
 
                 price = price.replace(' pуб.', '').strip()
 
@@ -125,7 +125,9 @@ def steam_search_game_price_list(name: str) -> List[Tuple[str, Union[float, int]
 
         game_price_list.append((name, price))
 
-    log_common.debug('game_price_list (%s): %s', len(game_price_list), game_price_list)
+    log_common and log_common.debug(f'game_price_list ({len(game_price_list)}): {game_price_list}')
+
+    time.sleep(0.5)
 
     return game_price_list
 

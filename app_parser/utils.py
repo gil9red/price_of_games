@@ -158,22 +158,24 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
 
 
 def get_price(game_name: str, log_common: Logger = None, log_append_game: Logger = None) -> Optional[Union[int, float]]:
+    def _on_found_price(game_name: str, name_from_site: str, price: Union[int, float]):
+        log_common and log_common.info(f'Нашли игру: {game_name!r} ({name_from_site}) -> {price}')
+        log_append_game and log_append_game.info(f'Нашли игру: {game_name!r} ({name_from_site}) -> {price}')
+
     # Поищем игру и ее цену в стиме
     game_price_list = steam_search_game_price_list(game_name)
 
     # Сначала пытаемся найти игру по полному совпадению
     for name, price in game_price_list:
         if game_name == name:
-            log_common.info(f'Нашли игру: {game_name!r} ({name}) -> {price}')
-            log_append_game.info(f'Нашли игру: {game_name!r} ({name}) -> {price}')
+            _on_found_price(game_name, name, price)
             return price
 
     # Если по полному совпадению на нашли, пытаемся найти предварительно очищая названия игр от лишних символов
     for name, price in game_price_list:
         # Если нашли игру, запоминаем цену и прерываем сравнение с другими найденными играми
         if smart_comparing_names(game_name, name):
-            log_common.info(f'Нашли игру: {game_name!r} ({name}) -> {price}')
-            log_append_game.info(f'Нашли игру: {game_name!r} ({name}) -> {price}')
+            _on_found_price(game_name, name, price)
             return price
 
     return

@@ -14,7 +14,7 @@ from common import (
 )
 from db import Game, fn
 
-from app_parser.utils import get_price
+from app_parser.utils import get_price as get_price_game
 
 
 def get_games_by_kind(kind: str) -> List[Dict[str, Any]]:
@@ -300,7 +300,7 @@ def check_and_fill_price_of_game(game_name: str, cache=True) -> Tuple[List[int],
             return set_price_game(game_name, other_price), other_price
 
     # Поищем игру и ее цену в стиме
-    other_price = get_price(
+    other_price = get_price_game(
         game_name,
         log_common, log_append_game
     )

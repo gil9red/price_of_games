@@ -144,7 +144,7 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
     name_2 = name_2.lower()
 
     def remove_postfix(text: str) -> str:
-        for postfix in ('(dlc)', ' expansion'):
+        for postfix in ('dlc', 'expansion'):
             if text.endswith(postfix):
                 return text[:-len(postfix)]
         return text
@@ -153,10 +153,13 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
     def clear_name(name: str) -> str:
         return re.sub(r'\W', '', name)
 
+    name_1 = clear_name(name_1)
     name_1 = remove_postfix(name_1)
+
+    name_2 = clear_name(name_2)
     name_2 = remove_postfix(name_2)
 
-    return clear_name(name_1) == clear_name(name_2)
+    return name_1 == name_2
 
 
 def get_price(game_name: str, log_common: Logger = None, log_append_game: Logger = None) -> Optional[Union[int, float]]:

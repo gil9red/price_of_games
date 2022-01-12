@@ -9,7 +9,6 @@ function run_check() {
         method: "POST",
         success: function(data) {
             console.log(data);
-//            console.log(JSON.stringify(data));
 
             let ok = data.status == 'ok';
             noty({
@@ -329,7 +328,6 @@ function load_tables() {
         dataType: "json",  // тип данных загружаемых с сервера
         success: function(data) {
             console.log(data);
-//            console.log(JSON.stringify(data));
 
             var FINISHED = 'Finished';
             var FINISHED_WATCHED = 'Finished watched';
@@ -375,7 +373,6 @@ $(document).ready(function() {
             dataType: "json",  // тип данных загружаемых с сервера
             success: function(data) {
                 console.log(data);
-//                console.log(JSON.stringify(data));
 
                 var ok = data.status == 'ok';
                 if (ok && data.result) {
@@ -422,7 +419,6 @@ $(document).ready(function() {
             dataType: "json",  // тип данных загружаемых с сервера
             success: function(data) {
                 console.log(data);
-//                console.log(JSON.stringify(data));
 
                 var ok = data.status == 'ok';
                 if (ok && data.result) {
@@ -470,7 +466,6 @@ $(document).ready(function() {
 
             success: function(data) {
                 console.log(data);
-//                console.log(JSON.stringify(data));
 
                 var ok = data.status == 'ok';
                 if (ok && data.result) {
@@ -517,7 +512,6 @@ $(document).ready(function() {
             dataType: "json",  // тип данных загружаемых с сервера
             success: function(data) {
                 console.log(data);
-//                console.log(JSON.stringify(data));
 
                 var ok = data.status == 'ok';
                 if (ok && data.result) {
@@ -570,7 +564,6 @@ $(document).ready(function() {
             dataType: "json",  // тип данных загружаемых с сервера
             success: function(data) {
                 console.log(data);
-//                console.log(JSON.stringify(data));
 
                 var ok = data.status == 'ok';
                 if (ok && data.result) {

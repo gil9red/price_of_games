@@ -1,3 +1,5 @@
+const FINISHED = 'Finished';
+const FINISHED_WATCHED = 'Finished watched';
 
 $.noty.defaults.theme = 'defaultTheme';
 $.noty.defaults.layout = 'bottomRight';
@@ -86,8 +88,8 @@ function set_visible_finished_watched_game(visible) {
  * @param mixed   c: decimal delimiter
  */
 Number.prototype.toMoney = function(n, x, s, c) {
-    var re = '\\d(?=(\\d{' + (x || 3) + '})+' + (n > 0 ? '\\D' : '$') + ')';
-    var num = this.toFixed(Math.max(0, ~~n));
+    let re = '\\d(?=(\\d{' + (x || 3) + '})+' + (n > 0 ? '\\D' : '$') + ')';
+    let num = this.toFixed(Math.max(0, ~~n));
 
     return (c ? num.replace('.', c) : num).replace(new RegExp(re, 'g'), '$&' + (s || ','));
 };
@@ -174,8 +176,8 @@ function statistic_for_table(items) {
 }
 
 function fill_statistics() {
-    var statistic_1 = statistic_for_table(window.finished_games);
-    var statistic_2 = statistic_for_table(window.finished_watched_games);
+    let statistic_1 = statistic_for_table(window.finished_games);
+    let statistic_2 = statistic_for_table(window.finished_watched_games);
 
     $('.finished_game_statistic').html(statistic_1);
     $('.finished_watched_game_statistic').html(statistic_2);
@@ -329,9 +331,6 @@ function load_tables() {
         success: function(data) {
             console.log(data);
 
-            var FINISHED = 'Finished';
-            var FINISHED_WATCHED = 'Finished watched';
-
             window.finished_games = data[FINISHED];
             window.finished_watched_games = data[FINISHED_WATCHED];
 
@@ -356,15 +355,15 @@ $(document).ready(function() {
 
     // Обработка изменения цены конкретной игры
     $("#form__set_price").submit(function() {
-        var thisForm = this;
+        let thisForm = this;
 
-        var url = $(this).attr("action");
-        var method = $(this).attr("method");
+        let url = $(this).attr("action");
+        let method = $(this).attr("method");
         if (method === undefined) {
             method = "get";
         }
 
-        var data = $(this).serialize();
+        let data = $(this).serialize();
 
         $.ajax({
             url: url,
@@ -374,7 +373,7 @@ $(document).ready(function() {
             success: function(data) {
                 console.log(data);
 
-                var ok = data.status == 'ok';
+                let ok = data.status == 'ok';
                 if (ok && data.result) {
                     load_tables();
                 }
@@ -402,15 +401,15 @@ $(document).ready(function() {
 
     // Обработка переименования игры
     $("#form__rename_game").submit(function() {
-        var thisForm = this;
+        let thisForm = this;
 
-        var url = $(this).attr("action");
-        var method = $(this).attr("method");
+        let url = $(this).attr("action");
+        let method = $(this).attr("method");
         if (method === undefined) {
             method = "get";
         }
 
-        var data = $(this).serialize();
+        let data = $(this).serialize();
 
         $.ajax({
             url: url,
@@ -420,7 +419,7 @@ $(document).ready(function() {
             success: function(data) {
                 console.log(data);
 
-                var ok = data.status == 'ok';
+                let ok = data.status == 'ok';
                 if (ok && data.result) {
                     load_tables();
                 }
@@ -448,15 +447,15 @@ $(document).ready(function() {
 
     // Обработка проверки цены игры
     $("#form__check_price").submit(function() {
-        var thisForm = this;
+        let thisForm = this;
 
-        var url = $(this).attr("action");
-        var method = $(this).attr("method");
+        let url = $(this).attr("action");
+        let method = $(this).attr("method");
         if (method === undefined) {
             method = "get";
         }
 
-        var data = $(this).serialize();
+        let data = $(this).serialize();
 
         $.ajax({
             url: url,
@@ -467,7 +466,7 @@ $(document).ready(function() {
             success: function(data) {
                 console.log(data);
 
-                var ok = data.status == 'ok';
+                let ok = data.status == 'ok';
                 if (ok && data.result) {
                     load_tables();
                 }
@@ -495,15 +494,15 @@ $(document).ready(function() {
 
     // Проверка всех цен игр без цены
     $("#form__check_price_all_non_price_games").submit(function() {
-        var thisForm = this;
+        let thisForm = this;
 
-        var url = $(thisForm).attr("action");
-        var method = $(thisForm).attr("method");
+        let url = $(thisForm).attr("action");
+        let method = $(thisForm).attr("method");
         if (method === undefined) {
             method = "get";
         }
 
-        var data = $(thisForm).serialize();
+        let data = $(thisForm).serialize();
 
         $.ajax({
             url: url,
@@ -513,7 +512,7 @@ $(document).ready(function() {
             success: function(data) {
                 console.log(data);
 
-                var ok = data.status == 'ok';
+                let ok = data.status == 'ok';
                 if (ok && data.result) {
                     load_tables();
                 }
@@ -547,15 +546,15 @@ $(document).ready(function() {
 
     // Обработка удаления конкретной игры
     $("#form__delete_game").submit(function() {
-        var thisForm = this;
+        let thisForm = this;
 
-        var url = $(this).attr("action");
-        var method = $(this).attr("method");
+        let url = $(this).attr("action");
+        let method = $(this).attr("method");
         if (method === undefined) {
             method = "get";
         }
 
-        var data = $(this).serialize();
+        let data = $(this).serialize();
 
         $.ajax({
             url: url,
@@ -565,7 +564,7 @@ $(document).ready(function() {
             success: function(data) {
                 console.log(data);
 
-                var ok = data.status == 'ok';
+                let ok = data.status == 'ok';
                 if (ok && data.result) {
                     load_tables();
                 }

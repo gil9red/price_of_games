@@ -27,6 +27,14 @@ function run_check() {
                 text: 'На сервере произошла ошибка',
                 type: 'error',
             });
+        },
+
+        beforeSend: function() {
+            $('.run_check.loading').show();
+        },
+
+        complete: function() {
+            $('.run_check.loading').hide();
         }
     });
 }

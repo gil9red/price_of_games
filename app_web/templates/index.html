@@ -192,8 +192,10 @@
 
                     <hr>
 
-                    <button class="btn btn-outline-success btn-sm btn-block" onclick="run_check()">Запуск проверки новых игр</button>
-
+                    <button class="btn btn-outline-success btn-sm btn-block" onclick="run_check()">
+                        <img class="run_check loading" style="display:none" src="{{ url_for('static', filename='images/loading.gif') }}"/>
+                        Запуск проверки новых игр
+                    </button>
                     <hr>
 
                     <form id="form__set_price" method="post" action="/set_price">

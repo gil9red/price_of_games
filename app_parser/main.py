@@ -110,8 +110,8 @@ if __name__ == '__main__':
 
             run()
 
-            # Every 1 days
-            wait(days=1)
+            # Every 1 hours
+            wait(hours=1)
 
         except:
             log.exception('Ошибка:')

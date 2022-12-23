@@ -8,7 +8,7 @@ import datetime as DT
 import time
 import re
 from logging import Logger
-from typing import List, Tuple, Union, Optional
+from typing import Union, Optional
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
@@ -26,7 +26,7 @@ session.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91
 session.headers['Accept-Language'] = 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3'
 
 
-def get_games_list() -> Tuple[List[str], List[str]]:
+def get_games_list() -> tuple[list[str], list[str]]:
     """
     Функция возвращает кортеж из двух списков: список пройденных игр и список просмотренных игр
 
@@ -66,7 +66,7 @@ def get_games_list() -> Tuple[List[str], List[str]]:
     return finished_game_list, finished_watched_game_list
 
 
-def steam_search_game_price_list(name: str, log_common: Logger = None) -> List[Tuple[str, Union[float, int]]]:
+def steam_search_game_price_list(name: str, log_common: Logger = None) -> list[tuple[str, Union[float, int]]]:
     """
     Функция принимает название игры, после ищет его в стиме и возвращает результат как список
     кортежей из (название игры, цена).
@@ -77,12 +77,12 @@ def steam_search_game_price_list(name: str, log_common: Logger = None) -> List[T
 
     # Дополнения с категорией Game не ищутся, например: "Pillars of Eternity: The White March Part I", поэтому url
     # был упрощен для поиска всего
-    url = 'https://store.steampowered.com/search/?term=' + name
+    url = 'https://store.steampowered.com/search/'
 
     # Из цикла не выйти, пока не получится скачать и распарсить страницу
     while True:
         try:
-            rs = session.get(url)
+            rs = session.get(url, params=dict(term=name, ndl=1))
             root = BeautifulSoup(rs.content, 'html.parser')
             break
 
@@ -162,7 +162,11 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
     return name_1 == name_2
 
 
-def get_price(game_name: str, log_common: Logger = None, log_append_game: Logger = None) -> Optional[Union[int, float]]:
+def get_price(
+        game_name: str,
+        log_common: Logger = None,
+        log_append_game: Logger = None
+) -> Optional[Union[int, float]]:
     def _on_found_price(game_name: str, name_from_site: str, price: Union[int, float]):
         log_common and log_common.info(f'Нашли игру: {game_name!r} ({name_from_site}) -> {price}')
         log_append_game and log_append_game.info(f'Нашли игру: {game_name!r} ({name_from_site}) -> {price}')

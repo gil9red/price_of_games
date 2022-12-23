@@ -6,18 +6,18 @@ __author__ = 'ipetrash'
 
 import datetime as DT
 import time
-from typing import List, Tuple, Dict, Any, Optional, Union
+from typing import Any, Optional, Union
 
 from common import (
     FINISHED, FINISHED_WATCHED, WebUserAlertException,
     log_common, log_append_game,
 )
-from db import Game, fn
+from db import Game
 
 from app_parser.utils import get_price as get_price_game
 
 
-def get_games_by_kind(kind: str) -> List[Dict[str, Any]]:
+def get_games_by_kind(kind: str) -> list[dict[str, Any]]:
     """
     Функция возвращает список игр из словарей с ключами: id, name, price, append_date.
 
@@ -42,7 +42,7 @@ def get_games_by_kind(kind: str) -> List[Dict[str, Any]]:
     ]
 
 
-def get_finished_games() -> List[Dict[str, Any]]:
+def get_finished_games() -> list[dict[str, Any]]:
     """
     Функция возвращает список завершенных игр как кортеж из (id, name, price)
 
@@ -51,7 +51,7 @@ def get_finished_games() -> List[Dict[str, Any]]:
     return get_games_by_kind(FINISHED)
 
 
-def get_finished_watched_games() -> List[Dict[str, Any]]:
+def get_finished_watched_games() -> list[dict[str, Any]]:
     """
     Функция возвращает список просмотренных игр как кортеж из (id, name, price)
 
@@ -76,7 +76,7 @@ def has_game(game_name: str) -> bool:
     return Game.select(Game.id).where(Game.name == game_name).exists()
 
 
-def set_price_game(game_name: str, price: Union[None, str, float]) -> List[int]:
+def set_price_game(game_name: str, price: Union[None, str, float]) -> list[int]:
     """
     Функция найдет игры с указанным названием и изменит их цену в базе.
     Возвращает список id игр с измененной ценой.
@@ -107,7 +107,7 @@ def set_price_game(game_name: str, price: Union[None, str, float]) -> List[int]:
     return ids
 
 
-def rename_game(old_name: str, new_name: str) -> Dict[str, Any]:
+def rename_game(old_name: str, new_name: str) -> dict[str, Any]:
     """
     Функция меняет название указанной игры и возвращает словарь с результатом работы.
 
@@ -198,7 +198,7 @@ def set_check_game_by_steam(game_name: str, check=True):
         game.save()
 
 
-def check_price_all_non_price_games() -> List[Tuple[List[int], str, float]]:
+def check_price_all_non_price_games() -> list[tuple[list[int], str, float]]:
     """
     Принудительная проверка цены у игр без цены. То, что цены игр уже проверялись для этой функции
     значение не имеет.
@@ -222,7 +222,10 @@ def check_price_all_non_price_games() -> List[Tuple[List[int], str, float]]:
     return games_with_changed_price
 
 
-def append_games_to_database(finished_game_list: List[str], finished_watched_game_list: List[str]) -> Tuple[int, int]:
+def append_games_to_database(
+        finished_game_list: list[str],
+        finished_watched_game_list: list[str]
+) -> tuple[int, int]:
     """
     Функция для добавление игр в таблицу базы. Если игра уже есть в базе, то запрос игнорируется.
 
@@ -253,7 +256,7 @@ def append_games_to_database(finished_game_list: List[str], finished_watched_gam
     return added_finished_games, added_watched_games
 
 
-def get_game_list_with_price(game_name: str) -> List[Tuple[int, str, float]]:
+def get_game_list_with_price(game_name: str) -> list[tuple[int, str, float]]:
     """
     Функция по названию игры вернет список игр с их id, kind и price
 
@@ -263,7 +266,7 @@ def get_game_list_with_price(game_name: str) -> List[Tuple[int, str, float]]:
     return [(game.id, game.kind, game.price) for game in query]
 
 
-def check_and_fill_price_of_game(game_name: str, cache=True) -> Tuple[List[int], Optional[Union[float, int]]]:
+def check_and_fill_price_of_game(game_name: str, cache=True) -> tuple[list[int], Optional[Union[float, int]]]:
     """
     Функция ищет цену игры и при нахождении ее ставит ей цену в базе.
     Возвращает кортеж из списка id игр с измененной ценой и саму цену.
@@ -344,6 +347,8 @@ def fill_price_of_games():
 
 
 if __name__ == '__main__':
+    from peewee import fn
+
     # Вывести счетчик игр
     query = Game.select(fn.COUNT('*'), fn.SUM(Game.price)).tuples().where(
         Game.kind == FINISHED

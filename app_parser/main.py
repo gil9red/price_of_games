@@ -15,8 +15,8 @@ import datetime as DT
 import json
 import time
 import sys
+
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Tuple
 from threading import Thread
 from pathlib import Path
 
@@ -35,7 +35,7 @@ from app_parser.logic import append_games_to_database, fill_price_of_games
 log = get_logger('main')
 
 
-def run() -> Tuple[int, int]:
+def run() -> tuple[int, int]:
     # Перед выполнением, запоминаем дату и время, чтобы иметь потом представление когда
     # в последний раз выполнялось заполнение списка
     Settings.set_value('last_run_date', DT.datetime.now())

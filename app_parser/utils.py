@@ -7,6 +7,7 @@ __author__ = 'ipetrash'
 import datetime as DT
 import time
 import re
+
 from logging import Logger
 from typing import Union, Optional
 from urllib.parse import urljoin
@@ -14,6 +15,7 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 import requests
 
+from app_parser.models import Game
 from config import BACKUP_DIR_LIST
 from common import log_common
 from third_party.mini_played_games_parser import parse_played_games
@@ -26,12 +28,7 @@ session.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91
 session.headers['Accept-Language'] = 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3'
 
 
-def get_games_list() -> tuple[list[str], list[str]]:
-    """
-    Функция возвращает кортеж из двух списков: список пройденных игр и список просмотренных игр
-
-    """
-
+def get_games() -> list[Game]:
     rs = session.get('https://gist.github.com/gil9red/2f80a34fb601cd685353')
 
     root = BeautifulSoup(rs.content, 'html.parser')
@@ -57,13 +54,17 @@ def get_games_list() -> tuple[list[str], list[str]]:
 
     platforms = parse_played_games(content_gist)
 
-    # Пройденные игры
-    finished_game_list = platforms['PC']['FINISHED_GAME']
+    items = []
+    for platform, categories in platforms.items():
+        for category, games in categories.items():
+            for game in games:
+                items.append(Game(
+                    name=game,
+                    platform=platform,
+                    category=category
+                ))
 
-    # Просмотренные игры
-    finished_watched_game_list = platforms['PC']['FINISHED_WATCHED']
-
-    return finished_game_list, finished_watched_game_list
+    return items
 
 
 def steam_search_game_price_list(name: str, log_common: Logger = None) -> list[tuple[str, Union[float, int]]]:

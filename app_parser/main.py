@@ -28,7 +28,7 @@ from common import get_logger
 
 from db import Settings, db_create_backup
 from third_party.wait import wait
-from app_parser.utils import get_games_list
+from app_parser.utils import get_games
 from app_parser.logic import append_games_to_database, fill_price_of_games
 
 
@@ -41,7 +41,14 @@ def run() -> tuple[int, int]:
     Settings.set_value('last_run_date', DT.datetime.now())
 
     # Получение игр из файла gist
-    finished_game_list, finished_watched_game_list = get_games_list()
+    games = get_games()
+    finished_game_list = [
+        game.name for game in games if game.platform == 'PC' and game.category == 'FINISHED_GAME'
+    ]
+    finished_watched_game_list = [
+        game.name for game in games if game.platform == 'PC' and game.category == 'FINISHED_WATCHED'
+    ]
+
     log.debug(
         "Пройденных игр %s, просмотренных игр: %s",
         len(finished_game_list),

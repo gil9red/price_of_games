@@ -24,7 +24,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from config import PORT_RUN_CHECK
-from common import get_logger
+from common import get_logger, FINISHED_GAME, FINISHED_WATCHED
 
 from db import Settings, db_create_backup
 from third_party.wait import wait
@@ -43,10 +43,10 @@ def run() -> tuple[int, int]:
     # Получение игр из файла gist
     games = get_games()
     finished_game_list = [
-        game.name for game in games if game.platform == 'PC' and game.category == 'FINISHED_GAME'
+        game for game in games if game.kind == FINISHED_GAME
     ]
     finished_watched_game_list = [
-        game.name for game in games if game.platform == 'PC' and game.category == 'FINISHED_WATCHED'
+        game for game in games if game.kind == FINISHED_WATCHED
     ]
 
     log.debug(
@@ -57,7 +57,8 @@ def run() -> tuple[int, int]:
 
     # Добавление в базу новых игр
     added_finished_games, added_watched_games = append_games_to_database(
-        finished_game_list, finished_watched_game_list
+        finished_game_list,
+        finished_watched_game_list
     )
     if added_finished_games:
         log.debug('Добавлено пройденных игр: %s', added_finished_games)

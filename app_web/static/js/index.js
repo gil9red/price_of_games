@@ -1,6 +1,3 @@
-const FINISHED = 'Finished';
-const FINISHED_WATCHED = 'Finished watched';
-
 $.noty.defaults.theme = 'defaultTheme';
 $.noty.defaults.layout = 'bottomRight';
 $.noty.defaults.timeout = 6000;
@@ -336,7 +333,7 @@ function load_tables() {
         success: function(data) {
             console.log(data);
 
-            window.finished_games = data[FINISHED];
+            window.finished_games = data[FINISHED_GAME];
             window.finished_watched_games = data[FINISHED_WATCHED];
 
             fill_game_tables();

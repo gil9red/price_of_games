@@ -18,7 +18,7 @@ import requests
 
 import config
 from db import Settings
-from common import WebUserAlertException, FINISHED, FINISHED_WATCHED
+from common import WebUserAlertException, FINISHED_GAME, FINISHED_WATCHED
 from app_parser import logic
 
 
@@ -32,10 +32,10 @@ def index():
         DB_FILE_NAME=config.DB_FILE_NAME,
         BACKUP_DIR_LIST=list(map(str, config.BACKUP_DIR_LIST)),
 
-        FINISHED=FINISHED,
+        FINISHED_GAME=FINISHED_GAME,
         FINISHED_WATCHED=FINISHED_WATCHED,
 
-        TITLE_FINISHED='Пройденные игры',
+        TITLE_FINISHED_GAME='Пройденные игры',
         TITLE_FINISHED_WATCHED='Просмотренные игры',
     )
 
@@ -58,6 +58,7 @@ def set_price():
         name = request.form['name'].strip()
         price = request.form['price'].strip()
         price = re.sub(r'[^\d.,]', '', price)
+        price = int(float(price))
 
         log.debug(f'name={name!r} price={price!r}')
 
@@ -135,7 +136,7 @@ def rename_game():
 
         # Просто без напряга возвращаем весь список и на странице заменяем все игры
         result = {
-            logic.FINISHED:         logic.get_finished_games(),
+            logic.FINISHED_GAME:    logic.get_finished_games(),
             logic.FINISHED_WATCHED: logic.get_finished_watched_games(),
         }
 
@@ -313,7 +314,7 @@ def get_games():
     finished_watched_games = logic.get_finished_watched_games()
 
     data = {
-        logic.FINISHED:         finished_games,
+        logic.FINISHED_GAME:         finished_games,
         logic.FINISHED_WATCHED: finished_watched_games,
     }
     log.debug(f'Finished games: {len(finished_games)}')

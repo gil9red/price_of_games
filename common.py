@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 from config import DIR_LOG
+from third_party import mini_played_games_parser
 
 
 class WebUserAlertException(Exception):
@@ -17,8 +18,8 @@ class WebUserAlertException(Exception):
     """
 
 
-FINISHED = 'Finished'
-FINISHED_WATCHED = 'Finished watched'
+FINISHED_GAME = mini_played_games_parser.FINISHED_GAME
+FINISHED_WATCHED = mini_played_games_parser.FINISHED_WATCHED
 
 
 def get_logger(file_name: str, dir_name=DIR_LOG, log_stdout=True, log_file=True):

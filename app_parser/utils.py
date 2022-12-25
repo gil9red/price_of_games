@@ -61,13 +61,13 @@ def get_games() -> list[Game]:
                 items.append(Game(
                     name=game,
                     platform=platform,
-                    category=category
+                    kind=category
                 ))
 
     return items
 
 
-def steam_search_game_price_list(name: str, log_common: Logger = None) -> list[tuple[str, Union[float, int]]]:
+def steam_search_game_price_list(name: str, log_common: Logger = None) -> list[tuple[str, Optional[int]]]:
     """
     Функция принимает название игры, после ищет его в стиме и возвращает результат как список
     кортежей из (название игры, цена).
@@ -122,7 +122,7 @@ def steam_search_game_price_list(name: str, log_common: Logger = None) -> list[t
 
         if isinstance(price, str):
             price = re.sub(r'[^\d.]', '', price)
-            price = float(price) if '.' in price else int(price)
+            price = int(float(price))  # Всегда храним как целые числа
 
         game_price_list.append((name, price))
 
@@ -167,8 +167,12 @@ def get_price(
         game_name: str,
         log_common: Logger = None,
         log_append_game: Logger = None
-) -> Optional[Union[int, float]]:
-    def _on_found_price(game_name: str, name_from_site: str, price: Union[int, float]):
+) -> Optional[Optional[int]]:
+    def _on_found_price(
+            game_name: str,
+            name_from_site: str,
+            price: Optional[int]
+    ):
         log_common and log_common.info(f'Нашли игру: {game_name!r} ({name_from_site}) -> {price}')
         log_append_game and log_append_game.info(f'Нашли игру: {game_name!r} ({name_from_site}) -> {price}')
 

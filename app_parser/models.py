@@ -11,4 +11,4 @@ from dataclasses import dataclass
 class Game:
     name: str
     platform: str
-    category: str
+    kind: str

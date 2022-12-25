@@ -8,12 +8,12 @@ import datetime as DT
 import logging
 import shutil
 
-from typing import Any, Callable, Union, Optional
+from typing import Any, Callable, Union, Optional, Type, Iterable
 
 # pip install peewee
 from peewee import (
-    SqliteDatabase, Model, fn,
-    TextField, ForeignKeyField, DateTimeField, BooleanField, DoubleField
+    SqliteDatabase, Model,
+    TextField, ForeignKeyField, DateTimeField, BooleanField, CharField, IntegerField
 )
 
 from config import BACKUP_DIR_LIST, DB_FILE_NAME
@@ -37,12 +37,44 @@ class BaseModel(Model):
     class Meta:
         database = db
 
+    def get_new(self) -> Type['BaseModel']:
+        return type(self).get(self._pk_expr())
+
+    @classmethod
+    def get_first(cls) -> Type['BaseModel']:
+        return cls.select().first()
+
+    @classmethod
+    def get_last(cls) -> Type['BaseModel']:
+        return cls.select().order_by(cls.id.desc()).first()
+
+    @classmethod
+    def get_inherited_models(cls) -> list[Type['BaseModel']]:
+        return sorted(cls.__subclasses__(), key=lambda x: x.__name__)
+
+    @classmethod
+    def print_count_of_tables(cls):
+        items = []
+        for sub_cls in cls.get_inherited_models():
+            name = sub_cls.__name__
+            count = sub_cls.select().count()
+            items.append(f'{name}: {count}')
+
+        print(', '.join(items))
+
+    @classmethod
+    def count(cls, filters: Iterable = None) -> int:
+        query = cls.select()
+        if filters:
+            query = query.filter(*filters)
+        return query.count()
+
     def __str__(self):
         fields = []
         for k, field in self._meta.fields.items():
             v = getattr(self, k)
 
-            if isinstance(field, TextField):
+            if isinstance(field, (TextField, CharField)):
                 if v:
                     v = repr(shorten(v))
 
@@ -56,18 +88,32 @@ class BaseModel(Model):
         return self.__class__.__name__ + '(' + ', '.join(fields) + ')'
 
 
+class Platform(BaseModel):
+    name = TextField(unique=True)
+
+    @classmethod
+    def add(cls, name: str) -> 'Platform':
+        return cls.get_or_create(name=name)[0]
+
+
 class Game(BaseModel):
     name = TextField()
-    price = DoubleField(null=True)
+    platform = ForeignKeyField(Platform, backref='games')
+    kind = TextField()
+    price = IntegerField(null=True)
     append_date = DateTimeField(default=DT.datetime.now)
     modify_price_date = DateTimeField(default=DT.datetime.now)
-    kind = TextField()
-    check_steam = BooleanField(default=False)
+    has_checked_price = BooleanField(default=False)
 
     class Meta:
         indexes = (
-            (("name", "kind"), True),
+            (("name", "platform", "kind"), True),
         )
+
+    def set_price(self, value: int):
+        self.price = value
+        self.modify_price_date = DT.datetime.now()
+        self.save()
 
     @property
     def append_date_dt(self) -> Union[DT.datetime, DateTimeField]:
@@ -119,13 +165,16 @@ class Settings(BaseModel):
 
 
 db.connect()
-db.create_tables([Game, Settings])
+db.create_tables(BaseModel.get_inherited_models())
 
 
 if __name__ == '__main__':
-    print(Settings.get_value('last_run_date'))
+    BaseModel.print_count_of_tables()
     print()
 
-    print('Last 5:')
-    for game in Game.select().order_by(Game.id.desc()).limit(5):
-        print(game)
+    # print(Settings.get_value('last_run_date'))
+    # print()
+    #
+    # print('Last 5:')
+    # for game in Game.select().order_by(Game.id.desc()).limit(5):
+    #     print(game)

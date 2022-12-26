@@ -1,3 +1,6 @@
+const COLUMN_APPEND_DATE = 2;
+const COLUMN_PRICE = 3;
+
 $.noty.defaults.theme = 'defaultTheme';
 $.noty.defaults.layout = 'bottomRight';
 $.noty.defaults.timeout = 6000;
@@ -250,14 +253,16 @@ function fill_table(table_selector, total_class, items) {
         lengthMenu: [ [10, 25, 50, -1], ["10 записей", "25 записей", "50 записей", "Все записи"] ],
         columns: [
             { title: "Название", data: 'name' },
+            { title: "Платформа", data: 'platform' },
             { title: "Дата добавления", data: 'append_date', render: append_date_render },
             { title: "Цена (руб.)", data: 'price', type: 'num', render: price_render },
         ],
-        order: [[ 1, "desc" ]],  // Сортировка по убыванию даты добавления
+        order: [[ COLUMN_APPEND_DATE, "desc" ]],  // Сортировка по убыванию даты добавления
         footerCallback: function(tfoot, data, start, end, display) {
             let api = this.api();
-            let total = api.column(2).data().reduce((a, b) => a + b, 0);
-            $(api.column(2).footer()).html(
+            let column_price = api.column(COLUMN_PRICE);
+            let total = column_price.data().reduce((a, b) => a + b, 0);
+            $(column_price.footer()).html(
                 toPrettyPrice(total)
             );
         },

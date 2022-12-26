@@ -11,7 +11,7 @@ from common import (
     FINISHED_GAME, FINISHED_WATCHED, WebUserAlertException,
     log_common, log_append_game,
 )
-from db import Game, Platform  # TODO:
+from db import Game, Platform
 
 from app_parser import models
 from app_parser.utils import get_price as get_price_game
@@ -23,18 +23,16 @@ def get_games_by_kind(kind: str) -> list[dict[str, Any]]:
 
     """
 
-    # TODO:
     query = (
-        Game.select(
-            Game.id, Game.name, Game.price, Game.append_date
-        )
-        .where(Game.kind == kind, Game.platform == Platform.get(Platform.name == 'PC'))
+        Game.select()
+        .where(Game.kind == kind)
         .order_by(Game.append_date.desc())
     )
     return [
         {
             'id': game.id,
             'name': game.name,
+            'platform': game.platform.name,
             'price': game.price,
             'append_date': game.append_date_dt.strftime('%d/%m/%Y %H:%M:%S'),
             'append_date_timestamp': int(game.append_date_dt.timestamp()),

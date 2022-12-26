@@ -12,18 +12,13 @@ __author__ = 'ipetrash'
 
 
 import datetime as DT
-import json
-import time
 import sys
 
-from http.server import BaseHTTPRequestHandler, HTTPServer
-from threading import Thread
 from pathlib import Path
 
 # Папка выше
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from config import PORT_RUN_CHECK
 from common import get_logger, FINISHED_GAME, FINISHED_WATCHED
 
 from db import Settings, db_create_backup
@@ -75,43 +70,7 @@ def run() -> tuple[int, int]:
     return added_finished_games, added_watched_games
 
 
-def _async_run_server(port):
-    class HttpProcessor(BaseHTTPRequestHandler):
-        def do_POST(self):
-            code = 200
-
-            log.debug("Серверный запуск проверки игр")
-            try:
-                added_finished_games, added_watched_games = run()
-                data = {
-                    'added_finished_games': added_finished_games,
-                    'added_watched_games': added_watched_games,
-                }
-                data = json.dumps(data).encode('utf-8')
-
-            except Exception as e:
-                log.exception('Ошибка сервера:')
-                code = 500
-                data = f"{e}".encode('utf-8')
-
-            self.send_response(code)
-            self.send_header('Content-type', 'text/json; charset=utf-8')
-            self.end_headers()
-            self.wfile.write(data)
-
-    def _run_server(port: int):
-        log.debug(f'HTTP server running on http://127.0.0.1:{port}')
-        server_address = ('', port)
-        httpd = HTTPServer(server_address, HttpProcessor)
-        httpd.serve_forever()
-
-    thread = Thread(target=_run_server, args=[port])
-    thread.start()
-
-
 if __name__ == '__main__':
-    _async_run_server(port=PORT_RUN_CHECK)
-
     while True:
         try:
             log.debug('Start')
@@ -126,4 +85,4 @@ if __name__ == '__main__':
             log.debug('Через 5 минут попробую снова...')
 
             # Wait 5 minutes before next attempt
-            time.sleep(5 * 60)
+            wait(minutes=5)

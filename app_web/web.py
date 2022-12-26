@@ -14,12 +14,12 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from app_web.app import app, log
 from flask import render_template, request, jsonify, send_from_directory
-import requests
 
 import config
 from db import Settings
 from common import WebUserAlertException, FINISHED_GAME, FINISHED_WATCHED
 from app_parser import logic
+from app_parser.main import run as run_check_of_price
 
 
 @app.route("/")
@@ -207,7 +207,6 @@ def check_price():
 def run_check():
     """
     Функция запускает проверку новых игр у парсера в main.py
-
     """
 
     log.debug('Call run_check')
@@ -215,14 +214,12 @@ def run_check():
     status = 'ok'
     result = None
     added_data = None
+    text = '<b>Проверка новых игр завершена.</b>'
 
-    rs = requests.post(f'http://127.0.0.1:{config.PORT_RUN_CHECK}')
-    if rs.ok:
-        json = rs.json()
-
-        text = '<b>Проверка новых игр завершена.</b>'
-        if json['added_finished_games'] or json['added_watched_games']:
-            text += '''
+    try:
+        added_finished_games, added_watched_games = run_check_of_price()
+        if added_finished_games or added_watched_games:
+            text += f'''
                 <br>
                 <table border="0">
                     <tr>
@@ -234,14 +231,17 @@ def run_check():
                         <td align="right" style="width: 20px">{added_watched_games}</td>
                     </tr>
                 </table>
-            '''.format(**json)
-            added_data = json
+            '''
+            added_data = dict(
+                added_finished_games=added_finished_games,
+                added_watched_games=added_watched_games
+            )
         else:
             text += '<br>Новый игр нет'
 
-    else:
+    except Exception as e:
         status = 'warning'
-        text = '<b>Проверка новых игр завершена ошибкой.</b>'
+        text = f'<b>Проверка новых игр завершена ошибкой: "{e}".</b>'
 
     data = {
         'status': status,

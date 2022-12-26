@@ -314,7 +314,7 @@ def get_games():
     finished_watched_games = logic.get_finished_watched_games()
 
     data = {
-        logic.FINISHED_GAME:         finished_games,
+        logic.FINISHED_GAME:    finished_games,
         logic.FINISHED_WATCHED: finished_watched_games,
     }
     log.debug(f'Finished games: {len(finished_games)}')

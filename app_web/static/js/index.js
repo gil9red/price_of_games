@@ -1,3 +1,4 @@
+const COLUMN_PLATFORM = 1;
 const COLUMN_APPEND_DATE = 2;
 const COLUMN_PRICE = 3;
 
@@ -257,15 +258,10 @@ function fill_table(table_selector, total_class, items) {
             { title: "Дата добавления", data: 'append_date', render: append_date_render },
             { title: "Цена (руб.)", data: 'price', type: 'num', render: price_render },
         ],
-        order: [[ COLUMN_APPEND_DATE, "desc" ]],  // Сортировка по убыванию даты добавления
-        footerCallback: function(tfoot, data, start, end, display) {
-            let api = this.api();
-            let column_price = api.column(COLUMN_PRICE);
-            let total = column_price.data().reduce((a, b) => a + b, 0);
-            $(column_price.footer()).html(
-                toPrettyPrice(total)
-            );
-        },
+        order: [
+            // Сортировка по убыванию даты добавления
+            [ COLUMN_APPEND_DATE, "desc" ]
+        ],
         search: {
             smart: false,
         },
@@ -281,6 +277,32 @@ function fill_table(table_selector, total_class, items) {
                 previous: '←',
                 next: '→',
             }
+        },
+        initComplete: function () {
+            let api = this.api();
+
+            // Под колонку платформы добавлен фильтр
+            let column = this.api().column(COLUMN_PLATFORM);
+            let select = $('<select class="form-control"><option value=""></option></select>')
+                .appendTo($(column.footer()).empty())
+                .on('change', function () {
+                    let val = $.fn.dataTable.util.escapeRegex($(this).val());
+                    column.search(val ? '^' + val + '$' : '', true, false).draw();
+                });
+            column
+                .data()
+                .unique()
+                .sort()
+                .each(function (d, j) {
+                    select.append('<option value="' + d + '">' + d + '</option>');
+                });
+
+            // Под колонку цены добавлена итоговая сумма
+            let column_price = api.column(COLUMN_PRICE);
+            let total = column_price.data().reduce((a, b) => a + b, 0);
+            $(column_price.footer()).html(
+                toPrettyPrice(total)
+            );
         },
     });
 

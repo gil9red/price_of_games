@@ -84,32 +84,41 @@
                 margin-bottom: 0.1rem;
             }
             #fixed_right_panel hr {
-                background-color: #fff !important;
+                background-color: white !important;
             }
 
-        #more_actions .card .card-header {
-          border: 0;
-          -webkit-box-shadow: 0 0 20px 0 rgba(213, 213, 213, 0.5);
-                  box-shadow: 0 0 20px 0 rgba(213, 213, 213, 0.5);
-          border-radius: 2px;
-          padding: 0;
+        #more_actions .card .card-header,
+        #charts .card .card-header {
+            border: 0;
+            -webkit-box-shadow: 0 0 20px 0 rgba(213, 213, 213, 0.5);
+            box-shadow: 0 0 20px 0 rgba(213, 213, 213, 0.5);
+            border-radius: 2px;
+            padding: 0;
         }
 
-        #more_actions .card .card-header .btn-header-link {
-          background: #A541BB;
-          color: #fff;
-          display: block;
-          text-align: left;
+        #more_actions .card .card-header .btn-header-link,
+        #charts .card .card-header .btn-header-link {
+            background: #A541BB;
+            color: white;
+            display: block;
+            text-align: left;
         }
 
-        #more_actions .card .card-header .btn-header-link.collapsed:after {
-          content: "⮝";
+        #charts .card .card-header .btn-header-link {
+            background: lightGray;
+            color: black;
         }
 
-        #more_actions .card .card-header .btn-header-link:after {
-          content: "⮟";
-          font-weight: 900;
-          float: right;
+        #more_actions .card .card-header .btn-header-link.collapsed:after,
+        #charts .card .card-header .btn-header-link.collapsed:after {
+            content: "⮝";
+        }
+
+        #more_actions .card .card-header .btn-header-link:after,
+        #charts .card .card-header .btn-header-link:after {
+            content: "⮟";
+            font-weight: 900;
+            float: right;
         }
     </style>
 
@@ -150,24 +159,35 @@
                             <tr><td class="field_name">Просмотренных игр:</td><td class="number_finished_watched_games"></td></tr>
                             <tr><td class="field_name">Всего игр:</td><td class="sum_number_games"></td></tr>
                         </table>
-                        <div id="charts" class="container-fluid">
-                            <div class="row">
-                                <div class="col">
-                                    <canvas id="chartKindByNumber"></canvas>
-                                </div>
-                                <div class="col">
-                                    <canvas id="chartKindByPrice"></canvas>
-                                </div>
-                                <div class="col">
-                                    <canvas id="chartKindByPlatform"></canvas>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col">
-                                    <canvas id="chartPlatformByNumber"></canvas>
-                                </div>
-                                <div class="col">
-                                    <canvas id="chartPlatformByPrice"></canvas>
+                        <div id="charts" class="container-fluid p-0">
+                            <div class="accordion">
+                                <div class="card">
+                                    <div class="card-header" id="charts_head">
+                                        <a href="#" class="btn btn-header-link collapsed" data-toggle="collapse" data-target="#charts_body" aria-expanded="true" aria-controls="charts_body">Графики</a>
+                                    </div>
+                                    <div id="charts_body" class="collapse" aria-labelledby="charts_head" data-parent="#charts">
+                                        <div class="card-body p-0 pt-2">
+                                            <div class="row">
+                                                <div class="col">
+                                                    <canvas id="chartKindByNumber"></canvas>
+                                                </div>
+                                                <div class="col">
+                                                    <canvas id="chartKindByPrice"></canvas>
+                                                </div>
+                                                <div class="col">
+                                                    <canvas id="chartKindByPlatform"></canvas>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col">
+                                                    <canvas id="chartPlatformByNumber"></canvas>
+                                                </div>
+                                                <div class="col">
+                                                    <canvas id="chartPlatformByPrice"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

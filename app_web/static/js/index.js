@@ -62,11 +62,6 @@ $(document).ready(function() {
             return false;
         });
     });
-
-    $('#switch_more_actions').prop('checked', false);
-    $('#switch_more_actions').change(function(){
-        $('#more_actions').toggle(this.checked);
-    });
 });
 
 function set_visible_finished_game(visible) {
@@ -192,7 +187,7 @@ function price_render(data, type, row, meta) {
     if (data != null) {
         return data;
     }
-    console.log(data, type, row, meta);
+
     // Для display и filter показываем текстом что цены нет и добавляем картинки для поиска
     if (type === 'display' || type === 'filter') {
         // Добавление иконки для поиска игры в стиме

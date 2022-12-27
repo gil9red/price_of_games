@@ -84,6 +84,31 @@
             #fixed_right_panel hr {
                 background-color: #fff !important;
             }
+
+#more_actions .card .card-header {
+  border: 0;
+  -webkit-box-shadow: 0 0 20px 0 rgba(213, 213, 213, 0.5);
+          box-shadow: 0 0 20px 0 rgba(213, 213, 213, 0.5);
+  border-radius: 2px;
+  padding: 0;
+}
+
+#more_actions .card .card-header .btn-header-link {
+  background: #A541BB;
+  color: #fff;
+  display: block;
+  text-align: left;
+}
+
+#more_actions .card .card-header .btn-header-link.collapsed:after {
+  content: "⮝";
+}
+
+#more_actions .card .card-header .btn-header-link:after {
+  content: "⮟";
+  font-weight: 900;
+  float: right;
+}
     </style>
 
     <script>
@@ -230,49 +255,53 @@
                     </form>
 
                     <hr>
-                    <br>
 
-                    <div class="custom-control custom-switch">
-                        <input id="switch_more_actions" type="checkbox" class="custom-control-input">
-                        <label class="custom-control-label" for="switch_more_actions">Показать больше действий</label>
-                    </div>
+                    <div class="container p-0">
+                        <div class="accordion" id="more_actions">
+                            <div class="card bg-dark text-white">
+                                <div class="card-header" id="more_actions_head">
+                                    <a href="#" class="btn btn-header-link collapsed" data-toggle="collapse" data-target="#more_actions_body"
+                                        aria-expanded="true" aria-controls="more_actions_body">Показать больше действий</a>
+                                </div>
+                                <div id="more_actions_body" class="collapse bg-dark text-white" aria-labelledby="more_actions_head" data-parent="#more_actions">
+                                    <div class="card-body p-0 pt-2">
+                                        <form id="form__check_price" method="post" action="/check_price">
+                                            <h6>Вызов проверки цены у игры</h6>
+                                            <div class="form-group">
+                                                <label for="form_check_price">Название игры:</label>
+                                                <input id="form_check_price" class="form-control form-control-sm" type="text" name="name" required>
+                                            </div>
+                                            <button type="submit" class="btn btn-warning btn-sm btn-block">Проверить цену</button>
+                                        </form>
 
-                    <br>
+                                        <hr>
+                                        <form id="form__check_price_all_non_price_games" action="/check_price_all_non_price_games">
+                                            <h6>Вызов проверки цены у всех игр без цены</h6>
+                                            <div class="form-group">
+                                                <img class="loading" style="display:none" src="{{ url_for('static', filename='images/loading.gif') }}"/>
+                                            </div>
+                                            <button type="submit" class="btn btn-warning btn-sm btn-block">Проверить цены всех игр</button>
+                                        </form>
 
-                    <div id="more_actions" style="display: none">
-                        <form id="form__check_price" method="post" action="/check_price">
-                            <h6>Вызов проверки цены у игры</h6>
-                            <div class="form-group">
-                                <label for="form_check_price">Название игры:</label>
-                                <input id="form_check_price" class="form-control form-control-sm" type="text" name="name" required>
+                                        <hr>
+                                        <form id="form__delete_game" method="post" action="/delete_game">
+                                            <h6>Удаление игры</h6>
+                                            <div>
+                                                <select name="kind" class="custom-select custom-select-sm">
+                                                    <option value="{{ FINISHED_GAME }}">{{ TITLE_FINISHED_GAME }}</option>
+                                                    <option value="{{ FINISHED_WATCHED }}">{{ TITLE_FINISHED_WATCHED }}</option>
+                                               </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="form__delete_game__name">Название игры:</label>
+                                                <input id="form__delete_game__name" class="form-control form-control-sm" type="text" name="name" required>
+                                            </div>
+                                            <button type="submit" class="btn btn-danger btn-sm btn-block">Удалить</button>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
-                            <button type="submit" class="btn btn-warning btn-sm btn-block">Проверить цену</button>
-                        </form>
-
-                        <hr>
-                        <form id="form__check_price_all_non_price_games" action="/check_price_all_non_price_games">
-                            <h6>Вызов проверки цены у всех игр без цены</h6>
-                            <div class="form-group">
-                                <img class="loading" style="display:none" src="{{ url_for('static', filename='images/loading.gif') }}"/>
-                            </div>
-                            <button type="submit" class="btn btn-warning btn-sm btn-block">Проверить цены всех игр</button>
-                        </form>
-
-                        <hr>
-                        <form id="form__delete_game" method="post" action="/delete_game">
-                            <h6>Удаление игры</h6>
-                            <div>
-                                <select name="kind" class="custom-select custom-select-sm">
-                                    <option value="{{ FINISHED_GAME }}">{{ TITLE_FINISHED_GAME }}</option>
-                                    <option value="{{ FINISHED_WATCHED }}">{{ TITLE_FINISHED_WATCHED }}</option>
-                               </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="form__delete_game__name">Название игры:</label>
-                                <input id="form__delete_game__name" class="form-control form-control-sm" type="text" name="name" required>
-                            </div>
-                            <button type="submit" class="btn btn-danger btn-sm btn-block">Удалить</button>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -281,9 +281,15 @@ function fill_table(table_selector, total_class, items) {
                 next: '→',
             }
         },
+        footerCallback: function (tfoot, data, start, end, display) {
+            // Под колонку цены добавлена итоговая сумма
+            let column_price = this.api().column(COLUMN_PRICE);
+            let total = column_price.data().reduce((a, b) => a + b, 0);
+            $(column_price.footer()).html(
+                toPrettyPrice(total)
+            );
+        },
         initComplete: function () {
-            let api = this.api();
-
             // Под колонку платформы добавлен фильтр
             let column = this.api().column(COLUMN_PLATFORM);
             let select = $('<select class="form-control"><option value=""></option></select>')
@@ -299,13 +305,6 @@ function fill_table(table_selector, total_class, items) {
                 .each(function (d, j) {
                     select.append(`<option value="${d}">${d}</option>`);
                 });
-
-            // Под колонку цены добавлена итоговая сумма
-            let column_price = api.column(COLUMN_PRICE);
-            let total = column_price.data().reduce((a, b) => a + b, 0);
-            $(column_price.footer()).html(
-                toPrettyPrice(total)
-            );
         },
     });
 

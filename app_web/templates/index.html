@@ -202,7 +202,7 @@
                     <hr>
 
                     <form id="form__set_price" method="post" action="/set_price">
-                        <h6>Установка цены у игры:</h6>
+                        <h6>Установка цены у игры</h6>
                         <div class="form-group">
                             <label for="form_name">Название игры:</label>
                             <input id="form_name" class="form-control form-control-sm" type="text" name="name" required>
@@ -217,7 +217,7 @@
                     <hr>
 
                     <form id="form__rename_game" method="post" action="/rename_game">
-                        <h6>Изменение названия игры:</h6>
+                        <h6>Изменение названия игры</h6>
                         <div class="form-group">
                             <label for="form_old_name">Старое название:</label>
                             <input id="form_old_name" class="form-control form-control-sm" type="text" name="old_name" required>
@@ -241,7 +241,7 @@
 
                     <div id="more_actions" style="display: none">
                         <form id="form__check_price" method="post" action="/check_price">
-                            <h6>Вызов проверки цены у игры:</h6>
+                            <h6>Вызов проверки цены у игры</h6>
                             <div class="form-group">
                                 <label for="form_check_price">Название игры:</label>
                                 <input id="form_check_price" class="form-control form-control-sm" type="text" name="name" required>
@@ -251,7 +251,7 @@
 
                         <hr>
                         <form id="form__check_price_all_non_price_games" action="/check_price_all_non_price_games">
-                            <h6>Вызов проверки цены у всех игр без цены:</h6>
+                            <h6>Вызов проверки цены у всех игр без цены</h6>
                             <div class="form-group">
                                 <img class="loading" style="display:none" src="{{ url_for('static', filename='images/loading.gif') }}"/>
                             </div>
@@ -260,7 +260,7 @@
 
                         <hr>
                         <form id="form__delete_game" method="post" action="/delete_game">
-                            <h6>Удаление игры:</h6>
+                            <h6>Удаление игры</h6>
                             <div>
                                 <select name="kind" class="custom-select custom-select-sm">
                                     <option value="{{ FINISHED_GAME }}">{{ TITLE_FINISHED_GAME }}</option>

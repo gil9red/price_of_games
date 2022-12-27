@@ -297,7 +297,7 @@ function fill_table(table_selector, total_class, items) {
                 .unique()
                 .sort()
                 .each(function (d, j) {
-                    select.append('<option value="' + d + '">' + d + '</option>');
+                    select.append(`<option value="${d}">${d}</option>`);
                 });
 
             // Под колонку цены добавлена итоговая сумма

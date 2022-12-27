@@ -401,6 +401,39 @@ function sortReversedMapByValue(map) {
     return new Map([...map.entries()].sort((a, b) => b[1] - a[1]));
 }
 
+function createOrUpdateChart(chartId, title, labels, data) {
+    let keyChartId = `obj-${chartId}`;
+    let objChart = window[keyChartId];
+    if (objChart) {
+        objChart.data.labels = labels;
+        objChart.data.datasets[0].data = data;
+        objChart.update();
+        return;
+    }
+
+    window[keyChartId] = new Chart(
+        document.getElementById(chartId),
+        {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: title,
+                    data: data,
+                }]
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: title
+                    }
+                }
+            }
+        }
+    )
+}
+
 function fill_charts() {
     let [
         platform_by_total_price_of_finished_games,
@@ -413,149 +446,73 @@ function fill_charts() {
         total_price_of_finished_watched_games
     ] = callStatisticsByGames(window.finished_watched_games);
 
-    new Chart(
-        document.getElementById('chartKindByNumber'),
-        {
-            type: 'doughnut',
-            data: {
-                labels: [
-                    'Пройденные',
-                    'Просмотренные',
-                ],
-                datasets: [{
-                    label: 'Категория по играм',
-                    data: [
-                        window.finished_games.length,
-                        window.finished_watched_games.length
-                    ],
-                }]
-            },
-            options: {
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Категория по играм'
-                    }
-                }
-            }
-        }
+    createOrUpdateChart(
+        'chartKindByNumber',
+        'Категория по играм',
+        [
+            'Пройденные',
+            'Просмотренные'
+        ],
+        [
+            window.finished_games.length,
+            window.finished_watched_games.length
+        ]
     );
 
-    new Chart(
-        document.getElementById('chartKindByPrice'),
-        {
-            type: 'doughnut',
-            data: {
-                labels: [
-                    'Пройденные',
-                    'Просмотренные',
-                ],
-                datasets: [{
-                    label: 'Категория по ценам',
-                    data: [
-                        total_price_of_finished_games,
-                        total_price_of_finished_watched_games
-                    ],
-                }]
-            },
-            options: {
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Категория по ценам'
-                    }
-                }
-            }
-        }
+    createOrUpdateChart(
+        'chartKindByPrice',
+        'Категория по ценам',
+        [
+            'Пройденные',
+            'Просмотренные'
+        ],
+        [
+            total_price_of_finished_games,
+            total_price_of_finished_watched_games
+        ]
     );
 
-    new Chart(
-        document.getElementById('chartKindByPlatform'),
-        {
-            type: 'doughnut',
-            data: {
-                labels: [
-                    'Пройденные',
-                    'Просмотренные',
-                ],
-                datasets: [{
-                    label: 'Категория по платформам',
-                    data: [
-                        platform_by_total_price_of_finished_games.size,
-                        platform_by_total_price_of_finished_watched_games.size
-                    ],
-                }]
-            },
-            options: {
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Категория по платформам'
-                    }
-                }
-            }
-        }
-    );
-
-    let platform_by_number = sortReversedMapByValue(
-        sumMaps(platform_by_number_of_finished_games, platform_by_number_of_finished_watched_games)
+    createOrUpdateChart(
+        'chartKindByPlatform',
+        'Категория по платформам',
+        [
+            'Пройденные',
+            'Просмотренные'
+        ],
+        [
+            platform_by_total_price_of_finished_games.size,
+            platform_by_total_price_of_finished_watched_games.size
+        ]
     );
 
     const numberOfTop = 10;
 
-    new Chart(
-        document.getElementById('chartPlatformByNumber'),
-        {
-            type: 'doughnut',
-            data: {
-                labels: Array.from(
-                    platform_by_number.keys()
-                ).slice(0, numberOfTop),
-                datasets: [{
-                    label: `Топ ${numberOfTop} платформ по играм`,
-                    data: Array.from(
-                        platform_by_number.values()
-                    ).slice(0, numberOfTop),
-                }]
-            },
-            options: {
-                plugins: {
-                    title: {
-                        display: true,
-                        text: `Топ ${numberOfTop} платформ по играм`
-                    }
-                }
-            }
-        }
+    let platform_by_number = sortReversedMapByValue(
+        sumMaps(platform_by_number_of_finished_games, platform_by_number_of_finished_watched_games)
+    );
+    createOrUpdateChart(
+        'chartPlatformByNumber',
+        `Топ ${numberOfTop} платформ по играм`,
+        Array.from(
+            platform_by_number.keys()
+        ).slice(0, numberOfTop),
+        Array.from(
+            platform_by_number.values()
+        ).slice(0, numberOfTop),
     );
 
     let platform_by_total_price = sortReversedMapByValue(
         sumMaps(platform_by_total_price_of_finished_games, platform_by_total_price_of_finished_watched_games)
     );
-    new Chart(
-        document.getElementById('chartPlatformByPrice'),
-        {
-            type: 'doughnut',
-            data: {
-                labels: Array.from(
-                    platform_by_total_price.keys()
-                ).slice(0, numberOfTop),
-                datasets: [{
-                    label: `Топ ${numberOfTop} платформ по ценам`,
-                    data: Array.from(
-                        platform_by_total_price.values()
-                    ).slice(0, numberOfTop),
-                }]
-            },
-            options: {
-                plugins: {
-                    title: {
-                        display: true,
-                        text: `Топ ${numberOfTop} платформ по ценам`
-                    }
-                }
-            }
-        }
+    createOrUpdateChart(
+        'chartPlatformByPrice',
+        `Топ ${numberOfTop} платформ по ценам`,
+        Array.from(
+            platform_by_total_price.keys()
+        ).slice(0, numberOfTop),
+        Array.from(
+            platform_by_total_price.values()
+        ).slice(0, numberOfTop),
     );
 }
 

@@ -355,6 +355,210 @@ function fill_game_tables() {
     fill_statistics();
 }
 
+function callStatisticsByGames(games) {
+    let platform_by_total_price = new Map();
+    let platform_by_number = new Map();
+    let total_price = 0;
+
+    for (let row of games) {
+        total_price += row.price;
+
+        let price = platform_by_total_price.has(row.platform)
+            ? platform_by_total_price.get(row.platform)
+            : 0;
+        platform_by_total_price.set(
+            row.platform,
+            row.price + price
+        );
+
+        let number = platform_by_number.has(row.platform)
+            ? platform_by_number.get(row.platform)
+            : 0;
+        platform_by_number.set(
+            row.platform,
+            number + 1
+        );
+    }
+
+    return [platform_by_total_price, platform_by_number, total_price];
+}
+
+function sumMaps(map1, map2) {
+    let newMap = new Map();
+    for (let [key, value] of map1) {
+        newMap.set(key, value);
+    }
+    for (let [key, value] of map2) {
+        if (newMap.has(key)) {
+            value += newMap.get(key);
+        }
+        newMap.set(key, value);
+    }
+    return newMap;
+}
+
+function sortReversedMapByValue(map) {
+    return new Map([...map.entries()].sort((a, b) => b[1] - a[1]));
+}
+
+function fill_charts() {
+    let [
+        platform_by_total_price_of_finished_games,
+        platform_by_number_of_finished_games,
+        total_price_of_finished_games
+    ] = callStatisticsByGames(window.finished_games);
+    let [
+        platform_by_total_price_of_finished_watched_games,
+        platform_by_number_of_finished_watched_games,
+        total_price_of_finished_watched_games
+    ] = callStatisticsByGames(window.finished_watched_games);
+
+    new Chart(
+        document.getElementById('chartKindByNumber'),
+        {
+            type: 'doughnut',
+            data: {
+                labels: [
+                    'Пройденные',
+                    'Просмотренные',
+                ],
+                datasets: [{
+                    label: 'Категория по играм',
+                    data: [
+                        window.finished_games.length,
+                        window.finished_watched_games.length
+                    ],
+                }]
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Категория по играм'
+                    }
+                }
+            }
+        }
+    );
+
+    new Chart(
+        document.getElementById('chartKindByPrice'),
+        {
+            type: 'doughnut',
+            data: {
+                labels: [
+                    'Пройденные',
+                    'Просмотренные',
+                ],
+                datasets: [{
+                    label: 'Категория по ценам',
+                    data: [
+                        total_price_of_finished_games,
+                        total_price_of_finished_watched_games
+                    ],
+                }]
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Категория по ценам'
+                    }
+                }
+            }
+        }
+    );
+
+    new Chart(
+        document.getElementById('chartKindByPlatform'),
+        {
+            type: 'doughnut',
+            data: {
+                labels: [
+                    'Пройденные',
+                    'Просмотренные',
+                ],
+                datasets: [{
+                    label: 'Категория по платформам',
+                    data: [
+                        platform_by_total_price_of_finished_games.size,
+                        platform_by_total_price_of_finished_watched_games.size
+                    ],
+                }]
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Категория по платформам'
+                    }
+                }
+            }
+        }
+    );
+
+    let platform_by_number = sortReversedMapByValue(
+        sumMaps(platform_by_number_of_finished_games, platform_by_number_of_finished_watched_games)
+    );
+
+    const numberOfTop = 10;
+
+    new Chart(
+        document.getElementById('chartPlatformByNumber'),
+        {
+            type: 'doughnut',
+            data: {
+                labels: Array.from(
+                    platform_by_number.keys()
+                ).slice(0, numberOfTop),
+                datasets: [{
+                    label: `Топ ${numberOfTop} платформ по играм`,
+                    data: Array.from(
+                        platform_by_number.values()
+                    ).slice(0, numberOfTop),
+                }]
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: `Топ ${numberOfTop} платформ по играм`
+                    }
+                }
+            }
+        }
+    );
+
+    let platform_by_total_price = sortReversedMapByValue(
+        sumMaps(platform_by_total_price_of_finished_games, platform_by_total_price_of_finished_watched_games)
+    );
+    new Chart(
+        document.getElementById('chartPlatformByPrice'),
+        {
+            type: 'doughnut',
+            data: {
+                labels: Array.from(
+                    platform_by_total_price.keys()
+                ).slice(0, numberOfTop),
+                datasets: [{
+                    label: `Топ ${numberOfTop} платформ по ценам`,
+                    data: Array.from(
+                        platform_by_total_price.values()
+                    ).slice(0, numberOfTop),
+                }]
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: `Топ ${numberOfTop} платформ по ценам`
+                    }
+                }
+            }
+        }
+    );
+}
+
 // Функция загружает все игры, перезаполняет таблицы игр, подсчитывает итого и статистику
 function load_tables() {
     $.ajax({
@@ -367,6 +571,7 @@ function load_tables() {
             window.finished_watched_games = data[FINISHED_WATCHED];
 
             fill_game_tables();
+            fill_charts();
         },
 
         error: function(data) {

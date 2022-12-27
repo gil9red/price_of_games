@@ -17,6 +17,8 @@
     <!-- noty -->
     <script src="{{ url_for('static', filename='js/jquery.noty.packaged.min.js') }}"></script>
 
+    <script src="{{ url_for('static', filename='js/chartjs-4.1.1.min.js') }}"></script>
+
     <style>
         .total_info_table td.field_name {
             white-space: nowrap;
@@ -148,6 +150,27 @@
                             <tr><td class="field_name">Просмотренных игр:</td><td class="number_finished_watched_games"></td></tr>
                             <tr><td class="field_name">Всего игр:</td><td class="sum_number_games"></td></tr>
                         </table>
+                        <div id="charts" class="container-fluid">
+                            <div class="row">
+                                <div class="col">
+                                    <canvas id="chartKindByNumber"></canvas>
+                                </div>
+                                <div class="col">
+                                    <canvas id="chartKindByPrice"></canvas>
+                                </div>
+                                <div class="col">
+                                    <canvas id="chartKindByPlatform"></canvas>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <canvas id="chartPlatformByNumber"></canvas>
+                                </div>
+                                <div class="col">
+                                    <canvas id="chartPlatformByPrice"></canvas>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="tab-pane fade" id="nav-debug" role="tabpanel" aria-labelledby="nav-debug-tab">
                         <table class="total_info_table table table-sm table-borderless">
@@ -162,6 +185,7 @@
                         </table>
                     </div>
                 </div>
+
                 <br>
 
                 <h4 id="finished_game_caption_table" class="text-center">{{ TITLE_FINISHED_GAME }} <div class="finished_game_statistic" style="display:inline-block;"></div></h4>

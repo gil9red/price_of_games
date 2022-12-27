@@ -132,23 +132,23 @@ function update_total_price_all_tables() {
     $('.sum_total_price_games.add_ccy').html(sum_total + " руб.");
 }
 
-function open_tab_with_steam_search_from_game_name(game_name) {
-    let url = 'http://store.steampowered.com/search/?term=' + game_name;
-    console.log(`open_tab_with_steam_search("${game_name}") -> ${url}`);
+function open_tab_with_steam_search_from_game_name(text) {
+    let url = 'http://store.steampowered.com/search/?term=' + text;
+    console.log(`open_tab_with_steam_search("${text}") -> ${url}`);
 
     window.open(url);
 }
 
-function open_tab_with_yandex_search_from_game_name(game_name) {
-    let url = 'https://yandex.ru/yandsearch?text=' + game_name + ' цена купить';
-    console.log(`open_tab_with_yandex_search("${game_name}") -> ${url}`);
+function open_tab_with_yandex_search_from_game_name(text) {
+    let url = 'https://yandex.ru/yandsearch?text=' + text + ' цена купить';
+    console.log(`open_tab_with_yandex_search("${text}") -> ${url}`);
 
     window.open(url);
 }
 
-function open_tab_with_google_search_from_game_name(game_name) {
-    let url = 'https://www.google.com/search?q=' + game_name + ' цена купить';
-    console.log(`open_tab_with_google_search("${game_name}") -> ${url}`);
+function open_tab_with_google_search_from_game_name(text) {
+    let url = 'https://www.google.com/search?q=' + text + ' цена купить';
+    console.log(`open_tab_with_google_search("${text}") -> ${url}`);
 
     window.open(url);
 }
@@ -192,30 +192,35 @@ function price_render(data, type, row, meta) {
     if (data != null) {
         return data;
     }
-
+    console.log(data, type, row, meta);
     // Для display и filter показываем текстом что цены нет и добавляем картинки для поиска
     if (type === 'display' || type === 'filter') {
         // Добавление иконки для поиска игры в стиме
         let img_steam_search = $(`<img src="${IMG_STEAM_SEARCH}" width="16" height="16"/>`);
-        img_steam_search.attr('onclick', `open_tab_with_steam_search_from_game_name("${row.name}")`);
+        img_steam_search.attr('onclick', `open_tab_with_steam_search_from_game_name("${row.name} ${row.platform}")`);
         img_steam_search.attr('alt', 'steam');
         img_steam_search.attr('title', 'Поиск игры в стиме');
 
         // Добавление иконки для поиска игры в гугле
         let img_google_search = $(`<img src="${IMG_GOOGLE_SEARCH}" width="16" height="16"/>`);
-        img_google_search.attr('onclick', `open_tab_with_google_search_from_game_name("${row.name}")`);
+        img_google_search.attr('onclick', `open_tab_with_google_search_from_game_name("${row.name} ${row.platform}")`);
         img_google_search.attr('alt', 'google');
         img_google_search.attr('title', 'Поиск игры в гугле');
 
         // Добавление иконки для поиска игры в яндексе
         let img_yandex_search = $(`<img src="${IMG_YANDEX_SEARCH}" width="16" height="16"/>`);
-        img_yandex_search.attr('onclick', `open_tab_with_yandex_search_from_game_name("${row.name}")`);
+        img_yandex_search.attr('onclick', `open_tab_with_yandex_search_from_game_name("${row.name} ${row.platform}")`);
         img_yandex_search.attr('alt', 'yandex');
         img_yandex_search.attr('title', 'Поиск игры в яндексе');
 
         let buttons_div = $('<div style="display: inline-block; float: right;"></div>');
-        buttons_div.append(img_steam_search);
-        buttons_div.append("&nbsp;");
+
+        // Кнопку стима показываем только для PC
+        if (row.platform == 'PC') {
+            buttons_div.append(img_steam_search);
+            buttons_div.append("&nbsp;");
+        }
+
         buttons_div.append(img_google_search);
         buttons_div.append("&nbsp;");
         buttons_div.append(img_yandex_search);

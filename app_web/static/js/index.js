@@ -324,7 +324,7 @@ function fill_table(table_selector, total_class, items) {
         .css('margin-left', '0');
     $(table_selector + '_wrapper button.btn.btn-danger').click(function() {
         $(table_selector + '_filter input').val('');
-        table.search('').columns().search('').draw();
+        table.search('').draw();
     });
 
     $(table_selector).on('click', 'tbody tr', function () {

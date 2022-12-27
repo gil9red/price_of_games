@@ -57,7 +57,7 @@ def set_price():
 
         name = request.form['name'].strip()
         price = request.form['price'].strip()
-        price = re.sub(r'[^\d.,]', '', price)
+        price = re.sub(r'[^\d.,]', '', price).replace(',', '.')
         price = int(float(price))
 
         log.debug(f'name={name!r} price={price!r}')

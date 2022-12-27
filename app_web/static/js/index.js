@@ -289,8 +289,8 @@ function fill_table(table_selector, total_class, items) {
             let select = $('<select class="form-control"><option value=""></option></select>')
                 .appendTo($(column.footer()).empty())
                 .on('change', function () {
-                    let val = $.fn.dataTable.util.escapeRegex($(this).val());
-                    column.search(val ? '^' + val + '$' : '', true, false).draw();
+                    let val = $(this).val();
+                    column.search(val).draw();
                 });
             column
                 .data()

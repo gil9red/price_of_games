@@ -251,7 +251,10 @@ function fill_table(table_selector, total_class, items) {
              "<'row'<'col-sm-12'tr>>" +
              "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
         data: items,
-        lengthMenu: [ [10, 25, 50, -1], ["10 записей", "25 записей", "50 записей", "Все записи"] ],
+        lengthMenu: [
+            [5, 10, 25, 50, -1],
+            ["5 записей", "10 записей", "25 записей", "50 записей", "Все записи"]
+        ],
         columns: [
             { title: "Название", data: 'name' },
             { title: "Платформа", data: 'platform' },

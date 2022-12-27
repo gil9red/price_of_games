@@ -17,22 +17,9 @@
     <!-- noty -->
     <script src="{{ url_for('static', filename='js/jquery.noty.packaged.min.js') }}"></script>
 
-    <script src="{{ url_for('static', filename='js/chartjs-4.1.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='chartjs-4.1.1/chart.umd.js') }}"></script>
 
     <style>
-        .total_info_table td.field_name {
-            white-space: nowrap;
-            width: 20%;
-        }
-        .total_info_table td {
-            padding: 0.2rem;
-            padding-right: 0.5rem;
-        }
-        .total_info_table hr {
-            margin-top: 0.3rem;
-            margin-bottom: 0.3rem;
-        }
-
         .noselect {
           -webkit-touch-callout: none; /* iOS Safari */
             -webkit-user-select: none; /* Safari */
@@ -150,16 +137,30 @@
                 </nav>
                 <div class="tab-content" id="nav-tabContent">
                     <div class="tab-pane fade show active" id="nav-stats" role="tabpanel" aria-labelledby="nav-stats-tab">
-                        <table class="total_info_table table table-sm table-borderless">
-                            <tr><td class="field_name">Итого по пройденным играм:</td><td class="total_price_finished_games add_ccy"></td></tr>
-                            <tr><td class="field_name">Итого по просмотренным играм:</td><td class="total_price_finished_watched_games add_ccy"></td></tr>
-                            <tr><td class="field_name">Общая сумма:</td><td class="sum_total_price_games add_ccy"></td></tr>
-                            <tr><td colspan="2"><hr></td></tr>
-                            <tr><td class="field_name">Пройденных игр:</td><td class="number_finished_games"></td></tr>
-                            <tr><td class="field_name">Просмотренных игр:</td><td class="number_finished_watched_games"></td></tr>
-                            <tr><td class="field_name">Всего игр:</td><td class="sum_number_games"></td></tr>
+                        <table class="mt-1" style="table-layout: auto">
+                            <tr>
+                                <td class="pr-2">Пройденных игр:</td>
+                                <td class="number_finished_games"></td>
+                                <td class="pl-5"></td>
+                                <td class="pr-2">Итого по пройденным играм:</td>
+                                <td class="total_price_finished_games add_ccy"></td>
+                            </tr>
+                            <tr>
+                                <td class="pr-2">Просмотренных игр:</td>
+                                <td class="number_finished_watched_games"></td>
+                                <td></td>
+                                <td class="pr-2">Итого по просмотренным играм:</td>
+                                <td class="total_price_finished_watched_games add_ccy"></td>
+                            </tr>
+                            <tr>
+                                <td class="pr-2">Всего игр:</td>
+                                <td class="sum_number_games"></td>
+                                <td></td>
+                                <td class="pr-2">Общая сумма:</td>
+                                <td class="sum_total_price_games add_ccy"></td>
+                            </tr>
                         </table>
-                        <div id="charts" class="container-fluid p-0">
+                        <div id="charts" class="container-fluid p-0 mt-1">
                             <div class="accordion">
                                 <div class="card">
                                     <div class="card-header" id="charts_head">
@@ -193,11 +194,10 @@
                         </div>
                     </div>
                     <div class="tab-pane fade" id="nav-debug" role="tabpanel" aria-labelledby="nav-debug-tab">
-                        <table class="total_info_table table table-sm table-borderless">
-                            <tr><td class="field_name">Последняя проверка игр была:</td><td>{{ last_run_date }}</td></tr>
-                            <tr><td colspan="2"><hr></td></tr>
-                            <tr><td class="field_name">DB_FILE_NAME:</td><td>{{ DB_FILE_NAME }}</td></tr>
-                            <tr><td class="field_name">BACKUP_DIR_LIST:</td><td>
+                        <table class="mt-1" style="table-layout: auto">
+                            <tr><td class="pr-3">Последняя проверка игр была:</td><td>{{ last_run_date }}</td></tr>
+                            <tr><td class="pr-3">DB_FILE_NAME:</td><td>{{ DB_FILE_NAME }}</td></tr>
+                            <tr><td class="pr-3 align-top">BACKUP_DIR_LIST:</td><td>
                                 {% for path in BACKUP_DIR_LIST %}
                                     <div>{{ path }}</div>
                                 {% endfor %}

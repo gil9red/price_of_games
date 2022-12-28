@@ -5,7 +5,7 @@ __author__ = 'ipetrash'
 
 
 import time
-from typing import Any, Optional
+from typing import Optional
 
 from common import (
     FINISHED_GAME, FINISHED_WATCHED, WebUserAlertException,

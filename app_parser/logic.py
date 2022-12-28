@@ -263,7 +263,7 @@ def append_games_to_database(
 
 def get_game_list_with_price(game_name: str) -> list[Game]:
     """
-    Функция по названию игры вернет список игр с их id, kind и price
+    Функция по названию игры вернет список игр
 
     """
 

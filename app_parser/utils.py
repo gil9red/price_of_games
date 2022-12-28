@@ -9,7 +9,8 @@ import time
 import re
 
 from logging import Logger
-from typing import Union, Optional
+from dataclasses import dataclass
+from typing import Optional
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
@@ -19,6 +20,12 @@ from app_parser.models import Game
 from config import BACKUP_DIR_LIST
 from common import log_common
 from third_party.mini_played_games_parser import parse_played_games
+
+
+@dataclass
+class SearchResult:
+    name: str
+    price: Optional[int]
 
 
 session = requests.Session()
@@ -67,7 +74,7 @@ def get_games() -> list[Game]:
     return items
 
 
-def steam_search_game_price_list(name: str, log_common: Logger = None) -> list[tuple[str, Optional[int]]]:
+def steam_search_game_price_list(name: str, log_common: Logger = None) -> list[SearchResult]:
     """
     Функция принимает название игры, после ищет его в стиме и возвращает результат как список
     кортежей из (название игры, цена).
@@ -124,7 +131,12 @@ def steam_search_game_price_list(name: str, log_common: Logger = None) -> list[t
             price = re.sub(r'[^\d.]', '', price)
             price = int(float(price))  # Всегда храним как целые числа
 
-        game_price_list.append((name, price))
+        game_price_list.append(
+            SearchResult(
+                name=name,
+                price=price,
+            )
+        )
 
     log_common and log_common.debug(f'game_price_list ({len(game_price_list)}): {game_price_list}')
 
@@ -167,30 +179,29 @@ def get_price(
         game_name: str,
         log_common: Logger = None,
         log_append_game: Logger = None
-) -> Optional[Optional[int]]:
-    def _on_found_price(
+) -> Optional[int]:
+    def _log_on_found_price(
             game_name: str,
-            name_from_site: str,
-            price: Optional[int]
+            result: SearchResult,
     ):
-        log_common and log_common.info(f'Нашли игру: {game_name!r} ({name_from_site}) -> {price}')
-        log_append_game and log_append_game.info(f'Нашли игру: {game_name!r} ({name_from_site}) -> {price}')
+        log_common and log_common.info(f'Нашли игру: {game_name!r} ({result.name}) -> {result.price}')
+        log_append_game and log_append_game.info(f'Нашли игру: {game_name!r} ({result.name}) -> {result.price}')
 
     # Поищем игру и ее цену в стиме
     game_price_list = steam_search_game_price_list(game_name, log_common)
 
     # Сначала пытаемся найти игру по полному совпадению
-    for name, price in game_price_list:
-        if game_name == name:
-            _on_found_price(game_name, name, price)
-            return price
+    for result in game_price_list:
+        if game_name == result.name:
+            _log_on_found_price(game_name, result)
+            return result.price
 
     # Если по полному совпадению на нашли, пытаемся найти предварительно очищая названия игр от лишних символов
-    for name, price in game_price_list:
+    for result in game_price_list:
         # Если нашли игру, запоминаем цену и прерываем сравнение с другими найденными играми
-        if smart_comparing_names(game_name, name):
-            _on_found_price(game_name, name, price)
-            return price
+        if smart_comparing_names(game_name, result.name):
+            _log_on_found_price(game_name, result)
+            return result.price
 
     return
 

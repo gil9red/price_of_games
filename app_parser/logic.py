@@ -103,7 +103,7 @@ def set_price_game(game_name: str, price: Optional[int]) -> list[int]:
     return ids
 
 
-def rename_game(old_name: str, new_name: str) -> dict[str, Any]:
+def rename_game(old_name: str, new_name: str) -> models.RenameGameResult:
     """
     Функция меняет название указанной игры и возвращает словарь с результатом работы.
 
@@ -143,12 +143,12 @@ def rename_game(old_name: str, new_name: str) -> dict[str, Any]:
     else:
         id_games_with_changed_price, price = None, None
 
-    return {
-        'id_games_with_changed_name': id_games_with_changed_name,
-        'id_games_with_changed_price': id_games_with_changed_price,
-        'new_name': new_name,
-        'price': price,
-    }
+    return models.RenameGameResult(
+        game_ids_with_changed_name=id_games_with_changed_name,
+        game_ids_with_changed_price=id_games_with_changed_price,
+        new_name=new_name,
+        price=price,
+    )
 
 
 def delete_game(game_name: str, kind: str) -> int:

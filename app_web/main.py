@@ -130,7 +130,7 @@ def rename_game():
         result_rename = logic.rename_game(old_name, new_name)
 
         # Возможно, после переименования игры мы смогли найти ее цену...
-        price = result_rename['price']
+        price = result_rename.price
         if price:
             text += f' и найдена ее цена: {price!r}'
 
@@ -150,7 +150,6 @@ def rename_game():
         'text': text,
         'result': result,
     }
-    # log.debug(data)
 
     return jsonify(data)
 

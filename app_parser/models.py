@@ -30,3 +30,11 @@ class PriceUpdateResult:
     game_ids: list[int]
     game_name: str
     price: Optional[int]
+
+
+@dataclass
+class RenameGameResult:
+    game_ids_with_changed_name: list[int]
+    game_ids_with_changed_price: list[int]
+    new_name: str
+    price: Optional[int]

@@ -4,10 +4,10 @@
 __author__ = 'ipetrash'
 
 
-import datetime as DT
 import logging
 import shutil
 
+from datetime import datetime
 from typing import Any, Callable, Union, Optional, Type, Iterable
 
 # pip install peewee
@@ -22,7 +22,7 @@ from third_party.shorten import shorten
 
 def db_create_backup(log: logging.Logger):
     for path in BACKUP_DIR_LIST:
-        file_name = str(DT.datetime.today().date()) + '.sqlite'
+        file_name = str(datetime.today().date()) + '.sqlite'
         file_name = path / file_name
 
         log.debug(f'Doing create backup in: {file_name}')
@@ -101,8 +101,8 @@ class Game(BaseModel):
     platform = ForeignKeyField(Platform, backref='games')
     kind = TextField()
     price = IntegerField(null=True)
-    append_date = DateTimeField(default=DT.datetime.now)
-    modify_price_date = DateTimeField(default=DT.datetime.now)
+    append_date = DateTimeField(default=datetime.now)
+    modify_price_date = DateTimeField(default=datetime.now)
     has_checked_price = BooleanField(default=False)
 
     class Meta:
@@ -112,20 +112,20 @@ class Game(BaseModel):
 
     def set_price(self, value: int):
         self.price = value
-        self.modify_price_date = DT.datetime.now()
+        self.modify_price_date = datetime.now()
         self.save()
 
     @property
-    def append_date_dt(self) -> Union[DT.datetime, DateTimeField]:
+    def append_date_dt(self) -> Union[datetime, DateTimeField]:
         if isinstance(self.append_date, str):
-            return DT.datetime.fromisoformat(self.append_date)
+            return datetime.fromisoformat(self.append_date)
 
         return self.append_date
 
     @property
-    def modify_price_date_dt(self) -> Union[DT.datetime, DateTimeField]:
+    def modify_price_date_dt(self) -> Union[datetime, DateTimeField]:
         if isinstance(self.modify_price_date, str):
-            return DT.datetime.fromisoformat(self.modify_price_date)
+            return datetime.fromisoformat(self.modify_price_date)
 
         return self.modify_price_date
 

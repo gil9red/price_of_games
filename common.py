@@ -22,7 +22,7 @@ FINISHED_GAME = mini_played_games_parser.FINISHED_GAME
 FINISHED_WATCHED = mini_played_games_parser.FINISHED_WATCHED
 
 
-def get_logger(file_name: str, dir_name=DIR_LOG, log_stdout=True, log_file=True):
+def get_logger(file_name: str, dir_name=DIR_LOG, log_stdout=True, log_file=True) -> logging.Logger:
     dir_name = Path(dir_name).resolve()
     dir_name.mkdir(parents=True, exist_ok=True)
 

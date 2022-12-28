@@ -14,11 +14,9 @@ DIR_LOG.mkdir(parents=True, exist_ok=True)
 
 DB_FILE_NAME = DIR / 'games.sqlite'
 
-
 BACKUP_DIR_LIST = [
     DIR / 'backup',
     Path(r'C:\Users\ipetrash\Dropbox\backup_price_of_games'),
 ]
-
 
 PORT_WEB = 5500

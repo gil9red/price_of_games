@@ -7,6 +7,8 @@ __author__ = 'ipetrash'
 import re
 import os.path
 import sys
+
+from enum import Enum
 from pathlib import Path
 
 # Папка выше
@@ -20,6 +22,11 @@ from db import Settings
 from common import WebUserAlertException, FINISHED_GAME, FINISHED_WATCHED
 from app_parser import logic
 from app_parser.main import run as run_check_of_price
+
+
+class StatusEnum(str, Enum):
+    OK = 'ok'
+    WARNING = 'warning'
 
 
 @app.route("/")
@@ -77,7 +84,7 @@ def set_price():
         # В modify_id_games будет список игр с названием <name>
         modify_id_games = logic.set_price_game(name, price)
 
-        status = 'ok'
+        status = StatusEnum.OK
         text = f'Игре {name!r} установлена цена {price!r} (предыдущая цена: {old_price!r})'
         result = {
             'new_price': price,
@@ -85,7 +92,7 @@ def set_price():
         }
 
     except WebUserAlertException as e:
-        status = 'warning'
+        status = StatusEnum.WARNING
         text = str(e)
         result = None
 
@@ -120,7 +127,7 @@ def rename_game():
         new_name = request.form['new_name'].strip()
         log.debug(f'old_name={old_name!r}, new_name={new_name!r}')
 
-        status = 'ok'
+        status = StatusEnum.OK
         text = f'Игра {old_name!r} переименована в {new_name!r}'
 
         if old_name == new_name:
@@ -141,7 +148,7 @@ def rename_game():
         }
 
     except WebUserAlertException as e:
-        status = 'warning'
+        status = StatusEnum.WARNING
         text = str(e)
         result = None
 
@@ -176,12 +183,12 @@ def check_price():
 
         price = price_update_result.price
         if price is None:
-            status = 'ok'
+            status = StatusEnum.OK
             text = f'Не получилось найти цену для игры {name!r}'
             result = None
 
         else:
-            status = 'ok'
+            status = StatusEnum.OK
             text = f'Для игры {name!r} найдена и установлена цена: {price!r}'
             result = {
                 'new_price': price,
@@ -189,7 +196,7 @@ def check_price():
             }
 
     except WebUserAlertException as e:
-        status = 'warning'
+        status = StatusEnum.WARNING
         text = str(e)
         result = None
 
@@ -211,7 +218,7 @@ def run_check():
 
     log.debug('Call run_check')
 
-    status = 'ok'
+    status = StatusEnum.OK
     result = None
     added_data = None
     text = '<b>Проверка новых игр завершена.</b>'
@@ -240,7 +247,7 @@ def run_check():
             text += '<br>Новый игр нет'
 
     except Exception as e:
-        status = 'warning'
+        status = StatusEnum.WARNING
         text = f'<b>Проверка новых игр завершена ошибкой: "{e}".</b>'
 
     data = {
@@ -267,7 +274,7 @@ def check_price_all_non_price_games():
         games_with_changed_price = logic.check_price_all_non_price_games()
         log.debug(games_with_changed_price)
 
-        status = 'ok'
+        status = StatusEnum.OK
 
         if games_with_changed_price:
             text = f'Цена найдена для {len(games_with_changed_price)} игр'
@@ -281,7 +288,7 @@ def check_price_all_non_price_games():
         }
 
     except WebUserAlertException as e:
-        status = 'warning'
+        status = StatusEnum.WARNING
         text = str(e)
         result = None
 
@@ -359,7 +366,7 @@ def delete_game():
     log.debug('request.form: %s', request.form)
 
     if 'name' not in request.form or 'kind' not in request.form:
-        status = 'warning'
+        status = StatusEnum.WARNING
         text = 'В запросе должен присутствовать параметр "name" / "kind"'
         result = None
 
@@ -373,14 +380,14 @@ def delete_game():
         try:
             id_game = logic.delete_game(name, kind)
 
-            status = 'ok'
+            status = StatusEnum.OK
             text = f'Удалена игра #{id_game} {name!r} ({kind!r})'
             result = {
                 'id_game': id_game,
             }
 
         except WebUserAlertException as e:
-            status = 'warning'
+            status = StatusEnum.WARNING
             text = str(e)
             result = None
 

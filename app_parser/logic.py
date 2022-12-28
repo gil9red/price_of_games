@@ -17,7 +17,7 @@ from app_parser import models
 from app_parser.utils import get_price as get_price_game
 
 
-def get_games_by_kind(kind: str) -> list[dict[str, Any]]:
+def get_games_by_kind(kind: str) -> list[models.GameInfo]:
     """
     Функция возвращает список игр из словарей с ключами: id, name, price, append_date.
 
@@ -29,19 +29,19 @@ def get_games_by_kind(kind: str) -> list[dict[str, Any]]:
         .order_by(Game.append_date.desc())
     )
     return [
-        {
-            'id': game.id,
-            'name': game.name,
-            'platform': game.platform.name,
-            'price': game.price,
-            'append_date': game.append_date_dt.strftime('%d/%m/%Y %H:%M:%S'),
-            'append_date_timestamp': int(game.append_date_dt.timestamp()),
-        }
+        models.GameInfo(
+            id=game.id,
+            name=game.name,
+            platform=game.platform.name,
+            price=game.price,
+            append_date=game.append_date_dt.strftime('%d/%m/%Y %H:%M:%S'),
+            append_date_timestamp=int(game.append_date_dt.timestamp()),
+        )
         for game in query
     ]
 
 
-def get_finished_games() -> list[dict[str, Any]]:
+def get_finished_games() -> list[models.GameInfo]:
     """
     Функция возвращает список завершенных игр как кортеж из (id, name, price)
 
@@ -50,7 +50,7 @@ def get_finished_games() -> list[dict[str, Any]]:
     return get_games_by_kind(FINISHED_GAME)
 
 
-def get_finished_watched_games() -> list[dict[str, Any]]:
+def get_finished_watched_games() -> list[models.GameInfo]:
     """
     Функция возвращает список просмотренных игр как кортеж из (id, name, price)
 
@@ -194,7 +194,7 @@ def set_checked_price_of_game(game_name: str, check=True):
         game.save()
 
 
-def check_price_all_non_price_games() -> list[tuple[list[int], str, Optional[int]]]:
+def check_price_all_non_price_games() -> list[models.PriceUpdateResult]:
     """
     Принудительная проверка цены у игр без цены. То, что цены игр уже проверялись для этой функции
     значение не имеет.
@@ -210,8 +210,14 @@ def check_price_all_non_price_games() -> list[tuple[list[int], str, Optional[int
 
     for game in games:
         id_games, price = check_and_fill_price_of_game(game.name)
-        if price is None:
-            games_with_changed_price.append((id_games, game.name, price))
+        if price is not None:
+            games_with_changed_price.append(
+                models.PriceUpdateResult(
+                    game_ids=id_games,
+                    game_name=game.name,
+                    price=price,
+                )
+            )
 
         time.sleep(3)
 

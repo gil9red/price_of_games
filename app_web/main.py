@@ -271,12 +271,6 @@ def check_price_all_non_price_games():
 
         if games_with_changed_price:
             text = f'Цена найдена для {len(games_with_changed_price)} игр'
-
-            # NOTE: если будет много игр, все не влезут
-            # text = 'Цена найдена для {} игр:<br>'.format(len(games_with_changed_price))
-            # for _, name, price in games_with_changed_price:
-            #     text += '&nbsp;&nbsp;"{}" -> {}<br>'.format(name, price)
-
         else:
             text = 'Не удалось найти цену для игр'
 

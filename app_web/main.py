@@ -173,8 +173,9 @@ def check_price():
         name = request.form['name'].strip()
         log.debug(name)
 
-        id_games_with_changed_price, price = logic.check_and_fill_price_of_game(name, cache=False)
+        price_update_result = logic.check_and_fill_price_of_game(name, cache=False)
 
+        price = price_update_result.price
         if price is None:
             status = 'ok'
             text = f'Не получилось найти цену для игры {name!r}'
@@ -185,7 +186,7 @@ def check_price():
             text = f'Для игры {name!r} найдена и установлена цена: {price!r}'
             result = {
                 'new_price': price,
-                'id_games_with_changed_price': id_games_with_changed_price,
+                'id_games_with_changed_price': price_update_result.game_ids,
             }
 
     except WebUserAlertException as e:

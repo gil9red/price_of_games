@@ -138,7 +138,8 @@ def rename_game(old_name: str, new_name: str) -> dict[str, Any]:
     # check_and_fill_price_of_game что-то могло поменяться
     has = Game.select().where(Game.name == new_name, Game.price.is_null()).exists()
     if has:
-        id_games_with_changed_price, price = check_and_fill_price_of_game(new_name)
+        result = check_and_fill_price_of_game(new_name)
+        id_games_with_changed_price, price = result.game_ids, result.price
     else:
         id_games_with_changed_price, price = None, None
 
@@ -209,15 +210,9 @@ def check_price_all_non_price_games() -> list[models.PriceUpdateResult]:
     log_common.debug(f'Игр без цены: {len(games)}')
 
     for game in games:
-        id_games, price = check_and_fill_price_of_game(game.name)
-        if price is not None:
-            games_with_changed_price.append(
-                models.PriceUpdateResult(
-                    game_ids=id_games,
-                    game_name=game.name,
-                    price=price,
-                )
-            )
+        result = check_and_fill_price_of_game(game.name)
+        if result.price is not None:
+            games_with_changed_price.append(result)
 
         time.sleep(3)
 
@@ -276,7 +271,7 @@ def get_game_list_with_price(game_name: str) -> list[Game]:
     return list(query)
 
 
-def check_and_fill_price_of_game(game_name: str, cache=True) -> tuple[list[int], Optional[int]]:
+def check_and_fill_price_of_game(game_name: str, cache=True) -> models.PriceUpdateResult:
     """
     Функция ищет цену игры и при нахождении ее ставит ей цену в базе.
     Возвращает кортеж из списка id игр с измененной ценой и саму цену.
@@ -288,7 +283,11 @@ def check_and_fill_price_of_game(game_name: str, cache=True) -> tuple[list[int],
     game_name = game_name.strip()
     if not game_name:
         log_common.warn(f'Не указано game ( = {game_name!r})')
-        return [], other_price
+        return models.PriceUpdateResult(
+            game_ids=[],
+            game_name=game_name,
+            price=other_price,
+        )
 
     # Попробуем найти цену игры в базе -- возможно игра уже есть, но в другой категории
     if cache:
@@ -311,7 +310,11 @@ def check_and_fill_price_of_game(game_name: str, cache=True) -> tuple[list[int],
             log_common.info(f'Нашли игру: {game_name!r} -> {other_price}')
             log_append_game.info(f'Нашли игру: {game_name!r} -> {other_price}')
 
-            return set_price_game(game_name, other_price), other_price
+            return models.PriceUpdateResult(
+                game_ids=set_price_game(game_name, other_price),
+                game_name=game_name,
+                price=other_price,
+            )
 
     # Поищем игру и ее цену в стиме
     other_price = get_price_game(
@@ -324,9 +327,17 @@ def check_and_fill_price_of_game(game_name: str, cache=True) -> tuple[list[int],
 
     if other_price is None:
         log_common.info(f'Не получилось найти цену игры {game_name!r}, price is {other_price}')
-        return [], other_price
+        return models.PriceUpdateResult(
+            game_ids=[],
+            game_name=game_name,
+            price=other_price,
+        )
 
-    return set_price_game(game_name, other_price), other_price
+    return models.PriceUpdateResult(
+        game_ids=set_price_game(game_name, other_price),
+        game_name=game_name,
+        price=other_price,
+    )
 
 
 def fill_price_of_games():

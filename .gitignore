@@ -108,6 +108,7 @@ docs/_build/
 target/
 
 # For the current project
-games.sqlite
 backup/
 logs/
+games.sqlite
+users.json

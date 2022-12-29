@@ -292,21 +292,6 @@
 
                     <hr>
 
-                    <form id="form__rename_game" method="post" action="/rename_game">
-                        <h6>Изменение названия игры</h6>
-                        <div class="form-group">
-                            <label for="form_old_name">Старое название:</label>
-                            <input id="form_old_name" class="form-control form-control-sm" type="text" name="old_name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="form_new_name">Новое название:</label>
-                            <input id="form_new_name" class="form-control form-control-sm" type="text" name="new_name" required>
-                        </div>
-                        <button type="submit" class="btn btn-outline-primary btn-sm btn-block">Изменить название</button>
-                    </form>
-
-                    <hr>
-
                     <div class="container p-0">
                         <div class="accordion" id="more_actions">
                             <div class="card bg-dark text-white">
@@ -316,6 +301,20 @@
                                 </div>
                                 <div id="more_actions_body" class="collapse bg-dark text-white" aria-labelledby="more_actions_head" data-parent="#more_actions">
                                     <div class="card-body p-0 pt-2">
+                                        <form id="form__rename_game" method="post" action="/rename_game">
+                                            <h6>Изменение названия игры</h6>
+                                            <div class="form-group">
+                                                <label for="form_old_name">Старое название:</label>
+                                                <input id="form_old_name" class="form-control form-control-sm" type="text" name="old_name" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="form_new_name">Новое название:</label>
+                                                <input id="form_new_name" class="form-control form-control-sm" type="text" name="new_name" required>
+                                            </div>
+                                            <button type="submit" class="btn btn-outline-primary btn-sm btn-block">Изменить название</button>
+                                        </form>
+
+                                        <hr>
                                         <form id="form__check_price" method="post" action="/check_price">
                                             <h6>Вызов проверки цены у игры</h6>
                                             <div class="form-group">

@@ -129,28 +129,28 @@ function update_total_price_all_tables() {
 }
 
 function open_tab_with_steam_search_from_game_name(text) {
-    let url = 'http://store.steampowered.com/search/?term=' + text;
+    let url = 'http://store.steampowered.com/search/?term=' + encodeURIComponent(text);
     console.log(`open_tab_with_steam_search("${text}") -> ${url}`);
 
     window.open(url);
 }
 
 function open_tab_with_yandex_search_from_game_name(text) {
-    let url = 'https://yandex.ru/yandsearch?text=' + text + ' цена купить';
+    let url = 'https://yandex.ru/yandsearch?text=' + encodeURIComponent(text) + ' цена купить';
     console.log(`open_tab_with_yandex_search("${text}") -> ${url}`);
 
     window.open(url);
 }
 
 function open_tab_with_google_search_from_game_name(text) {
-    let url = 'https://www.google.com/search?q=' + text + ' цена купить';
+    let url = 'https://www.google.com/search?q=' + encodeURIComponent(text) + ' цена купить';
     console.log(`open_tab_with_google_search("${text}") -> ${url}`);
 
     window.open(url);
 }
 
 function open_tab_with_google_search_from_game_name_en(text) {
-    let url = 'https://www.google.com/search?q=' + text + ' price buy';
+    let url = 'https://www.google.com/search?q=' + encodeURIComponent(text) + ' price buy';
     console.log(`open_tab_with_google_search("${text}") -> ${url}`);
 
     window.open(url);

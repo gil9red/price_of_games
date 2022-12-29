@@ -149,6 +149,13 @@ function open_tab_with_google_search_from_game_name(text) {
     window.open(url);
 }
 
+function open_tab_with_google_search_from_game_name_en(text) {
+    let url = 'https://www.google.com/search?q=' + text + ' price buy';
+    console.log(`open_tab_with_google_search("${text}") -> ${url}`);
+
+    window.open(url);
+}
+
 // Функция возвращает строку с статистикой: сколько всего игр, сколько имеют цены, и процент.
 // Пример: (0 / 160 (0%))
 function statistic_for_table(items) {
@@ -203,6 +210,12 @@ function price_render(data, type, row, meta) {
         img_google_search.attr('alt', 'google');
         img_google_search.attr('title', 'Поиск игры в гугле');
 
+        // Добавление иконки для поиска игры в гугле для поиска на английском
+        let img_google_search_en = $(`<img src="${IMG_GOOGLE_SEARCH_EN}" width="16" height="16"/>`);
+        img_google_search_en.attr('onclick', `open_tab_with_google_search_from_game_name_en("${row.name} ${row.platform}")`);
+        img_google_search_en.attr('alt', 'google');
+        img_google_search_en.attr('title', 'Поиск игры в гугле на аглийском');
+
         // Добавление иконки для поиска игры в яндексе
         let img_yandex_search = $(`<img src="${IMG_YANDEX_SEARCH}" width="16" height="16"/>`);
         img_yandex_search.attr('onclick', `open_tab_with_yandex_search_from_game_name("${row.name} ${row.platform}")`);
@@ -220,6 +233,8 @@ function price_render(data, type, row, meta) {
         buttons_div.append(img_google_search);
         buttons_div.append("&nbsp;");
         buttons_div.append(img_yandex_search);
+        buttons_div.append("&nbsp;");
+        buttons_div.append(img_google_search_en);
 
         return '<div>Цена не задана</div>' + buttons_div.html();
     }

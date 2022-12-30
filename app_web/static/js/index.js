@@ -330,14 +330,28 @@ function fill_table(table_selector, total_class, items) {
 
     // Добавление кнопки очищения к полю поиска
     $(table_selector + '_filter label').contents().unwrap(); //strip off that label tag Bootstrap doesn't like
-    $(table_selector + '_filter input')
+    let filterInput = $(table_selector + '_filter input')
         .attr('placeholder', 'Введите для поиска...')
         .wrap('<div class="input-group"></div>')
         .after('<div class="input-group-append"><button type="button" class="btn btn-danger">&times;</button></div>')
         .removeClass('form-control-sm')
         .css('margin-left', '0');
-    $(table_selector + '_wrapper button.btn.btn-danger').click(function() {
-        $(table_selector + '_filter input').val('');
+
+    let filterClearButton = $(table_selector + '_wrapper button.btn.btn-danger');
+    function updateStatsClearButton() {
+        filterClearButton.prop('disabled', !filterInput.val());
+    }
+
+    // Установка состояния кнопки
+    updateStatsClearButton();
+
+    filterInput.on("input", function() {
+        updateStatsClearButton();
+    });
+
+    filterClearButton.click(function() {
+        filterInput.val('');
+        updateStatsClearButton();
         table.search('').draw();
     });
 

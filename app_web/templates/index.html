@@ -111,6 +111,11 @@
             font-weight: 900;
             float: right;
         }
+
+        .chart-wrapper {
+            width: 300px;
+            height: 300px;
+        }
     </style>
 
     <script>
@@ -178,19 +183,19 @@
                                     <div id="charts_body" class="collapse" aria-labelledby="charts_head" data-parent="#charts">
                                         <div class="card-body p-0 pt-2">
                                             <div class="row">
-                                                <div class="col">
+                                                <div class="chart-wrapper">
                                                     <canvas id="chartKindByNumber"></canvas>
                                                 </div>
-                                                <div class="col">
+                                                <div class="chart-wrapper">
                                                     <canvas id="chartKindByPrice"></canvas>
                                                 </div>
-                                                <div class="col">
+                                                <div class="chart-wrapper">
                                                     <canvas id="chartKindByPlatform"></canvas>
                                                 </div>
-                                                <div class="col">
+                                                <div class="chart-wrapper">
                                                     <canvas id="chartPlatformByNumber"></canvas>
                                                 </div>
-                                                <div class="col">
+                                                <div class="chart-wrapper">
                                                     <canvas id="chartPlatformByPrice"></canvas>
                                                 </div>
                                             </div>

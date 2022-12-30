@@ -89,15 +89,10 @@
 
         #more_actions .card .card-header .btn-header-link,
         #charts .card .card-header .btn-header-link {
-            background: #A541BB;
-            color: white;
-            display: block;
-            text-align: left;
-        }
-
-        #charts .card .card-header .btn-header-link {
             background: lightGray;
             color: black;
+            display: block;
+            text-align: left;
         }
 
         #more_actions .card .card-header .btn-header-link.collapsed:after,
@@ -303,8 +298,8 @@
                         <div class="accordion" id="more_actions">
                             <div class="card bg-dark text-white">
                                 <div class="card-header" id="more_actions_head">
-                                    <a href="#" class="btn btn-header-link collapsed" data-toggle="collapse" data-target="#more_actions_body"
-                                        aria-expanded="true" aria-controls="more_actions_body">Показать больше действий</a>
+                                    <a href="#" class="btn btn-header-link bg-secondary text-white collapsed" data-toggle="collapse" data-target="#more_actions_body"
+                                        aria-expanded="true" aria-controls="more_actions_body">Больше действий</a>
                                 </div>
                                 <div id="more_actions_body" class="collapse bg-dark text-white" aria-labelledby="more_actions_head" data-parent="#more_actions">
                                     <div class="card-body p-0 pt-2">
@@ -327,7 +322,7 @@
                                             <h6>Вызов проверки цены у игры</h6>
                                             <div class="form-group">
                                                 <label for="form_check_price">Название игры:</label>
-                                                <input id="form_check_price" class="form-control form-control-sm game-name" type="text" name="name" disabled>
+                                                <input id="form_check_price" class="form-control form-control-sm game-name" type="text" name="name" readonly>
                                             </div>
                                             <input type="hidden" class="game-id" name="id"/>
                                             <button type="submit" class="btn btn-warning btn-sm btn-block">Проверить цену</button>

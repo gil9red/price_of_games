@@ -18,7 +18,7 @@ from app_web.app import app, log
 from flask import render_template, request, jsonify, send_from_directory
 
 import config
-from db import Settings
+from db import Game, Settings
 from common import WebUserAlertException, FINISHED_GAME, FINISHED_WATCHED
 from app_parser import logic
 from app_parser.main import run as run_check_of_price
@@ -27,6 +27,22 @@ from app_parser.main import run as run_check_of_price
 class StatusEnum(str, Enum):
     OK = 'ok'
     WARNING = 'warning'
+
+
+def check_form_params(form: dict, *args):
+    for arg in args:
+        if arg not in form:
+            text = f'В запросе отсутствует параметр "{arg}"'
+            raise WebUserAlertException(text)
+
+
+TITLE_FINISHED_GAME = 'Пройденные игры'
+TITLE_FINISHED_WATCHED = 'Просмотренные игры'
+
+KIND_BY_TITLE = {
+    FINISHED_GAME: TITLE_FINISHED_GAME,
+    FINISHED_WATCHED: TITLE_FINISHED_WATCHED,
+}
 
 
 @app.route("/")
@@ -42,8 +58,8 @@ def index():
         FINISHED_GAME=FINISHED_GAME,
         FINISHED_WATCHED=FINISHED_WATCHED,
 
-        TITLE_FINISHED_GAME='Пройденные игры',
-        TITLE_FINISHED_WATCHED='Просмотренные игры',
+        TITLE_FINISHED_GAME=TITLE_FINISHED_GAME,
+        TITLE_FINISHED_WATCHED=TITLE_FINISHED_WATCHED,
     )
 
 
@@ -58,9 +74,7 @@ def set_price():
     log.debug('request.form: %s', request.form)
 
     try:
-        if 'name' not in request.form or 'price' not in request.form:
-            text = 'В запросе должны присутствовать параметры "name" и "price"'
-            raise WebUserAlertException(text)
+        check_form_params(request.form, 'name', 'price')
 
         name = request.form['name'].strip()
         price = request.form['price'].strip()
@@ -116,14 +130,15 @@ def rename_game():
 
     log.debug('Call rename_game')
     log.debug('request.form: %s', request.form)
-    log.debug('request.args: %s', request.args)
 
     try:
-        if 'old_name' not in request.form or 'new_name' not in request.form:
-            text = 'В запросе должны присутствовать параметры "old_name" и "new_name"'
-            raise WebUserAlertException(text)
+        check_form_params(request.form, 'id', 'new_name')
 
-        old_name = request.form['old_name'].strip()
+        game_id = int(request.form['id'].strip())
+        game = Game.get_by_id(game_id)
+        log.debug(f'Действие будет выполнено над: {game}')
+
+        old_name = game.name
         new_name = request.form['new_name'].strip()
         log.debug(f'old_name={old_name!r}, new_name={new_name!r}')
 
@@ -134,6 +149,7 @@ def rename_game():
             text = f'У игры {old_name!r} уже такое название!'
             raise WebUserAlertException(text)
 
+        # TODO: Использовать точечную замену имени (и поиска цены)
         result_rename = logic.rename_game(old_name, new_name)
 
         # Возможно, после переименования игры мы смогли найти ее цену...
@@ -172,13 +188,15 @@ def check_price():
     log.debug('request.form: %s', request.form)
 
     try:
-        if 'name' not in request.form:
-            text = 'В запросе должен присутствовать параметр "name"'
-            raise WebUserAlertException(text)
+        check_form_params(request.form, 'id')
 
-        name = request.form['name'].strip()
-        log.debug(name)
+        game_id = int(request.form['id'].strip())
+        game = Game.get_by_id(game_id)
+        log.debug(f'Действие будет выполнено над: {game}')
 
+        name = game.name
+
+        # TODO: Использовать точечный поиск цены
         price_update_result = logic.check_and_fill_price_of_game(name, cache=False)
 
         price = price_update_result.price
@@ -365,31 +383,25 @@ def delete_game():
     log.debug('Call delete_game')
     log.debug('request.form: %s', request.form)
 
-    if 'name' not in request.form or 'kind' not in request.form:
+    try:
+        check_form_params(request.form, 'id')
+
+        game_id = int(request.form['id'].strip())
+        game = Game.get_by_id(game_id)
+        log.debug(f'Действие будет выполнено над: {game}')
+
+        logic.delete_game(game)
+
+        status = StatusEnum.OK
+        text = f'Удалена игра #{game_id} {game.name!r} ({game.platform.name!r}, {KIND_BY_TITLE[game.kind]!r})'
+        result = {
+            'id_game': game_id,
+        }
+
+    except WebUserAlertException as e:
         status = StatusEnum.WARNING
-        text = 'В запросе должен присутствовать параметр "name" / "kind"'
+        text = str(e)
         result = None
-
-    else:
-        name = request.form['name'].strip()
-        log.debug(name)
-
-        kind = request.form['kind'].strip()
-        log.debug(kind)
-
-        try:
-            id_game = logic.delete_game(name, kind)
-
-            status = StatusEnum.OK
-            text = f'Удалена игра #{id_game} {name!r} ({kind!r})'
-            result = {
-                'id_game': id_game,
-            }
-
-        except WebUserAlertException as e:
-            status = StatusEnum.WARNING
-            text = str(e)
-            result = None
 
     data = {
         'status': status,

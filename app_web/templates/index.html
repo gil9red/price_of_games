@@ -121,6 +121,10 @@
 
         const FINISHED_GAME = '{{ FINISHED_GAME }}';
         const FINISHED_WATCHED = '{{ FINISHED_WATCHED }}';
+        const KIND_BY_TITLE = {
+            {{ FINISHED_GAME }}: '{{ TITLE_FINISHED_GAME }}',
+            {{ FINISHED_WATCHED }}: '{{ TITLE_FINISHED_WATCHED }}',
+        }
     </script>
 
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
@@ -281,7 +285,7 @@
                         <h6>Установка цены у игры</h6>
                         <div class="form-group">
                             <label for="form_name">Название игры:</label>
-                            <input id="form_name" class="form-control form-control-sm" type="text" name="name" required>
+                            <input id="form_name" class="form-control form-control-sm" type="text" name="name" disabled>
                         </div>
                         <div class="form-group">
                             <label for="form_price">Цена:</label>
@@ -305,12 +309,13 @@
                                             <h6>Изменение названия игры</h6>
                                             <div class="form-group">
                                                 <label for="form_old_name">Старое название:</label>
-                                                <input id="form_old_name" class="form-control form-control-sm" type="text" name="old_name" required>
+                                                <input id="form_old_name" class="form-control form-control-sm game-name" type="text" disabled>
                                             </div>
                                             <div class="form-group">
                                                 <label for="form_new_name">Новое название:</label>
                                                 <input id="form_new_name" class="form-control form-control-sm" type="text" name="new_name" required>
                                             </div>
+                                            <input type="hidden" class="game-id" name="id"/>
                                             <button type="submit" class="btn btn-outline-primary btn-sm btn-block">Изменить название</button>
                                         </form>
 
@@ -319,8 +324,9 @@
                                             <h6>Вызов проверки цены у игры</h6>
                                             <div class="form-group">
                                                 <label for="form_check_price">Название игры:</label>
-                                                <input id="form_check_price" class="form-control form-control-sm" type="text" name="name" required>
+                                                <input id="form_check_price" class="form-control form-control-sm game-name" type="text" name="name" disabled>
                                             </div>
+                                            <input type="hidden" class="game-id" name="id"/>
                                             <button type="submit" class="btn btn-warning btn-sm btn-block">Проверить цену</button>
                                         </form>
 
@@ -336,16 +342,11 @@
                                         <hr>
                                         <form id="form__delete_game" method="post" action="/delete_game">
                                             <h6>Удаление игры</h6>
-                                            <div>
-                                                <select name="kind" class="custom-select custom-select-sm">
-                                                    <option value="{{ FINISHED_GAME }}">{{ TITLE_FINISHED_GAME }}</option>
-                                                    <option value="{{ FINISHED_WATCHED }}">{{ TITLE_FINISHED_WATCHED }}</option>
-                                               </select>
-                                            </div>
                                             <div class="form-group">
                                                 <label for="form__delete_game__name">Название игры:</label>
-                                                <input id="form__delete_game__name" class="form-control form-control-sm" type="text" name="name" required>
+                                                <input id="form__delete_game__name" class="form-control form-control-sm game-name" type="text" name="name" disabled>
                                             </div>
+                                            <input type="hidden" class="game-id" name="id"/>
                                             <button type="submit" class="btn btn-danger btn-sm btn-block">Удалить</button>
                                         </form>
                                     </div>

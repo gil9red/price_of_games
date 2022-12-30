@@ -344,16 +344,17 @@ function fill_table(table_selector, total_class, items) {
     $(table_selector).on('click', 'tbody tr', function () {
         let row = table.row($(this)).data();
 
+        // Если у текущей игры цены нет, то автоматически добавляем название игры
+        // в поле установки цены
         if (row.price == null) {
             $('#form_name').val(row.name);
         }
 
-        if ($(this).hasClass('selected') ) {
-            $(this).removeClass('selected');
-        } else {
-            table.$('tr.selected').removeClass('selected');
-            $(this).addClass('selected');
-        }
+        $('form input.game-id').val(row.id);
+        $('form input.game-name').val(row.name);
+
+        table.$('tr.selected').removeClass('selected');
+        $(this).addClass('selected');
     });
 
 }

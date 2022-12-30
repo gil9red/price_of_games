@@ -19,6 +19,7 @@ class Game:
 class GameInfo:
     id: int
     name: str
+    kind: str
     platform: str
     price: Optional[int]
     append_date: str

@@ -32,6 +32,7 @@ def get_games_by_kind(kind: str) -> list[models.GameInfo]:
         models.GameInfo(
             id=game.id,
             name=game.name,
+            kind=game.kind,
             platform=game.platform.name,
             price=game.price,
             append_date=game.append_date_dt.strftime('%d/%m/%Y %H:%M:%S'),
@@ -151,38 +152,18 @@ def rename_game(old_name: str, new_name: str) -> models.RenameGameResult:
     )
 
 
-def delete_game(game_name: str, kind: str) -> int:
+def delete_game(game: Game):
     """
-    Функция удаляет указанную игру и возвращает ее id.
+    Функция удаляет указанную игру.
     Возможна отправка исключения <WebUserAlertException> при ошибке.
 
     """
 
-    if not game_name or not kind or (kind != FINISHED_GAME and kind != FINISHED_WATCHED):
-        error_text = (
-            f'Не указано name ( = {game_name!r}) или kind ( = {kind!r}), '
-            f'или kind неправильный (может быть {FINISHED_GAME!r} или {FINISHED_WATCHED!r}).'
-        )
-        log_common.error(error_text)
-        raise WebUserAlertException(error_text)
-
     try:
-        game = Game.get_or_none(Game.name == game_name, Game.kind == kind)
-        if not game:
-            error_text = f'Не получилось найти игру с name={game_name!r}) и kind={kind!r}'
-            log_common.error(error_text)
-            raise WebUserAlertException(error_text)
-
-        id_game = game.id
         game.delete_instance()
 
-        return id_game
-
-    except WebUserAlertException as e:
-        raise e
-
     except Exception as e:
-        error_text = f'При удалении игры {game_name!r} ({kind!r}) произошла ошибка: {e}'
+        error_text = f'При удалении игры {game.name!r} ({game.platform!r}, {game.kind!r}) произошла ошибка: {e}'
         log_common.error(error_text)
         raise WebUserAlertException(error_text)
 

@@ -78,30 +78,29 @@
                 background-color: white !important;
             }
 
-        #more_actions .card .card-header,
-        #charts .card .card-header {
+        .card .card-header {
             border: 0;
             border-radius: 2px;
             padding: 0;
         }
 
-        #more_actions .card .card-header .btn-header-link,
-        #charts .card .card-header .btn-header-link {
-            background: lightGray;
-            color: black;
+        .card .card-header .btn-header-link {
+            background: #6c757d;
+            color: white;
             display: block;
             text-align: left;
-            -webkit-box-shadow: 0 0 0 0 !important;
             box-shadow: 0 0 0 0 !important;
         }
+        #more_actions .card .card-header .btn-header-link {
+            background: #6c757d;
+            color: white;
+        }
 
-        #more_actions .card .card-header .btn-header-link.collapsed:after,
-        #charts .card .card-header .btn-header-link.collapsed:after {
+        .card .card-header .btn-header-link.collapsed:after {
             content: "⮝";
         }
 
-        #more_actions .card .card-header .btn-header-link:after,
-        #charts .card .card-header .btn-header-link:after {
+        .card .card-header .btn-header-link:after {
             content: "⮟";
             font-weight: 900;
             float: right;
@@ -292,7 +291,7 @@
                         <div class="accordion" id="more_actions">
                             <div class="card bg-dark text-white">
                                 <div class="card-header" id="more_actions_head">
-                                    <a href="#" class="btn btn-header-link bg-secondary text-white collapsed" data-toggle="collapse" data-target="#more_actions_body"
+                                    <a href="#" class="btn btn-header-link collapsed" data-toggle="collapse" data-target="#more_actions_body"
                                         aria-expanded="true" aria-controls="more_actions_body">Больше действий</a>
                                 </div>
                                 <div id="more_actions_body" class="collapse bg-dark text-white" aria-labelledby="more_actions_head" data-parent="#more_actions">

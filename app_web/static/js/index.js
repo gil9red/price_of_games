@@ -500,7 +500,7 @@ function fill_charts() {
         ]
     );
 
-    const numberOfTop = 10;
+    const numberOfTop = 5;
 
     let platform_by_number = sortReversedMapByValue(
         sumMaps(platform_by_number_of_finished_games, platform_by_number_of_finished_watched_games)

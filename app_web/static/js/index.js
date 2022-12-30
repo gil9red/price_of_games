@@ -443,7 +443,7 @@ function createOrUpdateChart(chartId, title, labels, data) {
     window[keyChartId] = new Chart(
         document.getElementById(chartId),
         {
-            type: 'doughnut',
+            type: 'pie',
             data: {
                 labels: labels,
                 datasets: [{
@@ -460,7 +460,39 @@ function createOrUpdateChart(chartId, title, labels, data) {
                 }
             }
         }
-    )
+    );
+}
+
+function createOrUpdateCharts(chartId, title, labels, datasets) {
+    let keyChartId = `obj-${chartId}`;
+    let objChart = window[keyChartId];
+    if (objChart) {
+        objChart.data.labels = labels;
+        for (let i = 0; i < datasets.length; i++) {
+            objChart.data.datasets[i].data = datasets[i].data;
+        }
+        objChart.update();
+        return;
+    }
+
+    window[keyChartId] = new Chart(
+        document.getElementById(chartId),
+        {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: title
+                    }
+                }
+            }
+        }
+    );
 }
 
 function fill_charts() {
@@ -475,42 +507,44 @@ function fill_charts() {
         total_price_of_finished_watched_games
     ] = callStatisticsByGames(window.finished_watched_games);
 
-    createOrUpdateChart(
-        'chartKindByNumber',
-        'Категория по играм',
+    let backgroundColor = [
+        '#ff6384',
+        '#36a2eb',
+    ];
+    createOrUpdateCharts(
+        'chartKindBy',
+        'Категория по...',
+        // labels
         [
             'Пройденные',
-            'Просмотренные'
+            'Просмотренные',
         ],
+        // datasets
         [
-            window.finished_games.length,
-            window.finished_watched_games.length
-        ]
-    );
-
-    createOrUpdateChart(
-        'chartKindByPrice',
-        'Категория по ценам',
-        [
-            'Пройденные',
-            'Просмотренные'
-        ],
-        [
-            total_price_of_finished_games,
-            total_price_of_finished_watched_games
-        ]
-    );
-
-    createOrUpdateChart(
-        'chartKindByPlatform',
-        'Категория по платформам',
-        [
-            'Пройденные',
-            'Просмотренные'
-        ],
-        [
-            platform_by_total_price_of_finished_games.size,
-            platform_by_total_price_of_finished_watched_games.size
+            {
+                label: 'Категория по играм',
+                data: [
+                    window.finished_games.length,
+                    window.finished_watched_games.length
+                ],
+                backgroundColor: backgroundColor
+            },
+            {
+                label: 'Категория по ценам',
+                data: [
+                    total_price_of_finished_games,
+                    total_price_of_finished_watched_games
+                ],
+                backgroundColor: backgroundColor
+            },
+            {
+                label: 'Категория по платформам',
+                data: [
+                    platform_by_total_price_of_finished_games.size,
+                    platform_by_total_price_of_finished_watched_games.size
+                ],
+                backgroundColor: backgroundColor
+            },
         ]
     );
 

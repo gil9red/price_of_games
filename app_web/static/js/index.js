@@ -20,7 +20,7 @@ function run_check() {
             });
 
             if (ok && data.data != null) {
-                setTimeout(() => location.reload(true), 2000);
+                load_tables();
             }
         },
 

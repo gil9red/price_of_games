@@ -13,12 +13,11 @@ __author__ = 'ipetrash'
 
 from datetime import datetime
 
-from common import get_logger, FINISHED_GAME, FINISHED_WATCHED
-
-from db import Settings, db_create_backup
-from third_party.wait import wait
 from app_parser.utils import get_games
 from app_parser.logic import append_games_to_database, fill_price_of_games
+from common import get_logger, FINISHED_GAME, FINISHED_WATCHED
+from db import Settings, db_create_backup
+from third_party.wait import wait
 
 
 log = get_logger('main')

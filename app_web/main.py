@@ -9,14 +9,15 @@ import os.path
 
 from enum import Enum
 
-from app_web.app import app, log
 from flask import render_template, request, jsonify, send_from_directory
 
 import config
-from db import Game, Settings
-from common import WebUserAlertException, FINISHED_GAME, FINISHED_WATCHED
+
 from app_parser import logic
 from app_parser.main import run as run_check_of_price
+from app_web.app import app, log
+from common import WebUserAlertException, FINISHED_GAME, FINISHED_WATCHED
+from db import Game, Settings
 
 
 class StatusEnum(str, Enum):

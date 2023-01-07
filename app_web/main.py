@@ -6,13 +6,8 @@ __author__ = 'ipetrash'
 
 import re
 import os.path
-import sys
 
 from enum import Enum
-from pathlib import Path
-
-# Папка выше
-sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from app_web.app import app, log
 from flask import render_template, request, jsonify, send_from_directory

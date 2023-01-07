@@ -5,7 +5,6 @@ __author__ = 'ipetrash'
 
 
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -21,7 +20,7 @@ class GameInfo:
     name: str
     kind: str
     platform: str
-    price: Optional[int]
+    price: int | None
     append_date: str
     append_date_timestamp: int
 
@@ -30,7 +29,7 @@ class GameInfo:
 class PriceUpdateResult:
     game_ids: list[int]
     game_name: str
-    price: Optional[int]
+    price: int | None
 
 
 @dataclass
@@ -38,4 +37,4 @@ class RenameGameResult:
     game_ids_with_changed_name: list[int]
     game_ids_with_changed_price: list[int]
     new_name: str
-    price: Optional[int]
+    price: int | None

@@ -4,13 +4,12 @@
 __author__ = 'ipetrash'
 
 
-import datetime as DT
 import time
 import re
 
 from logging import Logger
 from dataclasses import dataclass
-from typing import Optional
+from datetime import datetime
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
@@ -25,7 +24,7 @@ from third_party.mini_played_games_parser import parse_played_games
 @dataclass
 class SearchResult:
     name: str
-    price: Optional[int]
+    price: int | None
 
 
 session = requests.Session()
@@ -51,7 +50,7 @@ def get_games() -> list[Game]:
 
         # Сохранение файла гиста в папку бекапа
         try:
-            file_name = str(DT.datetime.today().date()) + '.txt'
+            file_name = str(datetime.today().date()) + '.txt'
             file_name = path / file_name
 
             file_name.write_text(content_gist, 'utf-8')
@@ -179,7 +178,7 @@ def get_price(
         game_name: str,
         log_common: Logger = None,
         log_append_game: Logger = None
-) -> Optional[int]:
+) -> int | None:
     def _log_on_found_price(
             game_name: str,
             result: SearchResult,

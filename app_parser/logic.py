@@ -5,7 +5,6 @@ __author__ = 'ipetrash'
 
 
 import time
-from typing import Optional
 
 from common import (
     FINISHED_GAME, FINISHED_WATCHED, WebUserAlertException,
@@ -60,7 +59,7 @@ def get_finished_watched_games() -> list[models.GameInfo]:
     return get_games_by_kind(FINISHED_WATCHED)
 
 
-def get_price(game_name: str) -> Optional[int]:
+def get_price(game_name: str) -> int | None:
     """
     Функция возвращает цену игры.
     Если такой игры нет, вернется None.
@@ -76,7 +75,7 @@ def has_game(game_name: str) -> bool:
     return Game.select(Game.id).where(Game.name == game_name).exists()
 
 
-def set_price_game(game_name: str, price: Optional[int]) -> list[int]:
+def set_price_game(game_name: str, price: int | None) -> list[int]:
     """
     Функция найдет игры с указанным названием и изменит их цену в базе.
     Возвращает список id игр с измененной ценой.

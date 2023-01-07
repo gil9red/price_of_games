@@ -11,13 +11,7 @@ __author__ = 'ipetrash'
 """
 
 
-import datetime as DT
-import sys
-
-from pathlib import Path
-
-# Папка выше
-sys.path.append(str(Path(__file__).resolve().parent.parent))
+from datetime import datetime
 
 from common import get_logger, FINISHED_GAME, FINISHED_WATCHED
 
@@ -33,7 +27,7 @@ log = get_logger('main')
 def run() -> tuple[int, int]:
     # Перед выполнением, запоминаем дату и время, чтобы иметь потом представление когда
     # в последний раз выполнялось заполнение списка
-    Settings.set_value('last_run_date', DT.datetime.now())
+    Settings.set_value('last_run_date', datetime.now())
 
     # Получение игр из файла gist
     games = get_games()

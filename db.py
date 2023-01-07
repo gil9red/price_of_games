@@ -8,7 +8,7 @@ import logging
 import shutil
 
 from datetime import datetime
-from typing import Any, Callable, Union, Optional, Type, Iterable
+from typing import Any, Callable, Type, Iterable
 
 # pip install peewee
 from peewee import (
@@ -116,14 +116,14 @@ class Game(BaseModel):
         self.save()
 
     @property
-    def append_date_dt(self) -> Union[datetime, DateTimeField]:
+    def append_date_dt(self) -> datetime | DateTimeField:
         if isinstance(self.append_date, str):
             return datetime.fromisoformat(self.append_date)
 
         return self.append_date
 
     @property
-    def modify_price_date_dt(self) -> Union[datetime, DateTimeField]:
+    def modify_price_date_dt(self) -> datetime | DateTimeField:
         if isinstance(self.modify_price_date, str):
             return datetime.fromisoformat(self.modify_price_date)
 
@@ -148,7 +148,7 @@ class Settings(BaseModel):
             )
 
     @classmethod
-    def get_value(cls, key: str, get_typing_value_func: Callable = None) -> Optional[Union[str, Any]]:
+    def get_value(cls, key: str, get_typing_value_func: Callable = None) -> str | Any | None:
         obj = cls.get_or_none(key=key)
         value = obj and obj.value
 

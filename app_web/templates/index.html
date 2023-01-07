@@ -20,16 +20,6 @@
     <script src="{{ url_for('static', filename='chartjs-4.1.1/chart.umd.js') }}"></script>
 
     <style>
-        .noselect {
-          -webkit-touch-callout: none; /* iOS Safari */
-            -webkit-user-select: none; /* Safari */
-             -khtml-user-select: none; /* Konqueror HTML */
-               -moz-user-select: none; /* Firefox */
-                -ms-user-select: none; /* Internet Explorer/Edge */
-                    user-select: none; /* Non-prefixed version, currently
-                                          supported by Chrome and Opera */
-        }
-
         #back-top {
             position: fixed;
             z-index: 9999;
@@ -56,7 +46,16 @@
         }
 
         table.dataTable tbody tr.selected {
-            background-color: #b0bed9
+            background-color: #b0bed9;
+            color: black;
+        }
+
+        /* Убираем пустое пространство между комбобоксом количества записей и фильтра */
+        .dataTables_wrapper > .row:first-child > div:first-child {
+            padding-right: 2px;
+        }
+        .dataTables_wrapper > .row:first-child > div:nth-child(2) {
+            padding-left: 2px;
         }
 
         .dataTables_length > label,

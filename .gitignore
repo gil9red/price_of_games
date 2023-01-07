@@ -110,5 +110,5 @@ target/
 # For the current project
 backup/
 logs/
-games.sqlite
+database/
 users.json

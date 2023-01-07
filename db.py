@@ -5,32 +5,42 @@ __author__ = 'ipetrash'
 
 
 import logging
+import time
 import shutil
 
 from datetime import datetime
 from typing import Any, Callable, Type, Iterable
 
 # pip install peewee
-from peewee import (
-    SqliteDatabase, Model,
-    TextField, ForeignKeyField, DateTimeField, BooleanField, CharField, IntegerField
-)
+from peewee import Model, TextField, ForeignKeyField, DateTimeField, BooleanField, CharField, IntegerField
+from playhouse.sqliteq import SqliteQueueDatabase
 
-from config import BACKUP_DIR_LIST, DB_FILE_NAME
+from config import BACKUP_DIR_LIST, DB_FILE_NAME, DB_DIR_NAME
 from third_party.shorten import shorten
 
 
 def db_create_backup(log: logging.Logger):
     for path in BACKUP_DIR_LIST:
-        file_name = str(datetime.today().date()) + '.sqlite'
-        file_name = path / file_name
+        zip_name = path / f'{datetime.today().date()}.sqlite'
 
-        log.debug(f'Doing create backup in: {file_name}')
-        shutil.copy(DB_FILE_NAME, file_name)
+        log.info(f'Создание бэкапа базы данных в: {zip_name}')
+        shutil.make_archive(zip_name, 'zip', DB_DIR_NAME)
 
 
-# Ensure foreign-key constraints are enforced.
-db = SqliteDatabase(DB_FILE_NAME, pragmas={'foreign_keys': 1})
+# This working with multithreading
+# SOURCE: http://docs.peewee-orm.com/en/latest/peewee/playhouse.html#sqliteq
+db = SqliteQueueDatabase(
+    DB_FILE_NAME,
+    pragmas={
+        'foreign_keys': 1,
+        'journal_mode': 'wal',    # WAL-mode
+        'cache_size': -1024 * 64  # 64MB page-cache
+    },
+    use_gevent=False,     # Use the standard library "threading" module.
+    autostart=True,
+    queue_max_size=64,    # Max. # of pending writes that can accumulate.
+    results_timeout=5.0,  # Max. time to wait for query to be executed.
+)
 
 
 class BaseModel(Model):
@@ -167,6 +177,9 @@ class Settings(BaseModel):
 db.connect()
 db.create_tables(BaseModel.get_inherited_models())
 
+# Задержка в 50мс, чтобы дать время на запуск SqliteQueueDatabase и создание таблиц
+# Т.к. в SqliteQueueDatabase запросы на чтение выполняются сразу, а на запись попадают в очередь
+time.sleep(0.050)
 
 if __name__ == '__main__':
     BaseModel.print_count_of_tables()

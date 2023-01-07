@@ -12,7 +12,10 @@ DIR = Path(__file__).resolve().parent
 DIR_LOG = DIR / 'logs'
 DIR_LOG.mkdir(parents=True, exist_ok=True)
 
-DB_FILE_NAME = DIR / 'games.sqlite'
+DB_DIR_NAME = DIR / 'database'
+DB_DIR_NAME.mkdir(parents=True, exist_ok=True)
+
+DB_FILE_NAME = str(DB_DIR_NAME / 'games.sqlite')
 
 BACKUP_DIR_LIST = [
     DIR / 'backup',

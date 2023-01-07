@@ -58,7 +58,8 @@ def run() -> tuple[int, int]:
     fill_price_of_games()
 
     # Создание дубликата базы
-    db_create_backup(log)
+    if added_finished_games or added_watched_games:
+        db_create_backup(log)
 
     return added_finished_games, added_watched_games
 

@@ -283,6 +283,9 @@ function fill_table(table_selector, total_class, items) {
         search: {
             smart: false,
         },
+        select: {
+            toggleable: false,  // Нельзя убирать выделение повторным кликом
+        },
         language: {
             // NOTE: https://datatables.net/plug-ins/i18n/Russian.html
             search: "",
@@ -294,6 +297,12 @@ function fill_table(table_selector, total_class, items) {
             paginate: {
                 previous: '←',
                 next: '→',
+            },
+            // Убираем строку внизу таблицы, отображающаяся при выделении строки таблицы
+            select: {
+                rows: {
+                    _: "",
+                }
             }
         },
         footerCallback: function (tfoot, data, start, end, display) {
@@ -355,22 +364,19 @@ function fill_table(table_selector, total_class, items) {
         table.search('').draw();
     });
 
-    $(table_selector).on('click', 'tbody tr', function () {
-        let row = table.row($(this)).data();
+    table
+        .on('select', function(e, dt, type, indexes) {
+            let row = table.row(indexes[0]).data();
 
-        // Если у текущей игры цены нет, то автоматически добавляем название игры
-        // в поле установки цены
-        if (row.price == null) {
-            $('#form_name').val(row.name);
-        }
+            // Если у текущей игры цены нет, то автоматически добавляем название игры
+            // в поле установки цены
+            if (row.price == null) {
+                $('#form_name').val(row.name);
+            }
 
-        $('form input.game-id').val(row.id);
-        $('form input.game-name').val(row.name);
-
-        table.$('tr.selected').removeClass('selected');
-        $(this).addClass('selected');
-    });
-
+            $('form input.game-id').val(row.id);
+            $('form input.game-name').val(row.name);
+        });
 }
 
 function fill_game_tables() {

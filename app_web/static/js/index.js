@@ -436,40 +436,10 @@ function sortReversedMapByValue(map) {
     return new Map([...map.entries()].sort((a, b) => b[1] - a[1]));
 }
 
-function createOrUpdateChart(chartId, title, labels, data) {
-    let keyChartId = `obj-${chartId}`;
-    let objChart = window[keyChartId];
-    if (objChart) {
-        objChart.data.labels = labels;
-        objChart.data.datasets[0].data = data;
-        objChart.update();
-        return;
-    }
+function createOrUpdateCharts(chartId, title, labels, datasets, options) {
+    let thisOptions = structuredClone(options);
+    thisOptions.plugins.title.text = title;
 
-    window[keyChartId] = new Chart(
-        document.getElementById(chartId),
-        {
-            type: 'pie',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: title,
-                    data: data,
-                }]
-            },
-            options: {
-                plugins: {
-                    title: {
-                        display: true,
-                        text: title
-                    }
-                }
-            }
-        }
-    );
-}
-
-function createOrUpdateCharts(chartId, title, labels, datasets) {
     let keyChartId = `obj-${chartId}`;
     let objChart = window[keyChartId];
     if (objChart) {
@@ -489,14 +459,7 @@ function createOrUpdateCharts(chartId, title, labels, datasets) {
                 labels: labels,
                 datasets: datasets
             },
-            options: {
-                plugins: {
-                    title: {
-                        display: true,
-                        text: title
-                    }
-                }
-            }
+            options: thisOptions,
         }
     );
 }
@@ -517,6 +480,20 @@ function fill_charts() {
         '#ff6384',
         '#36a2eb',
     ];
+    let options = {
+        plugins: {
+            legend: {
+                labels: {
+                    color: "white",
+                },
+            },
+            title: {
+                display: true,
+                color: 'white',
+            }
+        }
+    };
+
     createOrUpdateCharts(
         'chartKindBy',
         'Категория по...',
@@ -551,7 +528,8 @@ function fill_charts() {
                 ],
                 backgroundColor: backgroundColor
             },
-        ]
+        ],
+        options
     );
 
     const numberOfTop = 5;
@@ -559,29 +537,39 @@ function fill_charts() {
     let platform_by_number = sortReversedMapByValue(
         sumMaps(platform_by_number_of_finished_games, platform_by_number_of_finished_watched_games)
     );
-    createOrUpdateChart(
+    createOrUpdateCharts(
         'chartPlatformByNumber',
         `Топ ${numberOfTop} платформ по играм`,
+        // labels
         Array.from(
             platform_by_number.keys()
         ).slice(0, numberOfTop),
-        Array.from(
-            platform_by_number.values()
-        ).slice(0, numberOfTop),
+        // datasets
+        [{
+            data: Array.from(
+                platform_by_number.values()
+            ).slice(0, numberOfTop),
+        }],
+        options
     );
 
     let platform_by_total_price = sortReversedMapByValue(
         sumMaps(platform_by_total_price_of_finished_games, platform_by_total_price_of_finished_watched_games)
     );
-    createOrUpdateChart(
+    createOrUpdateCharts(
         'chartPlatformByPrice',
         `Топ ${numberOfTop} платформ по ценам`,
+        // labels
         Array.from(
             platform_by_total_price.keys()
         ).slice(0, numberOfTop),
-        Array.from(
-            platform_by_total_price.values()
-        ).slice(0, numberOfTop),
+        // datasets
+        [{
+            data: Array.from(
+                platform_by_total_price.values()
+            ).slice(0, numberOfTop),
+        }],
+        options
     );
 }
 

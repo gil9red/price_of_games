@@ -4,6 +4,7 @@
 __author__ = 'ipetrash'
 
 
+import os.path
 from pathlib import Path
 
 
@@ -18,8 +19,9 @@ DB_DIR_NAME.mkdir(parents=True, exist_ok=True)
 DB_FILE_NAME = DB_DIR_NAME / 'games.sqlite'
 
 BACKUP_DIR_LIST = [
-    DIR / 'backup',
-    Path(r'C:\Users\ipetrash\Dropbox\backup_price_of_games'),
+    DIR / 'backup'
 ]
+if additional_backup_dir := os.getenv('ADDITIONAL_BACKUP_DIR'):
+    BACKUP_DIR_LIST.append(Path(additional_backup_dir))
 
 PORT_WEB = 5500

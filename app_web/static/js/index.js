@@ -316,7 +316,7 @@ function fill_table(table_selector, total_class, items) {
         initComplete: function () {
             // Под колонку платформы добавлен фильтр
             let column = this.api().column(COLUMN_PLATFORM);
-            let select = $('<select class="form-control"><option value=""></option></select>')
+            let select = $('<select class="form-control"><option value="">&lt;все&gt;</option></select>')
                 .appendTo($(column.footer()).empty())
                 .on('change', function () {
                     let val = $(this).val();

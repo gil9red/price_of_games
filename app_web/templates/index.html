@@ -237,51 +237,54 @@
             </div>
 
             <div id="fixed_right_panel" class="col-3 p-0 bg-dark text-white">
-                <div class="sticky-top p-2 vh-100 overflow-auto">
-                    <div class="custom-control custom-checkbox">
-                        <input id="checkbox_visible_finished_games" class="custom-control-input" type="checkbox" onclick="set_visible_finished_game($(this).is(':checked'))" checked>
-                        <label for="checkbox_visible_finished_games" class="custom-control-label">
-                            {{ TITLE_FINISHED_GAME }}
-                        </label>
-                    </div>
-                    <button class="btn btn-secondary btn-sm btn-block" onclick="document.location.href='#finished_game_caption_table'">
-                        Перейти к таблице
-                    </button>
-
-                    <hr>
-
-                    <div class="custom-control custom-checkbox">
-                        <input id="checkbox_visible_finished_watched_games" class="custom-control-input" type="checkbox" onclick="set_visible_finished_watched_game($(this).is(':checked'))" checked/>
-                        <label for="checkbox_visible_finished_watched_games" class="custom-control-label">
-                            {{ TITLE_FINISHED_WATCHED }}
-                        </label>
-                    </div>
-                    <button class="btn btn-secondary btn-sm btn-block" onclick="document.location.href='#finished_watched_game_caption_table'">
-                        Перейти к таблице
-                    </button>
-
-                    <hr>
-
-                    <button class="btn btn-outline-success btn-sm btn-block" onclick="run_check()">
-                        <img class="run_check loading" style="display:none" src="{{ url_for('static', filename='images/loading.gif') }}"/>
-                        Запуск проверки новых игр
-                    </button>
-                    <hr>
-
-                    <form id="form__set_price" method="post" action="/set_price">
-                        <h6>Установка цены у игры</h6>
-                        <div class="form-group">
-                            <label for="form_name">Название игры:</label>
-                            <input id="form_name" class="form-control form-control-sm" type="text" name="name" placeholder="Введите название игры...">
+                <div class="sticky-top vh-100 overflow-auto">
+                    <div class="p-2">
+                        <div class="custom-control custom-checkbox">
+                            <input id="checkbox_visible_finished_games" class="custom-control-input" type="checkbox" onclick="set_visible_finished_game($(this).is(':checked'))" checked>
+                            <label for="checkbox_visible_finished_games" class="custom-control-label">
+                                {{ TITLE_FINISHED_GAME }}
+                            </label>
                         </div>
-                        <div class="form-group">
-                            <label for="form_price">Цена:</label>
-                            <input id="form_price" class="form-control form-control-sm" type="text" name="price" placeholder="Введите цену игры..." required>
-                        </div>
-                        <button type="submit" class="btn btn-outline-primary btn-sm btn-block">Установить цену</button>
-                    </form>
+                        <button class="btn btn-secondary btn-sm btn-block" onclick="document.location.href='#finished_game_caption_table'">
+                            Перейти к таблице
+                        </button>
 
-                    <hr>
+                        <hr/>
+
+                        <div class="custom-control custom-checkbox">
+                            <input id="checkbox_visible_finished_watched_games" class="custom-control-input" type="checkbox" onclick="set_visible_finished_watched_game($(this).is(':checked'))" checked/>
+                            <label for="checkbox_visible_finished_watched_games" class="custom-control-label">
+                                {{ TITLE_FINISHED_WATCHED }}
+                            </label>
+                        </div>
+                        <button class="btn btn-secondary btn-sm btn-block" onclick="document.location.href='#finished_watched_game_caption_table'">
+                            Перейти к таблице
+                        </button>
+
+                        <hr/>
+
+                        <button class="btn btn-outline-success btn-sm btn-block" onclick="run_check()">
+                            <img class="run_check loading" style="display:none" src="{{ url_for('static', filename='images/loading.gif') }}"/>
+                            Запуск проверки новых игр
+                        </button>
+
+                        <hr/>
+
+                        <form id="form__set_price" method="post" action="/set_price">
+                            <h6>Установка цены у игры</h6>
+                            <div class="form-group">
+                                <label for="form_name">Название игры:</label>
+                                <input id="form_name" class="form-control form-control-sm" type="text" name="name" placeholder="Введите название игры...">
+                            </div>
+                            <div class="form-group">
+                                <label for="form_price">Цена:</label>
+                                <input id="form_price" class="form-control form-control-sm" type="text" name="price" placeholder="Введите цену игры..." required>
+                            </div>
+                            <button type="submit" class="btn btn-outline-primary btn-sm btn-block">Установить цену</button>
+                        </form>
+
+                        <hr/>
+                    </div>
 
                     <div class="container p-0">
                         <div class="accordion" id="more_actions">
@@ -291,7 +294,7 @@
                                         aria-expanded="true" aria-controls="more_actions_body">Больше действий</a>
                                 </div>
                                 <div id="more_actions_body" class="collapse bg-dark text-white" aria-labelledby="more_actions_head" data-parent="#more_actions">
-                                    <div class="card-body pl-1 pr-1 pt-2">
+                                    <div class="card-body p-2">
                                         <form id="form__rename_game" method="post" action="/rename_game">
                                             <h6>Изменение названия игры</h6>
                                             <div class="form-group">
@@ -306,7 +309,7 @@
                                             <button type="submit" class="btn btn-outline-primary btn-sm btn-block">Изменить название</button>
                                         </form>
 
-                                        <hr>
+                                        <hr/>
                                         <form id="form__check_price" method="post" action="/check_price">
                                             <h6>Вызов проверки цены у игры</h6>
                                             <div class="form-group">
@@ -317,7 +320,7 @@
                                             <button type="submit" class="btn btn-warning btn-sm btn-block">Проверить цену</button>
                                         </form>
 
-                                        <hr>
+                                        <hr/>
                                         <form id="form__check_price_all_non_price_games" action="/check_price_all_non_price_games">
                                             <h6>Вызов проверки цены у всех игр без цены</h6>
                                             <div class="form-group">
@@ -326,7 +329,7 @@
                                             <button type="submit" class="btn btn-warning btn-sm btn-block">Проверить цены всех игр</button>
                                         </form>
 
-                                        <hr>
+                                        <hr/>
                                         <form id="form__delete_game" method="post" action="/delete_game">
                                             <h6>Удаление игры</h6>
                                             <div class="form-group">

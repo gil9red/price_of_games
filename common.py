@@ -22,18 +22,21 @@ FINISHED_GAME = mini_played_games_parser.FINISHED_GAME
 FINISHED_WATCHED = mini_played_games_parser.FINISHED_WATCHED
 
 
-def get_logger(file_name: str, dir_name=DIR_LOG, log_stdout=True, log_file=True) -> logging.Logger:
-    dir_name = Path(dir_name).resolve()
-    dir_name.mkdir(parents=True, exist_ok=True)
-
-    file_name = str(dir_name / Path(file_name).resolve().name) + '.log'
-
-    log = logging.getLogger(file_name)
+def get_logger(
+        logger_name: str,
+        dir_name: Path = DIR_LOG,
+        log_stdout: bool = True,
+        log_file: bool = True
+) -> logging.Logger:
+    log = logging.getLogger(logger_name)
     log.setLevel(logging.DEBUG)
 
     formatter = logging.Formatter('[%(asctime)s] %(filename)s[LINE:%(lineno)d] %(levelname)-8s %(message)s')
 
     if log_file:
+        dir_name.mkdir(parents=True, exist_ok=True)
+        file_name = dir_name / f'{logger_name}.log'
+
         fh = logging.FileHandler(file_name, encoding='utf-8')
         fh.setLevel(logging.DEBUG)
         fh.setFormatter(formatter)

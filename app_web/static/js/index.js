@@ -342,7 +342,7 @@ function fill_table(table_selector, total_class, items) {
     let filterInput = $(table_selector + '_filter input')
         .attr('placeholder', 'Введите для поиска...')
         .wrap('<div class="input-group"></div>')
-        .after('<div class="input-group-append"><button type="button" class="btn btn-danger">&times;</button></div>')
+        .after('<div class="input-group-append"><button type="button" class="btn btn-danger glyphicon glyphicon-remove top-0"></button></div>')
         .removeClass('form-control-sm')
         .css('margin-left', '0');
 

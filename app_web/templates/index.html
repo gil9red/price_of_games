@@ -74,29 +74,22 @@
                 background-color: white !important;
             }
 
-        .card .card-header {
+        .card-header {
             border: 0;
             border-radius: 2px;
             padding: 0;
         }
-
-        .card .card-header .btn-header-link {
+        .card-header [data-toggle="collapse"] {
             background: #6c757d;
             color: white;
             display: block;
             text-align: left;
             box-shadow: 0 0 0 0 !important;
         }
-        #more_actions .card .card-header .btn-header-link {
-            background: #6c757d;
-            color: white;
-        }
-
-        .card .card-header .btn-header-link.collapsed:after {
+        .card-header [data-toggle="collapse"].collapsed:after {
             content: "⮝";
         }
-
-        .card .card-header .btn-header-link:after {
+        .card-header [data-toggle="collapse"]:after {
             content: "⮟";
             font-weight: 900;
             float: right;
@@ -164,26 +157,25 @@
                                 <td class="sum_total_price_games add_ccy"></td>
                             </tr>
                         </table>
-                        <div id="charts" class="container-fluid p-0 mt-2">
-                            <div class="accordion">
-                                <div class="card">
-                                    <div class="card-header" id="charts_head">
-                                        <a href="#" class="btn btn-header-link collapsed" data-toggle="collapse" data-target="#charts_body" aria-expanded="true" aria-controls="charts_body">Графики</a>
+                        <div class="container-fluid card p-0 mt-2">
+                            <div class="card-header">
+                                <button class="btn w-100 collapsed"
+                                        data-toggle="collapse" data-target="#charts"
+                                        aria-expanded="false" aria-controls="charts"
+                                >
+                                    Графики
+                                </button>
+                            </div>
+                            <div id="charts" class="card-body p-2 collapse">
+                                <div class="row">
+                                    <div class="chart-wrapper">
+                                        <canvas id="chartKindBy"></canvas>
                                     </div>
-                                    <div id="charts_body" class="collapse" aria-labelledby="charts_head" data-parent="#charts">
-                                        <div class="card-body pl-1 pr-1 pt-2">
-                                            <div class="row">
-                                                <div class="chart-wrapper">
-                                                    <canvas id="chartKindBy"></canvas>
-                                                </div>
-                                                <div class="chart-wrapper">
-                                                    <canvas id="chartPlatformByNumber"></canvas>
-                                                </div>
-                                                <div class="chart-wrapper">
-                                                    <canvas id="chartPlatformByPrice"></canvas>
-                                                </div>
-                                            </div>
-                                        </div>
+                                    <div class="chart-wrapper">
+                                        <canvas id="chartPlatformByNumber"></canvas>
+                                    </div>
+                                    <div class="chart-wrapper">
+                                        <canvas id="chartPlatformByPrice"></canvas>
                                     </div>
                                 </div>
                             </div>
@@ -287,61 +279,59 @@
                     </div>
 
                     <div class="container p-0">
-                        <div class="accordion" id="more_actions">
-                            <div class="card bg-dark text-white">
-                                <div class="card-header" id="more_actions_head">
-                                    <a href="#" class="btn btn-header-link collapsed" data-toggle="collapse" data-target="#more_actions_body"
-                                        aria-expanded="true" aria-controls="more_actions_body">Больше действий</a>
+                        <div class="card-header">
+                            <button class="btn w-100 collapsed"
+                                    data-toggle="collapse" data-target="#more_actions"
+                                    aria-expanded="false" aria-controls="more_actions"
+                            >
+                                Больше действий
+                            </button>
+                        </div>
+                        <div id="more_actions" class="card-body p-2 collapse">
+                            <form id="form__rename_game" method="post" action="/rename_game">
+                                <h6>Изменение названия игры</h6>
+                                <div class="form-group">
+                                    <label for="form_old_name">Старое название:</label>
+                                    <input id="form_old_name" class="form-control form-control-sm game-name" type="text" readonly>
                                 </div>
-                                <div id="more_actions_body" class="collapse bg-dark text-white" aria-labelledby="more_actions_head" data-parent="#more_actions">
-                                    <div class="card-body p-2">
-                                        <form id="form__rename_game" method="post" action="/rename_game">
-                                            <h6>Изменение названия игры</h6>
-                                            <div class="form-group">
-                                                <label for="form_old_name">Старое название:</label>
-                                                <input id="form_old_name" class="form-control form-control-sm game-name" type="text" readonly>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="form_new_name">Новое название:</label>
-                                                <input id="form_new_name" class="form-control form-control-sm" type="text" name="new_name" placeholder="Введите название игры..." required>
-                                            </div>
-                                            <input type="hidden" class="game-id" name="id"/>
-                                            <button type="submit" class="btn btn-outline-primary btn-sm btn-block">Изменить название</button>
-                                        </form>
-
-                                        <hr/>
-                                        <form id="form__check_price" method="post" action="/check_price">
-                                            <h6>Вызов проверки цены у игры</h6>
-                                            <div class="form-group">
-                                                <label for="form_check_price">Название игры:</label>
-                                                <input id="form_check_price" class="form-control form-control-sm game-name" type="text" name="name" readonly>
-                                            </div>
-                                            <input type="hidden" class="game-id" name="id"/>
-                                            <button type="submit" class="btn btn-warning btn-sm btn-block">Проверить цену</button>
-                                        </form>
-
-                                        <hr/>
-                                        <form id="form__check_price_all_non_price_games" action="/check_price_all_non_price_games">
-                                            <h6>Вызов проверки цены у всех игр без цены</h6>
-                                            <div class="form-group">
-                                                <img class="loading" style="display:none" src="{{ url_for('static', filename='images/loading.gif') }}"/>
-                                            </div>
-                                            <button type="submit" class="btn btn-warning btn-sm btn-block">Проверить цены всех игр</button>
-                                        </form>
-
-                                        <hr/>
-                                        <form id="form__delete_game" method="post" action="/delete_game">
-                                            <h6>Удаление игры</h6>
-                                            <div class="form-group">
-                                                <label for="form__delete_game__name">Название игры:</label>
-                                                <input id="form__delete_game__name" class="form-control form-control-sm game-name" type="text" name="name" readonly>
-                                            </div>
-                                            <input type="hidden" class="game-id" name="id"/>
-                                            <button type="submit" class="btn btn-danger btn-sm btn-block">Удалить</button>
-                                        </form>
-                                    </div>
+                                <div class="form-group">
+                                    <label for="form_new_name">Новое название:</label>
+                                    <input id="form_new_name" class="form-control form-control-sm" type="text" name="new_name" placeholder="Введите название игры..." required>
                                 </div>
-                            </div>
+                                <input type="hidden" class="game-id" name="id"/>
+                                <button type="submit" class="btn btn-outline-primary btn-sm btn-block">Изменить название</button>
+                            </form>
+
+                            <hr/>
+                            <form id="form__check_price" method="post" action="/check_price">
+                                <h6>Вызов проверки цены у игры</h6>
+                                <div class="form-group">
+                                    <label for="form_check_price">Название игры:</label>
+                                    <input id="form_check_price" class="form-control form-control-sm game-name" type="text" name="name" readonly>
+                                </div>
+                                <input type="hidden" class="game-id" name="id"/>
+                                <button type="submit" class="btn btn-warning btn-sm btn-block">Проверить цену</button>
+                            </form>
+
+                            <hr/>
+                            <form id="form__check_price_all_non_price_games" action="/check_price_all_non_price_games">
+                                <h6>Вызов проверки цены у всех игр без цены</h6>
+                                <div class="form-group">
+                                    <img class="loading" style="display:none" src="{{ url_for('static', filename='images/loading.gif') }}"/>
+                                </div>
+                                <button type="submit" class="btn btn-warning btn-sm btn-block">Проверить цены всех игр</button>
+                            </form>
+
+                            <hr/>
+                            <form id="form__delete_game" method="post" action="/delete_game">
+                                <h6>Удаление игры</h6>
+                                <div class="form-group">
+                                    <label for="form__delete_game__name">Название игры:</label>
+                                    <input id="form__delete_game__name" class="form-control form-control-sm game-name" type="text" name="name" readonly>
+                                </div>
+                                <input type="hidden" class="game-id" name="id"/>
+                                <button type="submit" class="btn btn-danger btn-sm btn-block">Удалить</button>
+                            </form>
                         </div>
                     </div>
                 </div>

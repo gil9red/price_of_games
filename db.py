@@ -9,7 +9,7 @@ import time
 import shutil
 
 from datetime import datetime
-from typing import Any, Callable, Type, Iterable
+from typing import Any, Callable, Type, Iterable, Optional
 
 # pip install peewee
 from peewee import Model, TextField, ForeignKeyField, DateTimeField, BooleanField, CharField, IntegerField
@@ -17,6 +17,14 @@ from playhouse.sqliteq import SqliteQueueDatabase
 
 from config import BACKUP_DIR_LIST, DB_FILE_NAME, DB_DIR_NAME
 from third_party.shorten import shorten
+
+
+class NotDefinedParameterException(Exception):
+    def __init__(self, parameter_name: str):
+        self.parameter_name = parameter_name
+        text = f'Parameter "{self.parameter_name}" must be defined!'
+
+        super().__init__(text)
 
 
 def db_create_backup(log: logging.Logger):
@@ -138,6 +146,60 @@ class Game(BaseModel):
             return datetime.fromisoformat(self.modify_price_date)
 
         return self.modify_price_date
+
+    def add_genre(self, genre_name: str) -> 'Genre':
+        genre = Genre.get_by(genre_name)
+        if not genre:
+            raise Exception(f'Неизвестный жанр {genre_name!r}!')
+
+        Game2Genre.create(game=self, genre=genre)
+        return genre
+
+    def get_genres(self) -> list['Genre']:
+        items: list[Genre] = [link.genre for link in self.links_to_genres]
+        items.sort(key=lambda x: x.name)
+        return items
+
+
+class Genre(BaseModel):
+    name = TextField(unique=True)
+    title = TextField()
+    description = TextField()
+
+    @classmethod
+    def get_by(cls, name: str) -> Optional['Genre']:
+        if not name or not name.strip():
+            raise NotDefinedParameterException(parameter_name='name')
+
+        return cls.get_or_none(name=name)
+
+    @classmethod
+    def add(cls, name: str, title: str, description: str) -> 'Genre':
+        obj = cls.get_by(name)
+        if obj:
+            if obj.title != title or obj.description != description:
+                obj.title = title
+                obj.description = description
+                obj.save()
+
+        else:
+            obj = cls.create(
+                name=name,
+                title=title,
+                description=description,
+            )
+
+        return obj
+
+
+class Game2Genre(BaseModel):
+    game = ForeignKeyField(Game, backref='links_to_genres')
+    genre = ForeignKeyField(Genre, backref='links_to_games')
+
+    class Meta:
+        indexes = (
+            (('game', 'genre'), True),
+        )
 
 
 class Settings(BaseModel):

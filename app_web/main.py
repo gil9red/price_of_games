@@ -339,36 +339,6 @@ def get_games():
     return jsonify(data)
 
 
-@app.route("/get_finished_games")
-def get_finished_games():
-    """
-    Функция для возврата списка пройденных игр как json.
-
-    """
-
-    log.debug('Call get_finished_games')
-
-    data = logic.get_finished_games()
-    log.debug(f'Finished games: {len(data)}')
-
-    return jsonify(data)
-
-
-@app.route("/get_finished_watched_games")
-def get_finished_watched_games():
-    """
-    Функция для возврата списка просмотренных игр как json.
-
-    """
-
-    log.debug('Call get_finished_watched_games')
-
-    data = logic.get_finished_watched_games()
-    log.debug(f'Watched games: {len(data)}')
-
-    return jsonify(data)
-
-
 @app.route("/delete_game", methods=['POST'])
 def delete_game():
     """

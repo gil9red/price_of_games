@@ -25,3 +25,4 @@ if additional_backup_dir := os.getenv('ADDITIONAL_BACKUP_DIR'):
     BACKUP_DIR_LIST.append(Path(additional_backup_dir))
 
 PORT_WEB = 5500
+PORT_GET_GAME_GENRES = 5501

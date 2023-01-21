@@ -4,6 +4,7 @@
 __author__ = 'ipetrash'
 
 
+import enum
 import logging
 import time
 import shutil
@@ -12,7 +13,7 @@ from datetime import datetime
 from typing import Any, Callable, Type, Iterable, Optional
 
 # pip install peewee
-from peewee import Model, TextField, ForeignKeyField, DateTimeField, BooleanField, CharField, IntegerField
+from peewee import Model, TextField, ForeignKeyField, DateTimeField, BooleanField, CharField, IntegerField, fn
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from config import BACKUP_DIR_LIST, DB_FILE_NAME, DB_DIR_NAME
@@ -25,6 +26,12 @@ class NotDefinedParameterException(Exception):
         text = f'Parameter "{self.parameter_name}" must be defined!'
 
         super().__init__(text)
+
+
+class ResultEnum(enum.Enum):
+    ADDED = enum.auto()
+    UPDATED = enum.auto()
+    NOTHING = enum.auto()
 
 
 def db_create_backup(log: logging.Logger):
@@ -147,18 +154,27 @@ class Game(BaseModel):
 
         return self.modify_price_date
 
-    def add_genre(self, genre_name: str) -> 'Genre':
+    def add_genre(self, genre_name: str) -> tuple[ResultEnum, 'Genre']:
         genre = Genre.get_by(genre_name)
         if not genre:
             raise Exception(f'Неизвестный жанр {genre_name!r}!')
 
+        if genre in self.get_genres():
+            return ResultEnum.NOTHING, genre
+
         Game2Genre.create(game=self, genre=genre)
-        return genre
+        return ResultEnum.ADDED, genre
 
     def get_genres(self) -> list['Genre']:
         items: list[Genre] = [link.genre for link in self.links_to_genres]
         items.sort(key=lambda x: x.name)
         return items
+
+    @classmethod
+    def get_games_without_genres(cls) -> list['Game']:
+        sub_query = Game2Genre.select().where(Game2Genre.game == cls.id)
+        query = cls.select().where(~fn.EXISTS(sub_query))
+        return list(query)
 
 
 class Genre(BaseModel):
@@ -174,22 +190,23 @@ class Genre(BaseModel):
         return cls.get_or_none(name=name)
 
     @classmethod
-    def add(cls, name: str, title: str, description: str) -> 'Genre':
+    def add_or_update(cls, name: str, title: str, description: str) -> tuple[ResultEnum, 'Genre']:
         obj = cls.get_by(name)
-        if obj:
-            if obj.title != title or obj.description != description:
-                obj.title = title
-                obj.description = description
-                obj.save()
-
-        else:
+        if not obj:
             obj = cls.create(
                 name=name,
                 title=title,
                 description=description,
             )
+            return ResultEnum.ADDED, obj
 
-        return obj
+        if obj.title != title or obj.description != description:
+            obj.title = title
+            obj.description = description
+            obj.save()
+            return ResultEnum.UPDATED, obj
+
+        return ResultEnum.NOTHING, obj
 
 
 class Game2Genre(BaseModel):
@@ -243,8 +260,10 @@ db.create_tables(BaseModel.get_inherited_models())
 # Т.к. в SqliteQueueDatabase запросы на чтение выполняются сразу, а на запись попадают в очередь
 time.sleep(0.050)
 
+
 if __name__ == '__main__':
     BaseModel.print_count_of_tables()
+    # Game: 1689, Game2Genre: 6973, Genre: 78, Platform: 24, Settings: 1
     print()
 
     # print(Settings.get_value('last_run_date'))

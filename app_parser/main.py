@@ -17,6 +17,7 @@ from app_parser.utils import get_games
 from app_parser.logic import append_games_to_database, fill_price_of_games
 from common import get_logger, FINISHED_GAME, FINISHED_WATCHED
 from db import Settings, db_create_backup
+from integrator_genres.main import run as fill_genres_of_games
 from third_party.wait import wait
 
 
@@ -56,6 +57,9 @@ def run() -> tuple[int, int]:
 
     # Заполнение цен игр
     fill_price_of_games()
+
+    # Заполнение жанров игр
+    fill_genres_of_games()
 
     # Создание дубликата базы
     if added_finished_games or added_watched_games:

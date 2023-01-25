@@ -6,10 +6,7 @@ __author__ = 'ipetrash'
 
 import time
 
-from common import (
-    FINISHED_GAME, FINISHED_WATCHED, WebUserAlertException,
-    log_common, log_append_game,
-)
+from common import FINISHED_GAME, FINISHED_WATCHED, WebUserAlertException, log_common, log_append_game
 from db import Game, Platform
 
 from app_parser import models
@@ -36,6 +33,10 @@ def get_games_by_kind(kind: str) -> list[models.GameInfo]:
             price=game.price,
             append_date=game.append_date_dt.strftime('%d/%m/%Y %H:%M:%S'),
             append_date_timestamp=int(game.append_date_dt.timestamp()),
+            genres=[
+                models.Genre(**genre.to_dict())
+                for genre in game.get_genres()
+            ]
         )
         for game in query
     ]

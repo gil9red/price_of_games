@@ -14,6 +14,7 @@ from typing import Any, Callable, Type, Iterable, Optional
 
 # pip install peewee
 from peewee import Model, TextField, ForeignKeyField, DateTimeField, BooleanField, CharField, IntegerField, fn
+from playhouse.shortcuts import model_to_dict
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from config import BACKUP_DIR_LIST, DB_FILE_NAME, DB_DIR_NAME
@@ -93,6 +94,9 @@ class BaseModel(Model):
         if filters:
             query = query.filter(*filters)
         return query.count()
+
+    def to_dict(self) -> dict:
+        return model_to_dict(self)
 
     def __str__(self):
         fields = []
@@ -179,7 +183,6 @@ class Game(BaseModel):
 
 class Genre(BaseModel):
     name = TextField(unique=True)
-    title = TextField()
     description = TextField()
 
     @classmethod
@@ -190,18 +193,16 @@ class Genre(BaseModel):
         return cls.get_or_none(name=name)
 
     @classmethod
-    def add_or_update(cls, name: str, title: str, description: str) -> tuple[ResultEnum, 'Genre']:
+    def add_or_update(cls, name: str, description: str) -> tuple[ResultEnum, 'Genre']:
         obj = cls.get_by(name)
         if not obj:
             obj = cls.create(
                 name=name,
-                title=title,
                 description=description,
             )
             return ResultEnum.ADDED, obj
 
-        if obj.title != title or obj.description != description:
-            obj.title = title
+        if obj.description != description:
             obj.description = description
             obj.save()
             return ResultEnum.UPDATED, obj

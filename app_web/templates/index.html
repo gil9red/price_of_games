@@ -22,6 +22,9 @@
 
     <script src="{{ url_for('static', filename='chartjs-4.1.1/chart.umd.js') }}"></script>
 
+    <script type="text/javascript" src="{{ url_for('static', filename='tagify-4.17.7/tagify.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='tagify-4.17.7/tagify.css') }}" />
+
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-dark.min_3.0.0.css') }}" />
 
     <style>
@@ -108,6 +111,66 @@
             width: 300px;
             height: 300px;
         }
+
+        /* Изменение стиля кнопок отображения/скрытия деталей строк таблицы */
+        table.dataTable td.dt-control:before,
+        table.dataTable tr.dt-hasChild td.dt-control::before {
+            background-color: transparent !important;
+            font-size: 1.2em;
+        }
+
+        /* Изменение стилей виджета тегов для темной темы */
+        .tagify {
+            --tag-bg: #6c757d;
+            --tag-text-color: #e9ecef;
+            --tag-hover: #3395ff;
+            --placeholder-color: #838e99;
+            --placeholder-color-focus: #838e99;
+            --tags-border-color: transparent;
+
+            width: 100%;
+        }
+        .tagify__dropdown > * {
+            background-color: #191d21;
+            color: #d3d3d3;
+        }
+        .tagify__dropdown__item:hover {
+            background-color: #3395ff;
+        }
+        .tagify__tag:hover {
+            background: #3395ff;
+        }
+
+        /* Спрячем кнопку удаления тега */
+        .tagify__tag__removeBtn {
+            display: none;
+        }
+
+        .genre:hover,
+        .platform:hover {
+            background-color: #3395ff;
+            color: white;
+            cursor: pointer;
+            padding: .2em;
+            border-radius: .25rem;
+        }
+
+        [aria-controls="fixed_right_panel"]:hover,
+        [aria-controls="fixed_right_panel"]:active {
+            text-decoration: none;
+        }
+        [aria-controls="fixed_right_panel"]:hover {
+            transform: scale(1.2);
+        }
+        [aria-controls="fixed_right_panel"]:before {
+            font-family: 'Glyphicons Halflings';
+            content: "\e105";  /* .glyphicon-eye-open */
+            color: #3395ff;
+            font-size: 1.5em;
+        }
+        [aria-controls="fixed_right_panel"][aria-expanded="false"]:before {
+            content: "\e106"; /* .glyphicon-eye-close */
+        }
     </style>
 
     <script>
@@ -134,11 +197,12 @@
 
     <div class="container-fluid">
         <div class="row">
-            <div class="col-9">
-                <nav id="tabs">
+            <div id="left-side" class="col">
+                <nav>
                     <div class="nav nav-tabs" id="nav-tab" role="tablist">
                         <a class="nav-item nav-link active" id="nav-stats-tab" data-toggle="tab" href="#nav-stats" role="tab" aria-controls="nav-stats" aria-selected="true">Статистика</a>
                         <a class="nav-item nav-link" id="nav-debug-tab" data-toggle="tab" href="#nav-debug" role="tab" aria-controls="nav-debug" aria-selected="false">Отладка</a>
+                        <a class="ml-auto collapsed glyphicon-eye-close p-0" data-toggle="collapse" href="#fixed_right_panel" role="button" aria-expanded="false" aria-controls="fixed_right_panel"></a>
                     </div>
                 </nav>
                 <div class="tab-content" id="nav-tabContent">
@@ -205,12 +269,19 @@
 
                 <br>
 
-                <h4 id="finished_game_caption_table" class="text-center">{{ TITLE_FINISHED_GAME }} <div class="finished_game_statistic" style="display:inline-block;"></div></h4>
+                <h4 id="finished_game_caption_table" class="text-center">{{ TITLE_FINISHED_GAME }} <div class="finished_game_statistic" style="display:inline-block;"></div>
+                    <div class="row loading-spinner" style="display: none">
+                        <div class="spinner-border text-primary m-auto" role="status">
+                            <span class="sr-only">Загрузка...</span>
+                        </div>
+                    </div>
+                </h4>
                 <table id="finished_game" class="table table-striped table-bordered w-100">
                     <thead class="thead-dark"></thead>
                     <tfoot>
                         <tr>
-                            <th></th>
+                            <th></th> <!-- Колонка для кнопки раскрытия деталей -->
+                            <th class="p-0"></th>
                             <th class="p-0"></th>
                             <th class="text-right">Итого:</th>
                             <th></th>
@@ -220,12 +291,19 @@
                 <br>
                 <br>
 
-                <h4 id="finished_watched_game_caption_table" class="text-center">{{ TITLE_FINISHED_WATCHED }} <div class="finished_watched_game_statistic" style="display:inline-block;"></div></h4>
+                <h4 id="finished_watched_game_caption_table" class="text-center">{{ TITLE_FINISHED_WATCHED }} <div class="finished_watched_game_statistic" style="display:inline-block;"></div>
+                    <div class="row loading-spinner" style="display: none">
+                        <div class="spinner-border text-primary m-auto" role="status">
+                            <span class="sr-only">Загрузка...</span>
+                        </div>
+                    </div>
+                </h4>
                 <table id="finished_watched_game" class="table table-striped table-bordered w-100">
                     <thead class="thead-dark"></thead>
                     <tfoot>
                         <tr>
-                            <th></th>
+                            <th></th> <!-- Колонка для кнопки раскрытия деталей -->
+                            <th class="p-0"></th>
                             <th class="p-0"></th>
                             <th class="text-right">Итого:</th>
                             <th></th>
@@ -237,9 +315,9 @@
                 <br>
             </div>
 
-            <div id="fixed_right_panel" class="col-3 p-0 bg-dark text-white">
+            <div id="fixed_right_panel" class="col-3 p-0 bg-dark text-white collapse">
                 <div class="sticky-top vh-100 overflow-auto">
-                    <div class="p-2">
+                    <div class="pt-2 pl-2 pr-2">
                         <div class="custom-control custom-checkbox">
                             <input id="checkbox_visible_finished_games" class="custom-control-input" type="checkbox" onclick="set_visible_finished_game($(this).is(':checked'))" checked>
                             <label for="checkbox_visible_finished_games" class="custom-control-label">
@@ -264,7 +342,7 @@
 
                         <hr/>
 
-                        <button class="btn btn-outline-success btn-sm btn-block" onclick="run_check()">
+                        <button class="btn btn-primary btn-sm btn-block" onclick="run_check()">
                             <img class="run_check loading" style="display:none" src="{{ url_for('static', filename='images/loading.gif') }}"/>
                             Запуск проверки новых игр
                         </button>
@@ -283,10 +361,8 @@
                             </div>
                             <button type="submit" class="btn btn-outline-primary btn-sm btn-block">Установить цену</button>
                         </form>
-
-                        <hr/>
                     </div>
-
+                    <hr/>
                     <div class="container p-0">
                         <div class="card-header">
                             <button class="btn w-100 collapsed"

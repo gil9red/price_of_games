@@ -15,14 +15,19 @@ class Game:
 
 
 @dataclass
-class GameInfo:
+class Genre:
     id: int
     name: str
-    kind: str
-    platform: str
+    description: str
+
+
+@dataclass
+class GameInfo(Game):
+    id: int
     price: int | None
     append_date: str
     append_date_timestamp: int
+    genres: list[Genre]
 
 
 @dataclass

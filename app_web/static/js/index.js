@@ -1,10 +1,14 @@
-const COLUMN_PLATFORM = 1;
-const COLUMN_APPEND_DATE = 2;
-const COLUMN_PRICE = 3;
+const COLUMN_DETAIL = 0;
+const COLUMN_NAME = 1;
+const COLUMN_PLATFORM = 2;
+const COLUMN_APPEND_DATE = 3;
+const COLUMN_PRICE = 4;
+
 
 $.noty.defaults.theme = 'defaultTheme';
 $.noty.defaults.layout = 'bottomRight';
 $.noty.defaults.timeout = 6000;
+
 
 function run_check() {
     $.ajax({
@@ -41,6 +45,10 @@ function run_check() {
     });
 }
 
+function onChangeVisibleFixedRightPanel(visible) {
+    localStorage.fixed_right_panel = visible;
+}
+
 $(document).ready(function() {
     // hide #back-top first
     $("#back-top").hide();
@@ -63,6 +71,14 @@ $(document).ready(function() {
             return false;
         });
     });
+
+    let fixedRightPanel = $('#fixed_right_panel');
+    if (localStorage.fixed_right_panel != null) {
+        let visible = localStorage.fixed_right_panel == "true";
+        fixedRightPanel.collapse(visible ? 'show' : 'hide');
+    }
+    fixedRightPanel.on("show.bs.collapse", () => onChangeVisibleFixedRightPanel(true));
+    fixedRightPanel.on("hide.bs.collapse", () => onChangeVisibleFixedRightPanel(false));
 });
 
 function set_visible_finished_game(visible) {
@@ -251,16 +267,160 @@ function append_date_render(data, type, row, meta) {
     return row.append_date_timestamp;
 }
 
+function genres_render(genres) {
+    let tags = [];
+    for (let genre of genres) {
+        let name = genre.name;
+        if (genre.description) {
+            tags.push(`<abbr class="genre" title="${genre.description}">${name}</abbr>`);
+        } else {
+            tags.push(`<span class="genre">${name}</span>`);
+        }
+    }
+    return tags.join(', ');
+}
+
+function format_detail_row(row) {
+    let genres = genres_render(row.genres);
+    return `
+        <table class="table-borderless table-sm">
+            <tbody>
+                <tr><td class="font-weight-bold">Жанры:</td><td>${genres}</td></tr>
+            </tbody>
+        </table>
+    `
+}
+
+function for_filter_render(data, type, row, meta) {
+    if (type === 'filter') {
+        return row.genres.map(genre => genre.name).join(', ');
+    }
+    return data;
+}
+
+function setVisibleProgress(table_selector, visible) {
+    let selector = `${table_selector}_caption_table .loading-spinner`;
+    $(selector).toggle(visible);
+}
+
+function platform_render(data, type, row, meta) {
+    if (type === 'filter') {
+        return data;
+    }
+    return `<span class="platform">${data}</span>`;
+}
+
+function createTags(elementJQuery, items, tableEl, queryTag) {
+    // Инициализация платформ
+    let tagify = new Tagify(elementJQuery[0], {
+        whitelist: items,
+        enforceWhitelist: true,
+        skipInvalid: true,
+        dropdown: {
+            enabled: 0,
+            closeOnSelect: false,
+            maxItems: items.length,
+        },
+        callbacks: {
+            // Удаление тега при клике на него
+            "click": (e) => e.detail.tagify.removeTags(e.detail.tag),
+        },
+    });
+
+    tableEl.on('click', queryTag, function () {
+        let text = $(this).text();
+        tagify.addTags(text);
+    });
+}
+
+function createFilterOfPlatforms(table, tableEl) {
+    // Под колонку платформы добавлен фильтр
+    let columnPlatform = table.api().column(COLUMN_PLATFORM);
+
+    let filterPlatform = $('<input placeholder="Платформы...">')
+        .appendTo($(columnPlatform.footer()).empty())
+        .on('change', function () {
+            let val = $(this).val();
+            if (val) {
+                let values = JSON.parse(val).map(x => '^' + $.fn.dataTable.util.escapeRegex(x.value) + '$');
+                let query = values.join('|');
+                columnPlatform.search(
+                    query,
+                    true,  // regexp
+                    false  // smart
+                ).draw();
+            } else {
+                columnPlatform.search("").draw();
+            }
+        });
+
+    let platforms = [];
+    columnPlatform
+        .data()
+        .unique()
+        .sort()
+        .each(function (d, j) {
+            platforms.push(d);
+        });
+
+    let commonCallbacks = {
+        // Удаление тега при клике на него
+        "click": (e) => e.detail.tagify.removeTags(e.detail.tag),
+    };
+
+    // Инициализация платформ
+    createTags(filterPlatform, platforms, tableEl, '.platform');
+}
+
+function createFilterOfGenres(table, tableEl) {
+    // Под колонку названия добавлен фильтр по жанрам
+    let columnName = table.api().column(COLUMN_NAME);
+
+    // Но поиск будет в колонке деталей - там размещен рендер для поиска жанров
+    let columnDetail = table.api().column(COLUMN_DETAIL);
+
+    let filterGenres = $('<input placeholder="Жанры...">')
+        .appendTo($(columnName.footer()).empty())
+        .on('change', function () {
+            let val = $(this).val();
+            if (val) {
+                let values = JSON.parse(val).map(x => `"${x.value}"`);
+                let query = values.join(' ');
+                columnDetail.search(
+                    query,
+                    false, // regexp
+                    true   // smart
+                ).draw();
+            } else {
+                columnDetail.search("").draw();
+            }
+        });
+
+    // Заполнение жанров из текущей таблицы
+    let genres = new Set();
+    table.api().rows().every(function (rowIdx, tableLoop, rowLoop) {
+        for (let genre of this.data().genres) {
+            genres.add(genre.name);
+        }
+    });
+    genres = Array.from(genres).sort();
+
+    // Инициализация жанров
+    createTags(filterGenres, genres, tableEl, '.genre');
+}
+
 function fill_table(table_selector, total_class, items) {
+    let tableEl = $(table_selector);
+
     if ($.fn.dataTable.isDataTable(table_selector)) {
-        $(table_selector).DataTable()
+        tableEl.DataTable()
             .clear()
             .rows.add(items)
             .draw();
         return;
     }
 
-    let table = $(table_selector).DataTable({
+    let table = tableEl.DataTable({
         // Теперь поле поиска будет занимать 9/12 места, вместо 6/12
         dom: "<'row'<'col-sm-12 col-md-3'l><'col-sm-12 col-md-9'f>>" +
              "<'row'<'col-sm-12'tr>>" +
@@ -271,8 +431,15 @@ function fill_table(table_selector, total_class, items) {
             ["5 записей", "10 записей", "25 записей", "50 записей", "Все записи"]
         ],
         columns: [
+            {
+                class: 'dt-control',
+                orderable: false,
+                data: null,
+                defaultContent: '',
+                render: for_filter_render,
+            },
             { title: "Название", data: 'name' },
-            { title: "Платформа", data: 'platform' },
+            { title: "Платформа", data: 'platform', render: platform_render },
             { title: "Дата добавления", data: 'append_date', render: append_date_render },
             { title: "Цена (руб.)", data: 'price', type: 'num', render: price_render },
         ],
@@ -314,22 +481,27 @@ function fill_table(table_selector, total_class, items) {
             );
         },
         initComplete: function () {
-            // Под колонку платформы добавлен фильтр
-            let column = this.api().column(COLUMN_PLATFORM);
-            let select = $('<select class="form-control"><option value="">&lt;все&gt;</option></select>')
-                .appendTo($(column.footer()).empty())
-                .on('change', function () {
-                    let val = $(this).val();
-                    column.search(val).draw();
-                });
-            column
-                .data()
-                .unique()
-                .sort()
-                .each(function (d, j) {
-                    select.append(`<option value="${d}">${d}</option>`);
-                });
+            createFilterOfPlatforms(this, tableEl);
+            createFilterOfGenres(this, tableEl);
+
+            setVisibleProgress(table_selector, false);
         },
+    });
+
+    // Добавление обработчика для отображения/скрытия деталей строки
+    $(table_selector + ' tbody').on('click', 'td.dt-control', function () {
+        let tr = $(this).closest('tr');
+        let row = table.row(tr);
+
+        if (row.child.isShown()) {
+            // This row is already open - close it
+            row.child.hide();
+            tr.removeClass('shown');
+        } else {
+            // Open this row
+            row.child(format_detail_row(row.data())).show();
+            tr.addClass('shown');
+        }
     });
 
     // Удаление -sm из виджета выбора количества записей
@@ -364,19 +536,18 @@ function fill_table(table_selector, total_class, items) {
         table.search('').draw();
     });
 
-    table
-        .on('select', function(e, dt, type, indexes) {
-            let row = table.row(indexes[0]).data();
+    table.on('select', function(e, dt, type, indexes) {
+        let row = table.row(indexes[0]).data();
 
-            // Если у текущей игры цены нет, то автоматически добавляем название игры
-            // в поле установки цены
-            if (row.price == null) {
-                $('#form_name').val(row.name);
-            }
+        // Если у текущей игры цены нет, то автоматически добавляем название игры
+        // в поле установки цены
+        if (row.price == null) {
+            $('#form_name').val(row.name);
+        }
 
-            $('form input.game-id').val(row.id);
-            $('form input.game-name').val(row.name);
-        });
+        $('form input.game-id').val(row.id);
+        $('form input.game-name').val(row.name);
+    });
 }
 
 function fill_game_tables() {
@@ -575,6 +746,10 @@ function fill_charts() {
 
 // Функция загружает все игры, перезаполняет таблицы игр, подсчитывает итого и статистику
 function load_tables() {
+    // TODO: Переиспользование селекторов таблиц
+    setVisibleProgress('#finished_game', true);
+    setVisibleProgress('#finished_watched_game', true);
+
     $.ajax({
         url: '/get_games',
         dataType: "json",  // тип данных загружаемых с сервера

@@ -564,29 +564,46 @@ function fill_game_tables() {
 function callStatisticsByGames(games) {
     let platform_by_total_price = new Map();
     let platform_by_number = new Map();
+    let genre_by_number = new Map();
+    let genre_by_total_price = new Map();
     let total_price = 0;
 
     for (let row of games) {
         total_price += row.price;
 
-        let price = platform_by_total_price.has(row.platform)
-            ? platform_by_total_price.get(row.platform)
-            : 0;
-        platform_by_total_price.set(
-            row.platform,
-            row.price + price
-        );
+        let platform_name = row.platform;
 
-        let number = platform_by_number.has(row.platform)
-            ? platform_by_number.get(row.platform)
+        let price = platform_by_total_price.has(platform_name)
+            ? platform_by_total_price.get(platform_name)
             : 0;
-        platform_by_number.set(
-            row.platform,
-            number + 1
-        );
+        platform_by_total_price.set(platform_name, row.price + price);
+
+        let number = platform_by_number.has(platform_name)
+            ? platform_by_number.get(platform_name)
+            : 0;
+        platform_by_number.set(platform_name, number + 1);
+
+        for (let genre of row.genres) {
+            let genre_name = genre.name;
+            let number = genre_by_number.has(genre_name)
+                ? genre_by_number.get(genre_name)
+                : 0;
+            genre_by_number.set(genre_name, number + 1);
+
+            let price = genre_by_total_price.has(genre_name)
+                ? genre_by_total_price.get(genre_name)
+                : 0;
+            genre_by_total_price.set(genre_name, row.price + price);
+        }
     }
 
-    return [platform_by_total_price, platform_by_number, total_price];
+    return [
+        platform_by_total_price,
+        platform_by_number,
+        total_price,
+        genre_by_number,
+        genre_by_total_price
+    ];
 }
 
 function sumMaps(map1, map2) {
@@ -639,12 +656,16 @@ function fill_charts() {
     let [
         platform_by_total_price_of_finished_games,
         platform_by_number_of_finished_games,
-        total_price_of_finished_games
+        total_price_of_finished_games,
+        genre_by_number_of_finished_games,
+        genre_by_total_price_of_finished_games
     ] = callStatisticsByGames(window.finished_games);
     let [
         platform_by_total_price_of_finished_watched_games,
         platform_by_number_of_finished_watched_games,
-        total_price_of_finished_watched_games
+        total_price_of_finished_watched_games,
+        genre_by_number_of_finished_watched_games,
+        genre_by_total_price_of_finished_watched_games
     ] = callStatisticsByGames(window.finished_watched_games);
 
     let backgroundColor = [
@@ -738,6 +759,44 @@ function fill_charts() {
         [{
             data: Array.from(
                 platform_by_total_price.values()
+            ).slice(0, numberOfTop),
+        }],
+        options
+    );
+
+    let genre_by_number = sortReversedMapByValue(
+        sumMaps(genre_by_number_of_finished_games, genre_by_number_of_finished_watched_games)
+    );
+    createOrUpdateCharts(
+        'chartGenreByNumber',
+        `Топ ${numberOfTop} жанров по играм`,
+        // labels
+        Array.from(
+            genre_by_number.keys()
+        ).slice(0, numberOfTop),
+        // datasets
+        [{
+            data: Array.from(
+                genre_by_number.values()
+            ).slice(0, numberOfTop),
+        }],
+        options
+    );
+
+    let genre_by_price = sortReversedMapByValue(
+        sumMaps(genre_by_total_price_of_finished_games, genre_by_total_price_of_finished_watched_games)
+    );
+    createOrUpdateCharts(
+        'chartGenreByPrice',
+        `Топ ${numberOfTop} жанров по ценам`,
+        // labels
+        Array.from(
+            genre_by_price.keys()
+        ).slice(0, numberOfTop),
+        // datasets
+        [{
+            data: Array.from(
+                genre_by_price.values()
             ).slice(0, numberOfTop),
         }],
         options

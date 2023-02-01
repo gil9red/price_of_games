@@ -479,12 +479,12 @@ function fill_table(table_selector, total_class, items) {
             $(column_price.footer()).html(
                 toPrettyPrice(total)
             );
+
+            setVisibleProgress(table_selector, false);
         },
         initComplete: function () {
             createFilterOfPlatforms(this, tableEl);
             createFilterOfGenres(this, tableEl);
-
-            setVisibleProgress(table_selector, false);
         },
     });
 

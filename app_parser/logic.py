@@ -31,8 +31,8 @@ def get_games_by_kind(kind: str) -> list[models.GameInfo]:
             kind=game.kind,
             platform=game.platform.name,
             price=game.price,
-            append_date=game.append_date_dt.strftime('%d/%m/%Y %H:%M:%S'),
-            append_date_timestamp=int(game.append_date_dt.timestamp()),
+            append_date=game.append_date.strftime('%d/%m/%Y %H:%M:%S'),
+            append_date_timestamp=int(game.append_date.timestamp()),
             genres=[
                 models.Genre(**genre.to_dict())
                 for genre in game.get_genres()
@@ -226,7 +226,7 @@ def append_games_to_database(
         log_common.info(f'Добавляю новую игру {name!r} ({game.platform}, {game.kind})')
         log_append_game.info(f'Добавляю новую игру {name!r} ({game.platform}, {game.kind})')
 
-        Game.create(name=name, platform=platform, kind=game.kind)
+        Game.add(name, platform, game.kind)
         return True
 
     # Добавление в базу пройденных игр

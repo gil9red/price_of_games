@@ -33,6 +33,7 @@ class ResultEnum(enum.Enum):
     ADDED = enum.auto()
     UPDATED = enum.auto()
     NOTHING = enum.auto()
+    DELETED = enum.auto()
 
 
 def db_create_backup(log: logging.Logger):
@@ -125,62 +126,6 @@ class Platform(BaseModel):
         return cls.get_or_create(name=name)[0]
 
 
-class Game(BaseModel):
-    name = TextField()
-    platform = ForeignKeyField(Platform, backref='games')
-    kind = TextField()
-    price = IntegerField(null=True)
-    append_date = DateTimeField(default=datetime.now)
-    modify_price_date = DateTimeField(default=datetime.now)
-    has_checked_price = BooleanField(default=False)
-
-    class Meta:
-        indexes = (
-            (("name", "platform", "kind"), True),
-        )
-
-    def set_price(self, value: int):
-        self.price = value
-        self.modify_price_date = datetime.now()
-        self.save()
-
-    @property
-    def append_date_dt(self) -> datetime | DateTimeField:
-        if isinstance(self.append_date, str):
-            return datetime.fromisoformat(self.append_date)
-
-        return self.append_date
-
-    @property
-    def modify_price_date_dt(self) -> datetime | DateTimeField:
-        if isinstance(self.modify_price_date, str):
-            return datetime.fromisoformat(self.modify_price_date)
-
-        return self.modify_price_date
-
-    def add_genre(self, genre_name: str) -> tuple[ResultEnum, 'Genre']:
-        genre = Genre.get_by(genre_name)
-        if not genre:
-            raise Exception(f'Неизвестный жанр {genre_name!r}!')
-
-        if genre in self.get_genres():
-            return ResultEnum.NOTHING, genre
-
-        Game2Genre.create(game=self, genre=genre)
-        return ResultEnum.ADDED, genre
-
-    def get_genres(self) -> list['Genre']:
-        items: list[Genre] = [link.genre for link in self.links_to_genres]
-        items.sort(key=lambda x: x.name)
-        return items
-
-    @classmethod
-    def get_games_without_genres(cls) -> list['Game']:
-        sub_query = Game2Genre.select().where(Game2Genre.game == cls.id)
-        query = cls.select().where(~fn.EXISTS(sub_query))
-        return list(query)
-
-
 class Genre(BaseModel):
     name = TextField(unique=True)
     description = TextField()
@@ -208,6 +153,105 @@ class Genre(BaseModel):
             return ResultEnum.UPDATED, obj
 
         return ResultEnum.NOTHING, obj
+
+
+class Game(BaseModel):
+    name = TextField()
+    platform = ForeignKeyField(Platform, backref='games')
+    kind = TextField()
+    price = IntegerField(null=True)
+    append_date = DateTimeField(default=datetime.now)
+    modify_price_date = DateTimeField(default=datetime.now)
+    has_checked_price = BooleanField(default=False)
+
+    class Meta:
+        indexes = (
+            (("name", "platform", "kind"), True),
+        )
+
+    @classmethod
+    def get_by(cls, name: str, platform: Platform, kind: str) -> Optional['Game']:
+        if not name or not name.strip():
+            raise NotDefinedParameterException(parameter_name='name')
+
+        if not platform:
+            raise NotDefinedParameterException(parameter_name='platform')
+
+        if not kind or not kind.strip():
+            raise NotDefinedParameterException(parameter_name='kind')
+
+        return cls.get_or_none(name=name, platform=platform, kind=kind)
+
+    @classmethod
+    def add(cls, name: str, platform: Platform, kind: str) -> 'Game':
+        obj = cls.get_by(name, platform, kind)
+        if not obj:
+            obj = cls.create(
+                name=name,
+                platform=platform,
+                kind=kind
+            )
+
+        return obj
+
+    def set_price(self, value: int):
+        self.price = value
+        self.modify_price_date = datetime.now()
+        self.save()
+
+    def add_genre(self, genre: str | Genre) -> tuple[ResultEnum, Genre]:
+        if isinstance(genre, str):
+            genre = Genre.get_by(genre)
+            if not genre:
+                raise Exception(f'Неизвестный жанр {genre!r}!')
+
+        if genre in self.get_genres():
+            return ResultEnum.NOTHING, genre
+
+        Game2Genre.create(game=self, genre=genre)
+        return ResultEnum.ADDED, genre
+
+    def get_genres(self) -> list[Genre]:
+        items: list[Genre] = [link.genre for link in self.links_to_genres]
+        items.sort(key=lambda x: x.name)
+        return items
+
+    def set_genres(self, genres: list[str]) -> dict[ResultEnum, int]:
+        result = {
+            ResultEnum.ADDED: 0,
+            ResultEnum.DELETED: 0,
+            ResultEnum.NOTHING: 0,
+        }
+
+        genres: list[Genre] = [Genre.get_by(name) for name in genres]
+        current_genres: list[Genre] = [link.genre for link in self.links_to_genres]
+
+        # Если игры есть жанры, которых нет среди тех, что были переданы
+        to_deleted = []
+        for link in self.links_to_genres:
+            if link.genre in genres:
+                result[ResultEnum.NOTHING] += 1
+            else:
+                to_deleted.append(link)
+
+        for link in to_deleted:
+            link.delete_instance()
+
+        result[ResultEnum.DELETED] = len(to_deleted)
+
+        # Если у игры нет жанра из тех, что были переданы
+        for genre in genres:
+            if genre not in current_genres:
+                result[ResultEnum.ADDED] += 1
+                self.add_genre(genre)
+
+        return result
+
+    @classmethod
+    def get_games_without_genres(cls) -> list['Game']:
+        sub_query = Game2Genre.select().where(Game2Genre.game == cls.id)
+        query = cls.select().where(~fn.EXISTS(sub_query))
+        return list(query)
 
 
 class Game2Genre(BaseModel):

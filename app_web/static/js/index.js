@@ -485,6 +485,8 @@ function fill_table(table_selector, total_class, items) {
         initComplete: function () {
             createFilterOfPlatforms(this, tableEl);
             createFilterOfGenres(this, tableEl);
+
+            tableEl.show();
         },
     });
 

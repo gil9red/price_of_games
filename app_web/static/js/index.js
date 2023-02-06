@@ -487,6 +487,7 @@ function fill_table(table_selector, total_class, items) {
             createFilterOfGenres(this, tableEl);
 
             tableEl.show();
+            this.api().columns.adjust().draw();
         },
     });
 

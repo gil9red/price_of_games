@@ -10,30 +10,36 @@ $.noty.defaults.layout = 'bottomRight';
 $.noty.defaults.timeout = 6000;
 
 
+function on_ajax_success(data) {
+    console.log(data);
+
+    let ok = data.status == 'ok';
+    if (data.text) {
+        noty({
+            text: data.text,
+            type: ok ? 'success' : 'warning',
+        });
+    }
+
+    if (ok && data.result) {
+        load_tables();
+    }
+}
+
+function on_ajax_error(data, reason) {
+    noty({
+        text: `На сервере произошла неожиданная ошибка ${reason}`,
+        type: 'error',
+    });
+}
+
+
 function run_check() {
     $.ajax({
         url: "/run_check",
         method: "POST",
-        success: function(data) {
-            console.log(data);
-
-            let ok = data.status == 'ok';
-            noty({
-                text: data.text,
-                type: ok ? 'success' : 'warning',
-            });
-
-            if (ok && data.data != null) {
-                load_tables();
-            }
-        },
-
-        error: function(data) {
-            noty({
-                text: 'На сервере произошла ошибка',
-                type: 'error',
-            });
-        },
+        success: on_ajax_success,
+        error: data => on_ajax_error(data, 'при запуске проверки цен'),
 
         beforeSend: function() {
             $('.run_check.loading').show();
@@ -47,6 +53,27 @@ function run_check() {
 
 function onChangeVisibleFixedRightPanel(visible) {
     localStorage.fixed_right_panel = visible;
+}
+
+function getGenresFromForm() {
+    let inputGenres = $('#form_genres');
+    let value = JSON.parse(inputGenres.val() || "[]");
+    return value.map(e => e.value).sort();
+}
+
+function updateStatesFormSetGenres() {
+    let genres = getGenresFromForm();
+
+    let inputGenres = $('#form_genres');
+    let oldGenres = inputGenres.data('old-value').sort();
+
+    let isNoGenres = genres.length == 0;
+    let isNoChanges = JSON.stringify(oldGenres) === JSON.stringify(genres);
+
+    // Отключение кнопки отправки при пустом списке жанров
+    window.formGenresButtonOk.prop("disabled", isNoGenres || isNoChanges);
+
+    window.formGenresButtonCancel.prop("disabled", isNoChanges);
 }
 
 $(document).ready(function() {
@@ -79,6 +106,18 @@ $(document).ready(function() {
     }
     fixedRightPanel.on("show.bs.collapse", () => onChangeVisibleFixedRightPanel(true));
     fixedRightPanel.on("hide.bs.collapse", () => onChangeVisibleFixedRightPanel(false));
+
+    $('#form__set_genres')[0].reset();
+
+    window.formGenresButtonOk = $('#form__set_genres button[data-role="accept"]');
+
+    window.formGenresButtonCancel = $('#form__set_genres button[data-role="cancel"]');
+    window.formGenresButtonCancel.click(function () {
+        let inputGenres = $('#form_genres');
+        let genres = inputGenres.data('old-value');
+        window.formGenres.removeAllTags();
+        window.formGenres.addTags(genres);
+    });
 });
 
 function set_visible_finished_game(visible) {
@@ -167,7 +206,28 @@ function open_tab_with_google_search_from_game_name(text) {
 
 function open_tab_with_google_search_from_game_name_en(text) {
     let url = 'https://www.google.com/search?q=' + encodeURIComponent(text) + ' price buy';
-    console.log(`open_tab_with_google_search("${text}") -> ${url}`);
+    console.log(`open_tab_with_google_search_from_game_name_en("${text}") -> ${url}`);
+
+    window.open(url);
+}
+
+function open_tab_genres_with_google_search_from_game_name(text) {
+    let url = 'https://www.google.com/search?q=' + encodeURIComponent(text) + ' жанры';
+    console.log(`open_tab_genres_with_google_search_from_game_name("${text}") -> ${url}`);
+
+    window.open(url);
+}
+
+function open_tab_genres_with_google_search_from_game_name_en(text) {
+    let url = 'https://www.google.com/search?q=' + encodeURIComponent(text) + ' genres';
+    console.log(`open_tab_genres_with_google_search_from_game_name_en("${text}") -> ${url}`);
+
+    window.open(url);
+}
+
+function open_tab_with_gamefaqs_search_from_game_name(text) {
+    let url = 'https://gamefaqs.gamespot.com/search?game=' + encodeURIComponent(text);
+    console.log(`open_tab_with_gamefaqs_search_from_game_name("${text}") -> ${url}`);
 
     window.open(url);
 }
@@ -214,45 +274,42 @@ function price_render(data, type, row, meta) {
 
     // Для display и filter показываем текстом что цены нет и добавляем картинки для поиска
     if (type === 'display' || type === 'filter') {
-        // Добавление иконки для поиска игры в стиме
-        let img_steam_search = $(`<img src="${IMG_STEAM_SEARCH}" width="16" height="16"/>`);
-        img_steam_search.attr('onclick', `open_tab_with_steam_search_from_game_name("${row.name} ${row.platform}")`);
-        img_steam_search.attr('alt', 'steam');
-        img_steam_search.attr('title', 'Поиск игры в стиме');
-
         // Добавление иконки для поиска игры в гугле
-        let img_google_search = $(`<img src="${IMG_GOOGLE_SEARCH}" width="16" height="16"/>`);
+        let img_google_search = $(`<img src="${IMG_GOOGLE_SEARCH}"/>`);
         img_google_search.attr('onclick', `open_tab_with_google_search_from_game_name("${row.name} ${row.platform}")`);
         img_google_search.attr('alt', 'google');
         img_google_search.attr('title', 'Поиск игры в гугле');
 
         // Добавление иконки для поиска игры в гугле для поиска на английском
-        let img_google_search_en = $(`<img src="${IMG_GOOGLE_SEARCH_EN}" width="16" height="16"/>`);
+        let img_google_search_en = $(`<img src="${IMG_GOOGLE_SEARCH_EN}"/>`);
         img_google_search_en.attr('onclick', `open_tab_with_google_search_from_game_name_en("${row.name} ${row.platform}")`);
-        img_google_search_en.attr('alt', 'google');
-        img_google_search_en.attr('title', 'Поиск игры в гугле на аглийском');
+        img_google_search_en.attr('alt', 'google на английском');
+        img_google_search_en.attr('title', 'Поиск игры в гугле на английском');
 
         // Добавление иконки для поиска игры в яндексе
-        let img_yandex_search = $(`<img src="${IMG_YANDEX_SEARCH}" width="16" height="16"/>`);
+        let img_yandex_search = $(`<img src="${IMG_YANDEX_SEARCH}"/>`);
         img_yandex_search.attr('onclick', `open_tab_with_yandex_search_from_game_name("${row.name} ${row.platform}")`);
         img_yandex_search.attr('alt', 'yandex');
         img_yandex_search.attr('title', 'Поиск игры в яндексе');
 
-        let buttons_div = $('<div style="display: inline-block; float: right;"></div>');
+        let buttons_div = $('<div class="btn-group search-img-group"></div>');
 
         // Кнопку стима показываем только для PC
         if (row.platform == 'PC') {
+            // Добавление иконки для поиска игры в стиме
+            let img_steam_search = $(`<img src="${IMG_STEAM_SEARCH}"/>`);
+            img_steam_search.attr('onclick', `open_tab_with_steam_search_from_game_name("${row.name} ${row.platform}")`);
+            img_steam_search.attr('alt', 'steam');
+            img_steam_search.attr('title', 'Поиск игры в стиме');
+
             buttons_div.append(img_steam_search);
-            buttons_div.append("&nbsp;");
         }
 
         buttons_div.append(img_google_search);
-        buttons_div.append("&nbsp;");
         buttons_div.append(img_yandex_search);
-        buttons_div.append("&nbsp;");
         buttons_div.append(img_google_search_en);
 
-        return '<div>Цена не задана</div>' + buttons_div.html();
+        return '<div>Цена не задана</div>' + buttons_div.prop('outerHTML');
     }
 
     // Для сортировки возвращаем null
@@ -550,6 +607,20 @@ function fill_table(table_selector, total_class, items) {
 
         $('form input.game-id').val(row.id);
         $('form input.game-name').val(row.name);
+
+        let genres = [];
+        for (let genre of row.genres) {
+            genres.push(genre.name);
+        }
+        let inputGenres = $('#form_genres');
+        inputGenres.data('old-value', genres);
+
+        window.formGenres.removeAllTags();
+        window.formGenres.addTags(genres);
+
+        $(".search-img-group").toggleClass("disabled", false);
+
+        updateStatesFormSetGenres();
     });
 }
 
@@ -806,6 +877,43 @@ function fill_charts() {
     );
 }
 
+function fill_genres() {
+    let genres = new Set();
+    for (let game of window.finished_games) {
+        for (let genre of game.genres) {
+            genres.add(genre.name);
+        }
+    }
+    for (let game of window.finished_watched_games) {
+        for (let genre of game.genres) {
+            genres.add(genre.name);
+        }
+    }
+    genres = Array.from(genres).sort();
+
+    // Инициализация поля для изменения жанров выбранной игры
+    let el = $('#form_genres')[0];
+    if (!window.formGenres) {
+        window.formGenres = new Tagify(el, {
+            whitelist: genres,
+            enforceWhitelist: true,
+            skipInvalid: true,
+            dropdown: {
+                enabled: 0,
+                closeOnSelect: false,
+                maxItems: genres.length,
+            },
+            callbacks: {
+                // Удаление тега при клике на него
+                "click": (e) => e.detail.tagify.removeTags(e.detail.tag),
+
+                // Управление состояний кнопок формы
+                "change": (e) => updateStatesFormSetGenres(),
+            },
+        });
+    }
+}
+
 // Функция загружает все игры, перезаполняет таблицы игр, подсчитывает итого и статистику
 function load_tables() {
     // TODO: Переиспользование селекторов таблиц
@@ -814,23 +922,18 @@ function load_tables() {
 
     $.ajax({
         url: '/get_games',
-        dataType: "json",  // тип данных загружаемых с сервера
+        dataType: "json",  // Тип данных загружаемых с сервера
         success: function(data) {
             console.log(data);
 
             window.finished_games = data[FINISHED_GAME];
             window.finished_watched_games = data[FINISHED_WATCHED];
 
+            fill_genres();
             fill_game_tables();
             fill_charts();
         },
-
-        error: function(data) {
-            noty({
-                text: 'Не удалось загрузить игры: на сервере произошла ошибка',
-                type: 'error',
-            });
-        }
+        error: data => on_ajax_error(data, 'при загрузке игр'),
     });
 }
 
@@ -857,35 +960,51 @@ $(document).ready(function() {
             url: url,
             method: method,  // HTTP метод, по умолчанию GET
             data: data,
-            dataType: "json",  // тип данных загружаемых с сервера
+            dataType: "json",  // Тип данных загружаемых с сервера
             success: function(data) {
-                console.log(data);
-
-                let ok = data.status == 'ok';
-                if (ok && data.result) {
-                    load_tables();
-                }
-
-                noty({
-                    text: data.text,
-                    type: ok ? 'success' : 'warning',
-                });
+                on_ajax_success(data);
 
                 // Очищение полей формы
                 thisForm.reset();
             },
-
-            error: function(data) {
-                noty({
-                    text: 'На сервере произошла ошибка',
-                    type: 'error',
-                });
-            }
+            error: data => on_ajax_error(data, 'при установке цены'),
         });
 
         return false;
     });
 
+    $('#form__set_genres').submit(function() {
+        let thisForm = this;
+
+        let url = $(this).attr("action");
+        let method = $(this).attr("method");
+        if (method === undefined) {
+            method = "get";
+        }
+
+        let data = {};
+        $(this).find('input, textearea, select').each(function() {
+            data[this.name] = $(this).val();
+        });
+        // У тегов формат немного излишний, заполняем своим
+        data['genres'] = JSON.stringify(getGenresFromForm());
+
+        $.ajax({
+            url: url,
+            method: method,  // HTTP метод, по умолчанию GET
+            data: data,
+            dataType: "json",  // Тип данных загружаемых с сервера
+            success: function(data) {
+                on_ajax_success(data);
+
+                // Очищение полей формы
+                thisForm.reset();
+            },
+            error: data => on_ajax_error(data, 'при установке жанров'),
+        });
+
+        return false;
+    });
 
     // Обработка переименования игры
     $("#form__rename_game").submit(function() {
@@ -903,30 +1022,14 @@ $(document).ready(function() {
             url: url,
             method: method,  // HTTP метод, по умолчанию GET
             data: data,
-            dataType: "json",  // тип данных загружаемых с сервера
+            dataType: "json",  // Тип данных загружаемых с сервера
             success: function(data) {
-                console.log(data);
-
-                let ok = data.status == 'ok';
-                if (ok && data.result) {
-                    load_tables();
-                }
-
-                noty({
-                    text: data.text,
-                    type: ok ? 'success' : 'warning',
-                });
+                on_ajax_success(data);
 
                 // Очищение полей формы
                 thisForm.reset();
             },
-
-            error: function(data) {
-                noty({
-                    text: 'На сервере произошла ошибка',
-                    type: 'error',
-                });
-            }
+            error: data => on_ajax_error(data, 'при переименовании игры'),
         });
 
         return false;
@@ -949,31 +1052,15 @@ $(document).ready(function() {
             url: url,
             method: method,  // HTTP метод, по умолчанию GET
             data: data,
-            dataType: "json",  // тип данных загружаемых с сервера
+            dataType: "json",  // Тип данных загружаемых с сервера
 
             success: function(data) {
-                console.log(data);
-
-                let ok = data.status == 'ok';
-                if (ok && data.result) {
-                    load_tables();
-                }
-
-                noty({
-                    text: data.text,
-                    type: ok ? 'success' : 'warning',
-                });
+                on_ajax_success(data);
 
                 // Очищение полей формы
                 thisForm.reset();
             },
-
-            error: function(data) {
-                noty({
-                    text: 'На сервере произошла ошибка',
-                    type: 'error',
-                });
-            }
+            error: data => on_ajax_error(data, 'при проверки цены игры'),
         });
 
         return false;
@@ -996,29 +1083,9 @@ $(document).ready(function() {
             url: url,
             method: method,  // HTTP метод, по умолчанию GET
             data: data,
-            dataType: "json",  // тип данных загружаемых с сервера
-            success: function(data) {
-                console.log(data);
-
-                let ok = data.status == 'ok';
-                if (ok && data.result) {
-                    load_tables();
-                }
-
-                noty({
-                    text: data.text,
-                    type: ok ? 'success' : 'warning',
-
-                    timeout: false,
-                });
-            },
-
-            error: function(data) {
-                noty({
-                    text: 'На сервере произошла ошибка',
-                    type: 'error',
-                });
-            },
+            dataType: "json",  // Тип данных загружаемых с сервера
+            success: on_ajax_success,
+            error: data => on_ajax_error(data, 'при проверки цен всех игр без цены'),
 
             beforeSend: function() {
                 $(thisForm).find('.loading').show();
@@ -1048,30 +1115,14 @@ $(document).ready(function() {
             url: url,
             method: method,  // HTTP метод, по умолчанию GET
             data: data,
-            dataType: "json",  // тип данных загружаемых с сервера
+            dataType: "json",  // Тип данных загружаемых с сервера
             success: function(data) {
-                console.log(data);
-
-                let ok = data.status == 'ok';
-                if (ok && data.result) {
-                    load_tables();
-                }
-
-                noty({
-                    text: data.text,
-                    type: ok ? 'success' : 'warning',
-                });
+                on_ajax_success(data);
 
                 // Очищение полей формы
                 thisForm.reset();
             },
-
-            error: function(data) {
-                noty({
-                    text: 'На сервере произошла ошибка',
-                    type: 'error',
-                });
-            }
+            error: data => on_ajax_error(data, 'при удалении игры'),
         });
 
         return false;

@@ -128,6 +128,9 @@
             --placeholder-color-focus: #838e99;
             --tags-border-color: transparent;
 
+            /* Для исправления появляющейся горизонтальной линии внутри тегов после открытия меню и наведения на тег */
+            --tag-inset-shadow-size: 2em;
+
             width: 100%;
         }
         .tagify__dropdown > * {
@@ -171,13 +174,26 @@
         [aria-controls="fixed_right_panel"][aria-expanded="false"]:before {
             content: "\e106"; /* .glyphicon-eye-close */
         }
+
+        .search-img-group > img {
+            margin-right: 3px;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        .search-img-group.disabled {
+            cursor: not-allowed;
+        }
+        .search-img-group.disabled > img {
+            pointer-events: none;
+        }
     </style>
 
     <script>
-        var IMG_STEAM_SEARCH = "{{ url_for('static', filename='images/steam_favicon.ico') }}";
-        var IMG_YANDEX_SEARCH = "{{ url_for('static', filename='images/yandex_favicon.ico') }}";
-        var IMG_GOOGLE_SEARCH = "{{ url_for('static', filename='images/google_favicon.ico') }}";
-        var IMG_GOOGLE_SEARCH_EN = "{{ url_for('static', filename='images/english-icon.svg') }}";
+        var IMG_STEAM_SEARCH = "{{ url_for('static', filename='images/search/steam_favicon.ico') }}";
+        var IMG_YANDEX_SEARCH = "{{ url_for('static', filename='images/search/yandex_favicon.ico') }}";
+        var IMG_GOOGLE_SEARCH = "{{ url_for('static', filename='images/search/google_favicon.ico') }}";
+        var IMG_GOOGLE_SEARCH_EN = "{{ url_for('static', filename='images/search/english-icon.svg') }}";
 
         const FINISHED_GAME = '{{ FINISHED_GAME }}';
         const FINISHED_WATCHED = '{{ FINISHED_WATCHED }}';
@@ -379,6 +395,31 @@
                             </button>
                         </div>
                         <div id="more_actions" class="card-body p-2 collapse">
+                            <form id="form__set_genres" method="post" action="/set_genres">
+                                <h6>Установка жанров у игры</h6>
+                                <div class="form-group">
+                                    <label for="form_genres_name">Название игры:</label>
+                                    <input id="form_genres_name" class="form-control form-control-sm game-name" type="text" name="name" readonly>
+                                </div>
+                                <div class="form-group mb-0">
+                                    <label for="form_genres">Жанры:</label>
+                                    <input id="form_genres" name="genres" data-old-value="[]" placeholder="Выберите жанры...">
+                                </div>
+                                <div class="form-group">
+                                    <label>Поиск:</label>
+                                    <div class="btn-group search-img-group disabled">
+                                        <img src="{{ url_for('static', filename='images/search/google_favicon.ico') }}" onclick="open_tab_genres_with_google_search_from_game_name($('#form_genres_name').val())" alt="google" title="Поиск игры в гугле">
+                                        <img src="{{ url_for('static', filename='images/search/english-icon.svg') }}" onclick="open_tab_genres_with_google_search_from_game_name_en($('#form_genres_name').val())" alt="google en" title="Поиск игры в гугле на английском">
+                                        <img src="{{ url_for('static', filename='images/search/gamefaqs_gamespot_favicon.ico') }}" onclick="open_tab_with_gamefaqs_search_from_game_name($('#form_genres_name').val())" alt="gamefaqs" title="Поиск игры в gamefaqs">
+                                    </div>
+                                </div>
+                                <div class="btn-group w-100" role="group">
+                                    <button class="btn btn-outline-primary btn-sm" data-role="accept" disabled>Ок</button>
+                                    <button type="button" class="btn btn-outline-success btn-sm" data-role="cancel" disabled>Отмена</button>
+                                </div>
+                            </form>
+
+                            <hr/>
                             <form id="form__rename_game" method="post" action="/rename_game">
                                 <h6>Изменение названия игры</h6>
                                 <div class="form-group">

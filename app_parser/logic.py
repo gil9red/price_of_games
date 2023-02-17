@@ -7,7 +7,7 @@ __author__ = 'ipetrash'
 import time
 
 from common import FINISHED_GAME, FINISHED_WATCHED, WebUserAlertException, log_common, log_append_game
-from db import Game, Platform
+from db import ResultEnum, Game, Platform
 
 from app_parser import models
 from app_parser.utils import get_price as get_price_game
@@ -100,6 +100,32 @@ def set_price_game(game_name: str, price: int | None) -> list[int]:
     for game in Game.select().where(Game.name == game_name):
         game.set_price(price)
         ids.append(game.id)
+
+    return ids
+
+
+def set_genres(game_name: str, genres: list[str]) -> list[int]:
+    """
+    Функция найдет игры с указанным названием и установит им жанры.
+    Возвращает список id игр с измененными жанрами.
+
+    """
+
+    game_name = game_name.strip()
+
+    if not game_name:
+        error_text = f'Не указано название игры ( = {game_name!r})'
+        log_common.error(error_text)
+        raise WebUserAlertException(error_text)
+
+    ids = []
+    for game in Game.select().where(Game.name == game_name):
+        result = game.set_genres(genres)
+
+        # Если были какие-то изменения списка жанров у игры и
+        # в статистике по добавленным или удаленным не нули
+        if result[ResultEnum.ADDED] or result[ResultEnum.DELETED]:
+            ids.append(game.id)
 
     return ids
 

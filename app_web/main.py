@@ -4,6 +4,7 @@
 __author__ = 'ipetrash'
 
 
+import json
 import re
 import os.path
 
@@ -98,6 +99,54 @@ def set_price():
         text = f'Игре {name!r} установлена цена {price!r} (предыдущая цена: {old_price!r})'
         result = {
             'new_price': price,
+            'modify_id_games': modify_id_games,
+        }
+
+    except WebUserAlertException as e:
+        status = StatusEnum.WARNING
+        text = str(e)
+        result = None
+
+    data = {
+        'status': status,
+        'text': text,
+        'result': result,
+    }
+    log.debug(data)
+
+    return jsonify(data)
+
+
+@app.route("/set_genres", methods=['POST'])
+def set_genres():
+    """
+    Функция устанавливает жанры для указанной игры.
+
+    """
+
+    log.debug('Call set_genres')
+    log.debug('request.form: %s', request.form)
+
+    try:
+        check_form_params(request.form, 'name', 'genres')
+
+        name = request.form['name'].strip()
+        genres = json.loads(
+            request.form['genres']
+        )
+
+        log.debug(f'name={name!r} genres={genres!r}')
+
+        if not logic.has_game(name):
+            text = f'Игры с названием {name!r} не существует'
+            raise WebUserAlertException(text)
+
+        # В modify_id_games будет список игр с названием <name>
+        modify_id_games = logic.set_genres(name, genres)
+
+        status = StatusEnum.OK
+        text = f'В игре {name!r} успешно изменен список жанров'
+        result = {
             'modify_id_games': modify_id_games,
         }
 
@@ -234,7 +283,6 @@ def run_check():
 
     status = StatusEnum.OK
     result = None
-    added_data = None
     text = '<b>Проверка новых игр завершена.</b>'
 
     try:
@@ -253,7 +301,7 @@ def run_check():
                     </tr>
                 </table>
             '''
-            added_data = dict(
+            result = dict(
                 added_finished_games=added_finished_games,
                 added_watched_games=added_watched_games
             )
@@ -268,7 +316,6 @@ def run_check():
         'status': status,
         'text': text,
         'result': result,
-        'data': added_data,
     }
     log.debug(data)
 

@@ -999,6 +999,9 @@ $(document).ready(function() {
 
                 // Очищение полей формы
                 thisForm.reset();
+
+                // После очищения поля нужно сделать кнопки поиска неактивными
+                $(".search-img-group").toggleClass("disabled", true);
             },
             error: data => on_ajax_error(data, 'при установке жанров'),
         });

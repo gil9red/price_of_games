@@ -27,174 +27,12 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-dark.min_3.0.0.css') }}" />
 
-    <style>
-        .top-0 {
-            top: 0 !important;
-        }
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='draggable-resizable-dialog/draggable-resizable-dialog.css') }}"/>
+    <script type="text/javascript" src="{{ url_for('static', filename='draggable-resizable-dialog/draggable-resizable-dialog.js') }}"></script>
 
-        #back-top {
-            position: fixed;
-            z-index: 9999;
-            bottom: 10px;
-            right: 10px;
-        }
-        #back-top a {
-            width: 100px;
-            color: black;
-            display: block;
-            background-color: lightgray;
-            text-align: center;
-            font: 20px/100% Arial, Helvetica, sans-serif;
-            text-decoration: none;
-            -webkit-transition: 1s;
-            -moz-transition: 1s;
-            transition: 1s;
-            line-height: 30px;
-            -webkit-border-radius: 10px;
-            border-radius: 10px;
-        }
-        #back-top a:hover {
-            background-color: gray;
-        }
-
-        /* Убираем пустое пространство между комбобоксом количества записей и фильтра */
-        .dataTables_wrapper > .row:first-child > div:first-child {
-            padding-right: 2px;
-        }
-        .dataTables_wrapper > .row:first-child > div:nth-child(2) {
-            padding-left: 2px;
-        }
-
-        .dataTables_length > label,
-        .dataTables_length > label > select {
-            width: 100% !important;
-        }
-        /* Убираем пустое место над результатом фильтра в таблицах */
-        .dataTables_info {
-            padding-top: 0px !important;
-        }
-
-        #fixed_right_panel {
-            font-size: 0.9rem;
-        }
-            #fixed_right_panel .form-group > label {
-                margin-bottom: 0.1rem;
-            }
-            #fixed_right_panel hr {
-                background-color: white !important;
-            }
-
-        .card-header {
-            border: 0;
-            border-radius: 2px;
-            padding: 0;
-        }
-        .card-header [data-toggle="collapse"] {
-            background: #6c757d;
-            color: white;
-            display: block;
-            text-align: left;
-            box-shadow: 0 0 0 0 !important;
-        }
-        .card-header [data-toggle="collapse"]:after {
-            font-family: 'Glyphicons Halflings';
-            content: "\e114";
-            float: right;
-        }
-        .card-header [data-toggle="collapse"].collapsed:after {
-            font-family: 'Glyphicons Halflings';
-            content: "\e113";
-            float: right;
-        }
-
-        .chart-wrapper {
-            width: 300px;
-            height: 300px;
-        }
-
-        /* Изменение стиля кнопок отображения/скрытия деталей строк таблицы */
-        table.dataTable td.dt-control:before,
-        table.dataTable tr.dt-hasChild td.dt-control::before {
-            background-color: transparent !important;
-            font-size: 1.2em;
-        }
-
-        /* Изменение стилей виджета тегов для темной темы */
-        .tagify {
-            --tag-bg: #6c757d;
-            --tag-text-color: #e9ecef;
-            --tag-hover: #3395ff;
-            --placeholder-color: #838e99;
-            --placeholder-color-focus: #838e99;
-            --tags-border-color: transparent;
-
-            /* Для исправления появляющейся горизонтальной линии внутри тегов после открытия меню и наведения на тег */
-            --tag-inset-shadow-size: 2em;
-
-            width: 100%;
-        }
-        .tagify__dropdown > * {
-            background-color: #191d21;
-            color: #d3d3d3;
-        }
-        .tagify__dropdown__item:hover {
-            background-color: #3395ff;
-        }
-        .tagify__tag:hover {
-            background: #3395ff;
-        }
-
-        /* Спрячем кнопку удаления тега */
-        .tagify__tag__removeBtn {
-            display: none;
-        }
-
-        .genre:hover,
-        .platform:hover {
-            background-color: #3395ff;
-            color: white;
-            cursor: pointer;
-            padding: .2em;
-            border-radius: .25rem;
-        }
-
-        [aria-controls="fixed_right_panel"]:hover,
-        [aria-controls="fixed_right_panel"]:active {
-            text-decoration: none;
-        }
-        [aria-controls="fixed_right_panel"]:hover {
-            transform: scale(1.2);
-        }
-        [aria-controls="fixed_right_panel"]:before {
-            font-family: 'Glyphicons Halflings';
-            content: "\e105";  /* .glyphicon-eye-open */
-            color: #3395ff;
-            font-size: 1.5em;
-        }
-        [aria-controls="fixed_right_panel"][aria-expanded="false"]:before {
-            content: "\e106"; /* .glyphicon-eye-close */
-        }
-
-        .search-img-group > img {
-            margin-right: 3px;
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-        }
-        .search-img-group.disabled {
-            cursor: not-allowed;
-        }
-        .search-img-group.disabled > img {
-            pointer-events: none;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='index.css') }}">
 
     <script>
-        var IMG_STEAM_SEARCH = "{{ url_for('static', filename='images/search/steam_favicon.ico') }}";
-        var IMG_YANDEX_SEARCH = "{{ url_for('static', filename='images/search/yandex_favicon.ico') }}";
-        var IMG_GOOGLE_SEARCH = "{{ url_for('static', filename='images/search/google_favicon.ico') }}";
-        var IMG_GOOGLE_SEARCH_EN = "{{ url_for('static', filename='images/search/english-icon.svg') }}";
-
         const FINISHED_GAME = '{{ FINISHED_GAME }}';
         const FINISHED_WATCHED = '{{ FINISHED_WATCHED }}';
         const KIND_BY_TITLE = {
@@ -210,6 +48,38 @@
     <p id="back-top" class="mb-0">
         <a href="#top">Наверх</a>
     </p>
+
+    <div id="dialog-iframe-google" class="dialog" data-top="10px" data-left="10px">
+        <div class="titlebar w-100">Google</div>
+        <button name="close"></button>
+        <div class="content">
+            <iframe
+                    class="w-100 h-100"
+                    src=""
+            ></iframe>
+        </div>
+        <div class="buttonpane">
+            <div class="buttonset">
+                <button name="ok">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="dialog-iframe-gamefaqs" class="dialog" data-top="10px" data-left="820px">
+        <div class="titlebar w-100">Gamefaqs</div>
+        <button name="close"></button>
+        <div class="content">
+            <iframe
+                    class="w-100 h-100"
+                    src=""
+            ></iframe>
+        </div>
+        <div class="buttonpane">
+            <div class="buttonset">
+                <button name="ok">OK</button>
+            </div>
+        </div>
+                </div>
 
     <div class="container-fluid">
         <div class="row">
@@ -381,6 +251,75 @@
                                 <label for="form_price">Цена:</label>
                                 <input id="form_price" class="form-control form-control-sm" type="text" name="price" placeholder="Введите цену игры..." required>
                             </div>
+                                <div class="form-group">
+                                    <label>Поиск:</label>
+                                    <div class="btn-toolbar" role="toolbar">
+                                        <div class="btn-group btn-group-sm search-img-group mr-1 disabled" role="group" title="Диалог">
+                                            <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <img src="{{ url_for('static', filename='images/dialog.png') }}" alt="Диалог">
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <a
+                                                    class="dropdown-item"
+                                                    href="#"
+                                                    onclick="open_dialog_google(this.getAttribute('data-game-name') + ' ' + this.getAttribute('data-game-platform') + ' цена купить')"
+                                                    data-game-name=""
+                                                    data-game-platform=""
+                                                >
+                                                    <img src="{{ url_for('static', filename='images/search/google_favicon.ico') }}" alt="google" title="Поиск игры в гугле">
+                                                    Поиск игры в гугле
+                                                </a>
+                                                <a
+                                                    class="dropdown-item"
+                                                    href="#"
+                                                    onclick="open_dialog_google(this.getAttribute('data-game-name') + ' ' + this.getAttribute('data-game-platform') + ' price buy')"
+                                                    data-game-name=""
+                                                    data-game-platform=""
+                                                >
+                                                    <img src="{{ url_for('static', filename='images/search/english-icon.svg') }}" alt="google en" title="Поиск игры в гугле на английском">
+                                                    Поиск игры в гугле на английском
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="btn-group btn-group-sm search-img-group disabled" role="group" title="Вкладка">
+                                            <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <img src="{{ url_for('static', filename='images/tabs.png') }}" alt="Вкладка">
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <a
+                                                    class="dropdown-item"
+                                                    href="#"
+                                                    onclick="open_tab_google(this.getAttribute('data-game-name') + ' ' + this.getAttribute('data-game-platform') + ' цена купить')"
+                                                    data-game-name=""
+                                                    data-game-platform=""
+                                                >
+                                                    <img src="{{ url_for('static', filename='images/search/google_favicon.ico') }}" alt="google" title="Поиск игры в гугле">
+                                                    Поиск игры в гугле
+                                                </a>
+                                                <a
+                                                    class="dropdown-item"
+                                                    href="#"
+                                                    onclick="open_tab_google(this.getAttribute('data-game-name') + ' ' + this.getAttribute('data-game-platform') + ' price buy')"
+                                                    data-game-name=""
+                                                    data-game-platform=""
+                                                >
+                                                    <img src="{{ url_for('static', filename='images/search/english-icon.svg') }}" alt="google en" title="Поиск игры в гугле на английском">
+                                                    Поиск игры в гугле на английском
+                                                </a>
+                                                <a
+                                                    class="dropdown-item steam"
+                                                    href="#"
+                                                    onclick="open_tab_steam(this.getAttribute('data-game-name'))"
+                                                    data-game-name=""
+                                                    data-game-platform=""
+                                                >
+                                                    <img src="{{ url_for('static', filename='images/search/steam_favicon.ico') }}" alt="steam" title="Поиск игры в steam">
+                                                    Поиск игры в steam
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             <button type="submit" class="btn btn-outline-primary btn-sm btn-block">Установить цену</button>
                         </form>
                     </div>
@@ -407,10 +346,75 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Поиск:</label>
-                                    <div class="btn-group search-img-group disabled">
-                                        <img src="{{ url_for('static', filename='images/search/google_favicon.ico') }}" onclick="open_tab_genres_with_google_search_from_game_name($('#form_genres_name').val())" alt="google" title="Поиск игры в гугле">
-                                        <img src="{{ url_for('static', filename='images/search/english-icon.svg') }}" onclick="open_tab_genres_with_google_search_from_game_name_en($('#form_genres_name').val())" alt="google en" title="Поиск игры в гугле на английском">
-                                        <img src="{{ url_for('static', filename='images/search/gamefaqs_gamespot_favicon.ico') }}" onclick="open_tab_with_gamefaqs_search_from_game_name($('#form_genres_name').val())" alt="gamefaqs" title="Поиск игры в gamefaqs">
+                                    <div class="btn-toolbar" role="toolbar">
+                                        <div class="btn-group btn-group-sm search-img-group mr-1 disabled" role="group" title="Диалог">
+                                            <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <img src="{{ url_for('static', filename='images/dialog.png') }}" alt="Диалог">
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <a
+                                                    class="dropdown-item"
+                                                    href="#"
+                                                    onclick="open_dialog_google(this.getAttribute('data-game-name') + ' жанры')"
+                                                    data-game-name=""
+                                                >
+                                                    <img src="{{ url_for('static', filename='images/search/google_favicon.ico') }}" alt="google" title="Поиск игры в гугле">
+                                                    Поиск игры в гугле
+                                                </a>
+                                                <a
+                                                    class="dropdown-item"
+                                                    href="#"
+                                                    onclick="open_dialog_google(this.getAttribute('data-game-name') + ' genres')"
+                                                    data-game-name=""
+                                                >
+                                                    <img src="{{ url_for('static', filename='images/search/english-icon.svg') }}" alt="google en" title="Поиск игры в гугле на английском">
+                                                    Поиск игры в гугле на английском
+                                                </a>
+                                                <a
+                                                    class="dropdown-item"
+                                                    href="#"
+                                                    onclick="open_dialog_gamefaqs(this.getAttribute('data-game-name'))"
+                                                    data-game-name=""
+                                                >
+                                                    <img src="{{ url_for('static', filename='images/search/gamefaqs_gamespot_favicon.ico') }}" alt="gamefaqs" title="Поиск игры в gamefaqs">
+                                                    Поиск игры в gamefaqs
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="btn-group btn-group-sm search-img-group disabled" role="group" title="Вкладка">
+                                            <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <img src="{{ url_for('static', filename='images/tabs.png') }}" alt="Вкладка">
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <a
+                                                    class="dropdown-item"
+                                                    href="#"
+                                                    onclick="open_tab_google(this.getAttribute('data-game-name') + ' жанры')"
+                                                    data-game-name=""
+                                                >
+                                                    <img src="{{ url_for('static', filename='images/search/google_favicon.ico') }}" alt="google" title="Поиск игры в гугле">
+                                                    Поиск игры в гугле
+                                                </a>
+                                                <a
+                                                    class="dropdown-item"
+                                                    href="#"
+                                                    onclick="open_tab_google(this.getAttribute('data-game-name') + ' genres')"
+                                                    data-game-name=""
+                                                >
+                                                    <img src="{{ url_for('static', filename='images/search/english-icon.svg') }}" alt="google en" title="Поиск игры в гугле на английском">
+                                                    Поиск игры в гугле на английском
+                                                </a>
+                                                <a
+                                                    class="dropdown-item"
+                                                    href="#"
+                                                    onclick="open_tab_gamefaqs(this.getAttribute('data-game-name'))"
+                                                    data-game-name=""
+                                                >
+                                                    <img src="{{ url_for('static', filename='images/search/gamefaqs_gamespot_favicon.ico') }}" alt="gamefaqs" title="Поиск игры в gamefaqs">
+                                                    Поиск игры в gamefaqs
+                                                </a>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="btn-group w-100" role="group">

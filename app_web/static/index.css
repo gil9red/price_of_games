@@ -1,0 +1,194 @@
+.top-0 {
+    top: 0 !important;
+}
+
+#back-top {
+    position: fixed;
+    z-index: 9999;
+    bottom: 10px;
+    right: 10px;
+}
+#back-top a {
+    width: 100px;
+    color: black;
+    display: block;
+    background-color: lightgray;
+    text-align: center;
+    font: 20px/100% Arial, Helvetica, sans-serif;
+    text-decoration: none;
+    -webkit-transition: 1s;
+    -moz-transition: 1s;
+    transition: 1s;
+    line-height: 30px;
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+}
+#back-top a:hover {
+    background-color: gray;
+}
+
+/* Убираем пустое пространство между комбобоксом количества записей и фильтра */
+.dataTables_wrapper > .row:first-child > div:first-child {
+    padding-right: 2px;
+}
+.dataTables_wrapper > .row:first-child > div:nth-child(2) {
+    padding-left: 2px;
+}
+
+.dataTables_length > label,
+.dataTables_length > label > select {
+    width: 100% !important;
+}
+/* Убираем пустое место над результатом фильтра в таблицах */
+.dataTables_info {
+    padding-top: 0px !important;
+}
+
+#fixed_right_panel {
+    font-size: 0.9rem;
+}
+    #fixed_right_panel .form-group > label {
+        margin-bottom: 0.1rem;
+    }
+    #fixed_right_panel hr {
+        background-color: white !important;
+    }
+
+.card-header {
+    border: 0;
+    border-radius: 2px;
+    padding: 0;
+}
+.card-header [data-toggle="collapse"] {
+    background: var(--gray);
+    color: white;
+    display: block;
+    text-align: left;
+    box-shadow: 0 0 0 0 !important;
+}
+.card-header [data-toggle="collapse"]:after {
+    font-family: 'Glyphicons Halflings';
+    content: "\e114";
+    float: right;
+}
+.card-header [data-toggle="collapse"].collapsed:after {
+    font-family: 'Glyphicons Halflings';
+    content: "\e113";
+    float: right;
+}
+
+.chart-wrapper {
+    width: 300px;
+    height: 300px;
+}
+
+/* Изменение стиля кнопок отображения/скрытия деталей строк таблицы */
+table.dataTable td.dt-control:before,
+table.dataTable tr.dt-hasChild td.dt-control::before {
+    background-color: transparent !important;
+    font-size: 1.2em;
+}
+
+/* Изменение стилей виджета тегов для темной темы */
+.tagify {
+    --tag-bg: var(--gray);
+    --tag-text-color: #e9ecef;
+    --tag-hover: var(--blue);
+    --placeholder-color: #838e99;
+    --placeholder-color-focus: #838e99;
+    --tags-border-color: transparent;
+
+    /* Для исправления появляющейся горизонтальной линии внутри тегов после открытия меню и наведения на тег */
+    --tag-inset-shadow-size: 2em;
+
+    width: 100%;
+}
+.tagify__dropdown > * {
+    background-color: #191d21;
+    color: #d3d3d3;
+}
+.tagify__dropdown__item:hover {
+    background-color: var(--blue);
+}
+.tagify__tag:hover {
+    background: var(--blue);
+}
+
+/* Спрячем кнопку удаления тега */
+.tagify__tag__removeBtn {
+    display: none;
+}
+
+.genre:hover,
+.platform:hover {
+    background-color: var(--blue);
+    color: white;
+    cursor: pointer;
+    padding: .2em;
+    border-radius: .25rem;
+}
+
+[aria-controls="fixed_right_panel"]:hover,
+[aria-controls="fixed_right_panel"]:active {
+    text-decoration: none;
+}
+[aria-controls="fixed_right_panel"]:hover {
+    transform: scale(1.2);
+}
+[aria-controls="fixed_right_panel"]:before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e105";  /* .glyphicon-eye-open */
+    color: var(--blue);
+    font-size: 1.5em;
+}
+[aria-controls="fixed_right_panel"][aria-expanded="false"]:before {
+    content: "\e106"; /* .glyphicon-eye-close */
+}
+
+.search-img-group img {
+    margin-right: 3px;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+.search-img-group.disabled > * {
+    pointer-events: none;
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+/* Прячем кнопку поиска в стиме, если платформа не PC */
+.steam[data-game-platform]:not([data-game-platform='PC']) {
+    display: none;
+}
+
+.dialog,
+.dialog * {
+    z-index: 9999 !important;
+}
+.dialog {
+    width: 800px;
+    height: 500px;
+}
+.dialog .titlebar {
+    background-color: var(--blue);
+}
+
+/* Отключение эффекта горизонтального заполнения при наведении на кнопки */
+.dialog button {
+	-webkit-transition: 0s !important;
+	transition: 0s !important;
+}
+
+.dialog button[name=close] {
+    background-color: var(--red);
+    border-color: var(--red);
+}
+.dialog .buttonset button {
+    background-color: var(--blue);
+    border-color: var(--blue);
+}
+
+.dialog .content {
+    overflow: hidden;
+}

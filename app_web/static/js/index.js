@@ -320,12 +320,15 @@ function append_date_render(data, type, row, meta) {
 
 function genres_render(genres) {
     let tags = [];
-    for (let genre of genres) {
-        let name = genre.name;
+    for (let name of genres) {
+        let genre = ALL_GENRES[name];
+        let description = genre.aliases;
+
         if (genre.description) {
-            tags.push(`<abbr class="genre" title="${genre.description}">${name}</abbr>`);
+            description = `${genre.description}\n\n${description}`;
+            tags.push(`<abbr class="genre" title="${description}">${name}</abbr>`);
         } else {
-            tags.push(`<span class="genre">${name}</span>`);
+            tags.push(`<span class="genre" title="${description}">${name}</span>`);
         }
     }
     return tags.join(', ');
@@ -344,7 +347,7 @@ function format_detail_row(row) {
 
 function for_filter_render(data, type, row, meta) {
     if (type === 'filter') {
-        return row.genres.map(genre => genre.name).join(', ');
+        return row.genres.join(', ');
     }
     return data;
 }
@@ -448,13 +451,20 @@ function createFilterOfGenres(table, tableEl) {
         });
 
     // Заполнение жанров из текущей таблицы
-    let genres = new Set();
+    let uniqueGenres = new Set();
     table.api().rows().every(function (rowIdx, tableLoop, rowLoop) {
-        for (let genre of this.data().genres) {
-            genres.add(genre.name);
+        for (let name of this.data().genres) {
+            uniqueGenres.add(name);
         }
     });
-    genres = Array.from(genres).sort();
+
+    let genres = new Array();
+    for (let name of Array.from(uniqueGenres).sort()) {
+        genres.push({
+            value: name,
+            searchBy: ALL_GENRES[name].aliases,
+        });
+    }
 
     // Инициализация жанров
     createTags(filterGenres, genres, tableEl, '.genre');
@@ -602,10 +612,7 @@ function fill_table(table_selector, total_class, items) {
         $('form input.game-id').val(row.id);
         $('form input.game-name').val(row.name);
 
-        let genres = [];
-        for (let genre of row.genres) {
-            genres.push(genre.name);
-        }
+        let genres = row.genres;
         let inputGenres = $('#form_genres');
         inputGenres.data('old-value', genres);
 
@@ -654,8 +661,7 @@ function callStatisticsByGames(games) {
             : 0;
         platform_by_number.set(platform_name, number + 1);
 
-        for (let genre of row.genres) {
-            let genre_name = genre.name;
+        for (let genre_name of row.genres) {
             let number = genre_by_number.has(genre_name)
                 ? genre_by_number.get(genre_name)
                 : 0;
@@ -875,18 +881,14 @@ function fill_charts() {
 }
 
 function fill_genres() {
-    let genres = new Set();
-    for (let game of window.finished_games) {
-        for (let genre of game.genres) {
-            genres.add(genre.name);
-        }
+    let genres = new Array();
+    for (let name in ALL_GENRES) {
+        genres.push({
+            value: name,
+            searchBy: ALL_GENRES[name].aliases,
+        });
     }
-    for (let game of window.finished_watched_games) {
-        for (let genre of game.genres) {
-            genres.add(genre.name);
-        }
-    }
-    genres = Array.from(genres).sort();
+    genres = genres.sort((a, b) => a.value.localeCompare(b.value));
 
     // Инициализация поля для изменения жанров выбранной игры
     let el = $('#form_genres')[0];
@@ -926,7 +928,6 @@ function load_tables() {
             window.finished_games = data[FINISHED_GAME];
             window.finished_watched_games = data[FINISHED_WATCHED];
 
-            fill_genres();
             fill_game_tables();
             fill_charts();
         },
@@ -938,6 +939,8 @@ $(document).ready(function() {
     // По умолчанию, флаги всегда стоят
     $('#checkbox_visible_finished_games').prop('checked', true);
     $('#checkbox_visible_finished_watched_games').prop('checked', true);
+
+    fill_genres();
 
     load_tables();
 

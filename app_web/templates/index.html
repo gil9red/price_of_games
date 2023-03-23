@@ -38,7 +38,8 @@
         const KIND_BY_TITLE = {
             {{ FINISHED_GAME }}: '{{ TITLE_FINISHED_GAME }}',
             {{ FINISHED_WATCHED }}: '{{ TITLE_FINISHED_WATCHED }}',
-        }
+        };
+        const ALL_GENRES = {{all_genres | safe}};
     </script>
 
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>

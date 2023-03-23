@@ -27,7 +27,7 @@ class GameInfo(Game):
     price: int | None
     append_date: str
     append_date_timestamp: int
-    genres: list[Genre]
+    genres: list[str]
 
 
 @dataclass

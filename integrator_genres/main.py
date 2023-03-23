@@ -37,10 +37,11 @@ def get_result_as_text(result_by_number: dict[ResultEnum, int]) -> str:
     return ", ".join(f"{result.name}: {number}" for result, number in result_by_number.items())
 
 
-def process_genre(name: str, description: str) -> ResultEnum:
+def process_genre(name: str, description: str, aliases: str = '') -> ResultEnum:
     result, _ = Genre.add_or_update(
         name=name,
         description=description,
+        aliases=aliases,
     )
     match result:
         case ResultEnum.ADDED:

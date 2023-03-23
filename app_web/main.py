@@ -18,7 +18,7 @@ from app_parser import logic
 from app_parser.main import run as run_check_of_price
 from app_web.app import app, log
 from common import WebUserAlertException, FINISHED_GAME, FINISHED_WATCHED
-from db import Game, Settings
+from db import Game, Genre, Settings
 
 
 class StatusEnum(str, Enum):
@@ -57,6 +57,14 @@ def index():
 
         TITLE_FINISHED_GAME=TITLE_FINISHED_GAME,
         TITLE_FINISHED_WATCHED=TITLE_FINISHED_WATCHED,
+
+        all_genres={
+            genre.name: {
+                'description': genre.description,
+                'aliases': genre.aliases,
+            }
+            for genre in Genre.select()
+        },
     )
 
 

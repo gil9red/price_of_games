@@ -129,6 +129,7 @@ class Platform(BaseModel):
 class Genre(BaseModel):
     name = TextField(unique=True)
     description = TextField()
+    aliases = TextField(default='')
 
     @classmethod
     def get_by(cls, name: str) -> Optional['Genre']:
@@ -138,7 +139,7 @@ class Genre(BaseModel):
         return cls.get_or_none(name=name)
 
     @classmethod
-    def add_or_update(cls, name: str, description: str) -> tuple[ResultEnum, 'Genre']:
+    def add_or_update(cls, name: str, description: str, aliases: str = '') -> tuple[ResultEnum, 'Genre']:
         obj = cls.get_by(name)
         if not obj:
             obj = cls.create(
@@ -147,8 +148,16 @@ class Genre(BaseModel):
             )
             return ResultEnum.ADDED, obj
 
+        has_updated = False
         if obj.description != description:
             obj.description = description
+            has_updated = True
+
+        if aliases and obj.aliases != aliases:
+            obj.aliases = aliases
+            has_updated = True
+
+        if has_updated:
             obj.save()
             return ResultEnum.UPDATED, obj
 

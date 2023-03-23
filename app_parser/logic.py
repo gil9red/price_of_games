@@ -33,10 +33,7 @@ def get_games_by_kind(kind: str) -> list[models.GameInfo]:
             price=game.price,
             append_date=game.append_date.strftime('%d/%m/%Y %H:%M:%S'),
             append_date_timestamp=int(game.append_date.timestamp()),
-            genres=[
-                models.Genre(**genre.to_dict())
-                for genre in game.get_genres()
-            ]
+            genres=[genre.name for genre in game.get_genres()]
         )
         for game in query
     ]

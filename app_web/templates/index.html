@@ -33,11 +33,11 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='index.css') }}">
 
     <script>
-        const FINISHED_GAME = '{{ FINISHED_GAME }}';
-        const FINISHED_WATCHED = '{{ FINISHED_WATCHED }}';
+        const FINISHED_GAME = '{{ finished_game }}';
+        const FINISHED_WATCHED = '{{ finished_watched }}';
         const KIND_BY_TITLE = {
-            {{ FINISHED_GAME }}: '{{ TITLE_FINISHED_GAME }}',
-            {{ FINISHED_WATCHED }}: '{{ TITLE_FINISHED_WATCHED }}',
+            {{ finished_game }}: '{{ title_finished_game }}',
+            {{ finished_watched }}: '{{ title_finished_watched }}',
         };
         const ALL_GENRES = {{all_genres | safe}};
     </script>
@@ -150,9 +150,9 @@
                     <div class="tab-pane fade" id="nav-debug" role="tabpanel" aria-labelledby="nav-debug-tab">
                         <table class="mt-1" style="table-layout: auto">
                             <tr><td class="pr-3">Последняя проверка игр была:</td><td>{{ last_run_date }}</td></tr>
-                            <tr><td class="pr-3">DB_FILE_NAME:</td><td>{{ DB_FILE_NAME }}</td></tr>
-                            <tr><td class="pr-3 align-top">BACKUP_DIR_LIST:</td><td>
-                                {% for path in BACKUP_DIR_LIST %}
+                            <tr><td class="pr-3">Путь к базе данных:</td><td>{{ db_file_name }}</td></tr>
+                            <tr><td class="pr-3 align-top">Пути бэкапа:</td><td>
+                                {% for path in backup_dir_list %}
                                     <div>{{ path }}</div>
                                 {% endfor %}
                             </td></tr>
@@ -162,7 +162,7 @@
 
                 <br>
 
-                <h4 id="finished_game_caption_table" class="text-center">{{ TITLE_FINISHED_GAME }} <div class="finished_game_statistic" style="display:inline-block;"></div>
+                <h4 id="finished_game_caption_table" class="text-center">{{ title_finished_game }} <div class="finished_game_statistic" style="display:inline-block;"></div>
                     <div class="row loading-spinner" style="display: none">
                         <div class="spinner-border text-primary m-auto" role="status">
                             <span class="sr-only">Загрузка...</span>
@@ -184,7 +184,7 @@
                 <br>
                 <br>
 
-                <h4 id="finished_watched_game_caption_table" class="text-center">{{ TITLE_FINISHED_WATCHED }} <div class="finished_watched_game_statistic" style="display:inline-block;"></div>
+                <h4 id="finished_watched_game_caption_table" class="text-center">{{ title_finished_watched }} <div class="finished_watched_game_statistic" style="display:inline-block;"></div>
                     <div class="row loading-spinner" style="display: none">
                         <div class="spinner-border text-primary m-auto" role="status">
                             <span class="sr-only">Загрузка...</span>
@@ -214,7 +214,7 @@
                         <div class="custom-control custom-checkbox">
                             <input id="checkbox_visible_finished_games" class="custom-control-input" type="checkbox" onclick="set_visible_finished_game($(this).is(':checked'))" checked>
                             <label for="checkbox_visible_finished_games" class="custom-control-label">
-                                {{ TITLE_FINISHED_GAME }}
+                                {{ title_finished_game }}
                             </label>
                         </div>
                         <button class="btn btn-secondary btn-sm btn-block" onclick="document.location.href='#finished_game_caption_table'">
@@ -226,7 +226,7 @@
                         <div class="custom-control custom-checkbox">
                             <input id="checkbox_visible_finished_watched_games" class="custom-control-input" type="checkbox" onclick="set_visible_finished_watched_game($(this).is(':checked'))" checked/>
                             <label for="checkbox_visible_finished_watched_games" class="custom-control-label">
-                                {{ TITLE_FINISHED_WATCHED }}
+                                {{ title_finished_watched }}
                             </label>
                         </div>
                         <button class="btn btn-secondary btn-sm btn-block" onclick="document.location.href='#finished_watched_game_caption_table'">

@@ -318,14 +318,25 @@ function append_date_render(data, type, row, meta) {
     return row.append_date_timestamp;
 }
 
+function get_genre_description(genre_name) {
+    let genre = ALL_GENRES[genre_name];
+    let description = genre.aliases;
+
+    if (genre.description) {
+        description = `${genre.description}\n\n${description}`;
+    }
+
+    return description;
+}
+
 function genres_render(genres) {
     let tags = [];
     for (let name of genres) {
-        let genre = ALL_GENRES[name];
-        let description = genre.aliases;
+        let description = get_genre_description(name);
 
+        // Для визуальной разницы
+        let genre = ALL_GENRES[name];
         if (genre.description) {
-            description = `${genre.description}\n\n${description}`;
             tags.push(`<abbr class="genre" title="${description}">${name}</abbr>`);
         } else {
             tags.push(`<span class="genre" title="${description}">${name}</span>`);
@@ -365,7 +376,6 @@ function platform_render(data, type, row, meta) {
 }
 
 function createTags(elementJQuery, items, tableEl, queryTag) {
-    // Инициализация платформ
     let tagify = new Tagify(elementJQuery[0], {
         whitelist: items,
         enforceWhitelist: true,
@@ -462,7 +472,8 @@ function createFilterOfGenres(table, tableEl) {
     for (let name of Array.from(uniqueGenres).sort()) {
         genres.push({
             value: name,
-            searchBy: ALL_GENRES[name].aliases,
+            searchBy: ALL_GENRES[name].aliases, // Для альтернативного поиска жанров
+            title: get_genre_description(name), // Для всплывающих подсказок при наведении мышки
         });
     }
 
@@ -885,7 +896,8 @@ function fill_genres() {
     for (let name in ALL_GENRES) {
         genres.push({
             value: name,
-            searchBy: ALL_GENRES[name].aliases,
+            searchBy: ALL_GENRES[name].aliases, // Для альтернативного поиска жанров
+            title: get_genre_description(name), // Для всплывающих подсказок при наведении мышки
         });
     }
     genres = genres.sort((a, b) => a.value.localeCompare(b.value));

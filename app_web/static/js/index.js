@@ -67,12 +67,29 @@ function showDialogIFrameGamefaqs(src) {
     showDialogWithIFrame('dialog-iframe-gamefaqs', src);
 }
 
-function run_check() {
+function run_check_prices() {
     $.ajax({
-        url: "/run_check",
+        url: "/run_check_prices",
         method: "POST",
         success: on_ajax_success,
         error: data => on_ajax_error(data, 'при запуске проверки цен'),
+
+        beforeSend: function() {
+            $('.run_check.loading').show();
+        },
+
+        complete: function() {
+            $('.run_check.loading').hide();
+        }
+    });
+}
+
+function run_check_genres() {
+    $.ajax({
+        url: "/run_check_genres",
+        method: "POST",
+        success: on_ajax_success,
+        error: data => on_ajax_error(data, 'при запуске проверки жанров игр'),
 
         beforeSend: function() {
             $('.run_check.loading').show();

@@ -19,6 +19,7 @@ from app_parser.main import run as run_check_of_price
 from app_web.app import app, log
 from common import WebUserAlertException, FINISHED_GAME, FINISHED_WATCHED
 from db import Game, Genre, Settings
+from integrator_genres.main import fill_from_current_games as run_check_of_genres
 
 
 class StatusEnum(str, Enum):
@@ -280,13 +281,13 @@ def check_price():
     return jsonify(data)
 
 
-@app.route("/run_check", methods=['POST'])
-def run_check():
+@app.route("/run_check_prices", methods=['POST'])
+def run_check_prices():
     """
     Функция запускает проверку новых игр у парсера в main.py
     """
 
-    log.debug('Call run_check')
+    log.debug('Call run_check_prices')
 
     status = StatusEnum.OK
     result = None
@@ -313,11 +314,47 @@ def run_check():
                 added_watched_games=added_watched_games
             )
         else:
-            text += '<br>Новый игр нет'
+            text += '<br>Новых игр нет'
 
     except Exception as e:
         status = StatusEnum.WARNING
         text = f'<b>Проверка новых игр завершена ошибкой: "{e}".</b>'
+
+    data = {
+        'status': status,
+        'text': text,
+        'result': result,
+    }
+    log.debug(data)
+
+    return jsonify(data)
+
+
+@app.route("/run_check_genres", methods=['POST'])
+def run_check_genres():
+    """
+    Функция запускает проверку новых жанров у игр без жанров
+    """
+
+    log.debug('Call run_check_genres')
+
+    status = StatusEnum.OK
+    result = None
+    text = '<b>Проверка заполнения жанров играм завершена.</b>'
+
+    try:
+        added = run_check_of_genres()
+        if added:
+            text += f'<br>Обновлено игр: {added}'
+            result = dict(
+                added=added,
+            )
+        else:
+            text += '<br>Без изменений'
+
+    except Exception as e:
+        status = StatusEnum.WARNING
+        text = f'<b>Проверка новых жанров у игр завершена ошибкой: "{e}".</b>'
 
     data = {
         'status': status,

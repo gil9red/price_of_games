@@ -81,10 +81,11 @@ def fill_genres():
     log.info('Завершено.\n')
 
 
-def fill_from_current_games():
+def fill_from_current_games() -> int:
     log.info('Запуск заполнения жанров у игр')
 
     result_by_number = get_result_by_number()
+    total = 0
 
     for game in Game.get_games_without_genres():
         url = f'{URL_GAME}/{quote(game.name)}'
@@ -93,13 +94,20 @@ def fill_from_current_games():
         if not item:
             continue
 
-        for result in process_game(game, genres=item['genres']):
+        results = process_game(game, genres=item['genres'])
+        for result in results:
             result_by_number[result] += 1
+
+        # Если хотя бы один жанр был добавлен
+        if ResultEnum.ADDED in results:
+            total += 1
 
     text = get_result_as_text(result_by_number)
     log.info(f'Результат: {text}')
 
     log.info('Завершено.\n')
+
+    return total
 
 
 def run():

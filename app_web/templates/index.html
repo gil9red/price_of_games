@@ -235,7 +235,7 @@
 
                         <hr/>
 
-                        <button class="btn btn-primary btn-sm btn-block" onclick="run_check()">
+                        <button class="btn btn-primary btn-sm btn-block" onclick="run_check_prices()">
                             <img class="run_check loading" style="display:none" src="{{ url_for('static', filename='images/loading.gif') }}"/>
                             Запуск проверки новых игр
                         </button>
@@ -423,6 +423,12 @@
                                     <button type="button" class="btn btn-outline-success btn-sm" data-role="cancel" disabled>Отмена</button>
                                 </div>
                             </form>
+                            <hr/>
+
+                            <button class="btn btn-primary btn-sm btn-block" onclick="run_check_genres()">
+                                <img class="run_check loading" style="display:none" src="{{ url_for('static', filename='images/loading.gif') }}"/>
+                                Поиск жанров всех игр без жанра
+                            </button>
 
                             <hr/>
                             <form id="form__rename_game" method="post" action="/rename_game">

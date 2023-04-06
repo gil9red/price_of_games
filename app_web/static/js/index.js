@@ -21,7 +21,8 @@ function on_ajax_success(data) {
         });
     }
 
-    if (ok && data.result) {
+    let isReloadTableOnAjax = $('#cbReloadTableOnAjax').is(':checked');
+    if (isReloadTableOnAjax && ok && data.result) {
         load_tables();
     }
 }

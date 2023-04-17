@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__author__ = 'ipetrash'
+__author__ = "ipetrash"
 
 
 from pathlib import Path
@@ -17,9 +17,9 @@ import requests
 log = get_logger(Path(__file__).resolve().parent.name)
 
 
-URL_BASE = f'http://127.0.0.1:{PORT_GET_GAME_GENRES}'
-URL_GAME = f'{URL_BASE}/api/game'
-URL_GENRES = f'{URL_BASE}/api/genres'
+URL_BASE = f"http://127.0.0.1:{PORT_GET_GAME_GENRES}"
+URL_GAME = f"{URL_BASE}/api/game"
+URL_GENRES = f"{URL_BASE}/api/genres"
 
 
 def get_result_by_number() -> dict[ResultEnum, int]:
@@ -34,10 +34,12 @@ def get_result_as_text(result_by_number: dict[ResultEnum, int]) -> str:
     if not total:
         return "изменений нет"
 
-    return ", ".join(f"{result.name}: {number}" for result, number in result_by_number.items())
+    return ", ".join(
+        f"{result.name}: {number}" for result, number in result_by_number.items()
+    )
 
 
-def process_genre(name: str, description: str, aliases: str = '') -> ResultEnum:
+def process_genre(name: str, description: str, aliases: str = "") -> ResultEnum:
     result, _ = Genre.add_or_update(
         name=name,
         description=description,
@@ -45,9 +47,9 @@ def process_genre(name: str, description: str, aliases: str = '') -> ResultEnum:
     )
     match result:
         case ResultEnum.ADDED:
-            log.info(f'Добавлен жанр {name!r}')
+            log.info(f"Добавлен жанр {name!r}")
         case ResultEnum.UPDATED:
-            log.info(f'Обновлен жанр {name!r}')
+            log.info(f"Обновлен жанр {name!r}")
 
     return result
 
@@ -58,7 +60,7 @@ def process_game(game: Game, genres: list[str]) -> list[ResultEnum]:
     for genre in genres:
         result, _ = game.add_genre(genre)
         if result == ResultEnum.ADDED:
-            log.info(f'В игру {game.name!r} добавлен жанр {genre!r}')
+            log.info(f"В игру {game.name!r} добавлен жанр {genre!r}")
 
         results.append(result)
 
@@ -66,7 +68,7 @@ def process_game(game: Game, genres: list[str]) -> list[ResultEnum]:
 
 
 def fill_genres():
-    log.info('Запуск заполнения жанров')
+    log.info("Запуск заполнения жанров")
 
     result_by_number = get_result_by_number()
 
@@ -76,25 +78,25 @@ def fill_genres():
         result_by_number[result] += 1
 
     text = get_result_as_text(result_by_number)
-    log.info(f'Результат: {text}')
+    log.info(f"Результат: {text}")
 
-    log.info('Завершено.\n')
+    log.info("Завершено.\n")
 
 
 def fill_from_current_games() -> int:
-    log.info('Запуск заполнения жанров у игр')
+    log.info("Запуск заполнения жанров у игр")
 
     result_by_number = get_result_by_number()
     total = 0
 
     for game in Game.get_games_without_genres():
-        url = f'{URL_GAME}/{quote(game.name)}'
+        url = f"{URL_GAME}/{quote(game.name)}"
         rs = requests.get(url)
         item = rs.json()
         if not item:
             continue
 
-        results = process_game(game, genres=item['genres'])
+        results = process_game(game, genres=item["genres"])
         for result in results:
             result_by_number[result] += 1
 
@@ -103,9 +105,9 @@ def fill_from_current_games() -> int:
             total += 1
 
     text = get_result_as_text(result_by_number)
-    log.info(f'Результат: {text}')
+    log.info(f"Результат: {text}")
 
-    log.info('Завершено.\n')
+    log.info("Завершено.\n")
 
     return total
 
@@ -115,5 +117,5 @@ def run():
     fill_from_current_games()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()

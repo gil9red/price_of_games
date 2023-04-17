@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__author__ = 'ipetrash'
+__author__ = "ipetrash"
 
 
 import logging
@@ -23,21 +23,23 @@ FINISHED_WATCHED = mini_played_games_parser.FINISHED_WATCHED
 
 
 def get_logger(
-        logger_name: str,
-        dir_name: Path = DIR_LOG,
-        log_stdout: bool = True,
-        log_file: bool = True
+    logger_name: str,
+    dir_name: Path = DIR_LOG,
+    log_stdout: bool = True,
+    log_file: bool = True,
 ) -> logging.Logger:
     log = logging.getLogger(logger_name)
     log.setLevel(logging.DEBUG)
 
-    formatter = logging.Formatter('[%(asctime)s] %(filename)s[LINE:%(lineno)d] %(levelname)-8s %(message)s')
+    formatter = logging.Formatter(
+        "[%(asctime)s] %(filename)s[LINE:%(lineno)d] %(levelname)-8s %(message)s"
+    )
 
     if log_file:
         dir_name.mkdir(parents=True, exist_ok=True)
-        file_name = dir_name / f'{logger_name}.log'
+        file_name = dir_name / f"{logger_name}.log"
 
-        fh = logging.FileHandler(file_name, encoding='utf-8')
+        fh = logging.FileHandler(file_name, encoding="utf-8")
         fh.setLevel(logging.DEBUG)
         fh.setFormatter(formatter)
         log.addHandler(fh)
@@ -51,5 +53,5 @@ def get_logger(
     return log
 
 
-log_common = get_logger('common')
-log_append_game = get_logger('append_game', log_stdout=False)
+log_common = get_logger("common")
+log_append_game = get_logger("append_game", log_stdout=False)

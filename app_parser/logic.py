@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__author__ = 'ipetrash'
+__author__ = "ipetrash"
 
 
 import time
 
-from common import FINISHED_GAME, FINISHED_WATCHED, WebUserAlertException, log_common, log_append_game
+from common import (
+    FINISHED_GAME,
+    FINISHED_WATCHED,
+    WebUserAlertException,
+    log_common,
+    log_append_game,
+)
 from db import ResultEnum, Game, Platform
 
 from app_parser import models
@@ -31,9 +37,9 @@ def get_games_by_kind(kind: str) -> list[models.GameInfo]:
             kind=game.kind,
             platform=game.platform.name,
             price=game.price,
-            append_date=game.append_date.strftime('%d/%m/%Y %H:%M:%S'),
+            append_date=game.append_date.strftime("%d/%m/%Y %H:%M:%S"),
             append_date_timestamp=int(game.append_date.timestamp()),
-            genres=[genre.name for genre in game.get_genres()]
+            genres=[genre.name for genre in game.get_genres()],
         )
         for game in query
     ]
@@ -85,8 +91,8 @@ def set_price_game(game_name: str, price: int | None) -> list[int]:
     if isinstance(price, str):
         price = price.strip()
 
-    if not game_name or price == '' or price is None:
-        error_text = f'Не указано game ( = {game_name!r}) или price ( = {price!r})'
+    if not game_name or price == "" or price is None:
+        error_text = f"Не указано game ( = {game_name!r}) или price ( = {price!r})"
         log_common.error(error_text)
         raise WebUserAlertException(error_text)
 
@@ -111,7 +117,7 @@ def set_genres(game_name: str, genres: list[str]) -> list[int]:
     game_name = game_name.strip()
 
     if not game_name:
-        error_text = f'Не указано название игры ( = {game_name!r})'
+        error_text = f"Не указано название игры ( = {game_name!r})"
         log_common.error(error_text)
         raise WebUserAlertException(error_text)
 
@@ -137,17 +143,21 @@ def rename_game(old_name: str, new_name: str) -> models.RenameGameResult:
     new_name = new_name.strip()
 
     if not old_name or not new_name:
-        error_text = f'Не указано old_name ( = {old_name!r}) или new_name ( = {new_name!r})'
+        error_text = (
+            f"Не указано old_name ( = {old_name!r}) или new_name ( = {new_name!r})"
+        )
         log_common.error(error_text)
         raise WebUserAlertException(error_text)
 
     if not has_game(old_name):
-        error_text = f'Игры с названием {old_name!r} не существует'
+        error_text = f"Игры с названием {old_name!r} не существует"
         log_common.error(error_text)
         raise WebUserAlertException(error_text)
 
     if has_game(new_name):
-        error_text = f'Нельзя переименовать {old_name!r}, т.к. имя {new_name!r} уже занято'
+        error_text = (
+            f"Нельзя переименовать {old_name!r}, т.к. имя {new_name!r} уже занято"
+        )
         log_common.error(error_text)
         raise WebUserAlertException(error_text)
 
@@ -186,7 +196,7 @@ def delete_game(game: Game):
         game.delete_instance()
 
     except Exception as e:
-        error_text = f'При удалении игры {game.name!r} ({game.platform!r}, {game.kind!r}) произошла ошибка: {e}'
+        error_text = f"При удалении игры {game.name!r} ({game.platform!r}, {game.kind!r}) произошла ошибка: {e}"
         log_common.error(error_text)
         raise WebUserAlertException(error_text)
 
@@ -211,7 +221,7 @@ def check_price_all_non_price_games() -> list[models.PriceUpdateResult]:
 
     query = Game.select().where(Game.price.is_null())
     games = list(query)
-    log_common.debug(f'Игр без цены: {len(games)}')
+    log_common.debug(f"Игр без цены: {len(games)}")
 
     for game in games:
         result = check_and_fill_price_of_game(game.name)
@@ -224,8 +234,7 @@ def check_price_all_non_price_games() -> list[models.PriceUpdateResult]:
 
 
 def append_games_to_database(
-        finished_game_list: list[models.Game],
-        finished_watched_game_list: list[models.Game]
+    finished_game_list: list[models.Game], finished_watched_game_list: list[models.Game]
 ) -> tuple[int, int]:
     """
     Функция для добавление игр в таблицу базы. Если игра уже есть в базе, то запрос игнорируется.
@@ -238,16 +247,22 @@ def append_games_to_database(
         platform = Platform.add(game.platform)
 
         # Для отсеивания дубликатов
-        has = Game.select(Game.id).where(
-            Game.name == name,
-            Game.platform == platform,
-            Game.kind == game.kind,
-        ).exists()
+        has = (
+            Game.select(Game.id)
+            .where(
+                Game.name == name,
+                Game.platform == platform,
+                Game.kind == game.kind,
+            )
+            .exists()
+        )
         if has:
             return False
 
-        log_common.info(f'Добавляю новую игру {name!r} ({game.platform}, {game.kind})')
-        log_append_game.info(f'Добавляю новую игру {name!r} ({game.platform}, {game.kind})')
+        log_common.info(f"Добавляю новую игру {name!r} ({game.platform}, {game.kind})")
+        log_append_game.info(
+            f"Добавляю новую игру {name!r} ({game.platform}, {game.kind})"
+        )
 
         Game.add(name, platform, game.kind)
         return True
@@ -275,7 +290,9 @@ def get_game_list_with_price(game_name: str) -> list[Game]:
     return list(query)
 
 
-def check_and_fill_price_of_game(game_name: str, cache=True) -> models.PriceUpdateResult:
+def check_and_fill_price_of_game(
+    game_name: str, cache=True
+) -> models.PriceUpdateResult:
     """
     Функция ищет цену игры и при нахождении ее ставит ей цену в базе.
     Возвращает кортеж из списка id игр с измененной ценой и саму цену.
@@ -286,7 +303,7 @@ def check_and_fill_price_of_game(game_name: str, cache=True) -> models.PriceUpda
 
     game_name = game_name.strip()
     if not game_name:
-        log_common.warn(f'Не указано game ( = {game_name!r})')
+        log_common.warn(f"Не указано game ( = {game_name!r})")
         return models.PriceUpdateResult(
             game_ids=[],
             game_name=game_name,
@@ -297,22 +314,24 @@ def check_and_fill_price_of_game(game_name: str, cache=True) -> models.PriceUpda
     if cache:
         game_list = get_game_list_with_price(game_name)
         if game_list:
-            log_common.debug(f'get_game_list_with_price(game={game_name!r}): {game_list}')
+            log_common.debug(
+                f"get_game_list_with_price(game={game_name!r}): {game_list}"
+            )
 
             # Вытащим id, kind и price найденной игры
             game = game_list[0]
             other_id, other_kind, other_price = game.id, game.kind, game.price
 
             log_common.info(
-                f'Для игры {game_name!r} удалось найти цену {other_price!r} '
-                f'из базы, взяв ее из аналога c id={other_id} в категории {other_kind!r}'
+                f"Для игры {game_name!r} удалось найти цену {other_price!r} "
+                f"из базы, взяв ее из аналога c id={other_id} в категории {other_kind!r}"
             )
 
             # Отметим что игра искалась в стиме (чтобы она не искалась в нем, если будет вызвана проверка)
             set_checked_price_of_game(game_name)
 
-            log_common.info(f'Нашли игру: {game_name!r} -> {other_price}')
-            log_append_game.info(f'Нашли игру: {game_name!r} -> {other_price}')
+            log_common.info(f"Нашли игру: {game_name!r} -> {other_price}")
+            log_append_game.info(f"Нашли игру: {game_name!r} -> {other_price}")
 
             return models.PriceUpdateResult(
                 game_ids=set_price_game(game_name, other_price),
@@ -321,16 +340,15 @@ def check_and_fill_price_of_game(game_name: str, cache=True) -> models.PriceUpda
             )
 
     # Поищем игру и ее цену в стиме
-    other_price = get_price_game(
-        game_name,
-        log_common, log_append_game
-    )
+    other_price = get_price_game(game_name, log_common, log_append_game)
 
     # Отметим что игра искалась
     set_checked_price_of_game(game_name)
 
     if other_price is None:
-        log_common.info(f'Не получилось найти цену игры {game_name!r}, price is {other_price}')
+        log_common.info(
+            f"Не получилось найти цену игры {game_name!r}, price is {other_price}"
+        )
         return models.PriceUpdateResult(
             game_ids=[],
             game_name=game_name,
@@ -356,9 +374,10 @@ def fill_price_of_games():
     # Перед перебором собираем все игры и удаляем дубликаты (игры могут и просмотренными, и пройденными)
     # заодно список кортежей из одного имени делаем просто список имен
 
-    query = Game.select().distinct().where(
-        Game.price.is_null(),
-        Game.has_checked_price == False
+    query = (
+        Game.select()
+        .distinct()
+        .where(Game.price.is_null(), Game.has_checked_price == False)
     )
     games_list = list(query)
     if not games_list:
@@ -367,7 +386,7 @@ def fill_price_of_games():
 
     log_common.info(f"Нужно найти цену {len(games_list)} играм")
 
-    platform_pc = Platform.get(Platform.name == 'PC')
+    platform_pc = Platform.get(Platform.name == "PC")
 
     for game in games_list:
         # Для PC поиск цены выполняется в стиме, для остальных платформ это не поддержано
@@ -379,17 +398,21 @@ def fill_price_of_games():
             set_checked_price_of_game(game.name)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from peewee import fn
 
     # Вывести счетчик игр
-    query = Game.select(fn.COUNT('*'), fn.SUM(Game.price)).tuples().where(
-        Game.kind == FINISHED_GAME
+    query = (
+        Game.select(fn.COUNT("*"), fn.SUM(Game.price))
+        .tuples()
+        .where(Game.kind == FINISHED_GAME)
     )
     finished_number, finished_sum_price = query.first()
 
-    query = Game.select(fn.COUNT('*'), fn.SUM(Game.price)).tuples().where(
-        Game.kind == FINISHED_WATCHED
+    query = (
+        Game.select(fn.COUNT("*"), fn.SUM(Game.price))
+        .tuples()
+        .where(Game.kind == FINISHED_WATCHED)
     )
     finished_watched_number, finished_watched_sum_price = query.first()
 
@@ -399,10 +422,12 @@ if __name__ == '__main__':
     total_number = finished_number + finished_watched_number
     total_price = finished_sum_price + finished_watched_sum_price
 
-    print(f'{FINISHED_GAME}: {finished_number}, total price: {finished_sum_price}')
-    print(f'{FINISHED_WATCHED}: {finished_watched_number}, total price: {finished_watched_sum_price}')
-    print(f'Total {total_number}, total price: {total_price}')
+    print(f"{FINISHED_GAME}: {finished_number}, total price: {finished_sum_price}")
+    print(
+        f"{FINISHED_WATCHED}: {finished_watched_number}, total price: {finished_watched_sum_price}"
+    )
+    print(f"Total {total_number}, total price: {total_price}")
     print()
 
-    print(get_price('A Story About My Uncle'))
-    print(get_price('A Story About My '))
+    print(get_price("A Story About My Uncle"))
+    print(get_price("A Story About My "))

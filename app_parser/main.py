@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__author__ = 'ipetrash'
+__author__ = "ipetrash"
 
 
 """
@@ -21,19 +21,17 @@ from integrator_genres.main import run as fill_genres_of_games
 from third_party.wait import wait
 
 
-log = get_logger('main')
+log = get_logger("main")
 
 
 def run() -> tuple[int, int]:
     # Перед выполнением, запоминаем дату и время, чтобы иметь потом представление когда
     # в последний раз выполнялось заполнение списка
-    Settings.set_value('last_run_date', datetime.now())
+    Settings.set_value("last_run_date", datetime.now())
 
     # Получение игр из файла gist
     games = get_games()
-    finished_game_list = [
-        game for game in games if game.kind == FINISHED_GAME
-    ]
+    finished_game_list = [game for game in games if game.kind == FINISHED_GAME]
     finished_watched_game_list = [
         game for game in games if game.kind == FINISHED_WATCHED
     ]
@@ -41,19 +39,18 @@ def run() -> tuple[int, int]:
     log.debug(
         "Пройденных игр %s, просмотренных игр: %s",
         len(finished_game_list),
-        len(finished_watched_game_list)
+        len(finished_watched_game_list),
     )
 
     # Добавление в базу новых игр
     added_finished_games, added_watched_games = append_games_to_database(
-        finished_game_list,
-        finished_watched_game_list
+        finished_game_list, finished_watched_game_list
     )
     if added_finished_games:
-        log.debug('Добавлено пройденных игр: %s', added_finished_games)
+        log.debug("Добавлено пройденных игр: %s", added_finished_games)
 
     if added_watched_games:
-        log.debug('Добавлено просмотренных игр: %s', added_watched_games)
+        log.debug("Добавлено просмотренных игр: %s", added_watched_games)
 
     # Заполнение цен игр
     fill_price_of_games()
@@ -68,10 +65,10 @@ def run() -> tuple[int, int]:
     return added_finished_games, added_watched_games
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     while True:
         try:
-            log.debug('Start')
+            log.debug("Start")
 
             run()
 
@@ -79,8 +76,8 @@ if __name__ == '__main__':
             wait(hours=1)
 
         except:
-            log.exception('Ошибка:')
-            log.debug('Через 5 минут попробую снова...')
+            log.exception("Ошибка:")
+            log.debug("Через 5 минут попробую снова...")
 
             # Wait 5 minutes before next attempt
             wait(minutes=5)

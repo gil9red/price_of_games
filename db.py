@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__author__ = 'ipetrash'
+__author__ = "ipetrash"
 
 
 import enum
@@ -13,7 +13,16 @@ from datetime import datetime
 from typing import Any, Callable, Type, Iterable, Optional
 
 # pip install peewee
-from peewee import Model, TextField, ForeignKeyField, DateTimeField, BooleanField, CharField, IntegerField, fn
+from peewee import (
+    Model,
+    TextField,
+    ForeignKeyField,
+    DateTimeField,
+    BooleanField,
+    CharField,
+    IntegerField,
+    fn,
+)
 from playhouse.shortcuts import model_to_dict
 from playhouse.sqliteq import SqliteQueueDatabase
 
@@ -38,10 +47,10 @@ class ResultEnum(enum.Enum):
 
 def db_create_backup(log: logging.Logger):
     for path in BACKUP_DIR_LIST:
-        zip_name = path / f'{datetime.today().date()}.sqlite'
+        zip_name = path / f"{datetime.today().date()}.sqlite"
 
-        log.info(f'Создание бэкапа базы данных в: {zip_name}')
-        shutil.make_archive(zip_name, 'zip', DB_DIR_NAME)
+        log.info(f"Создание бэкапа базы данных в: {zip_name}")
+        shutil.make_archive(zip_name, "zip", DB_DIR_NAME)
 
 
 # This working with multithreading
@@ -49,9 +58,9 @@ def db_create_backup(log: logging.Logger):
 db = SqliteQueueDatabase(
     DB_FILE_NAME,
     pragmas={
-        'foreign_keys': 1,
-        'journal_mode': 'wal',    # WAL-mode
-        'cache_size': -1024 * 64  # 64MB page-cache
+        "foreign_keys": 1,
+        "journal_mode": "wal",     # WAL-mode
+        "cache_size": -1024 * 64,  # 64MB page-cache
     },
     use_gevent=False,     # Use the standard library "threading" module.
     autostart=True,
@@ -64,19 +73,19 @@ class BaseModel(Model):
     class Meta:
         database = db
 
-    def get_new(self) -> Type['BaseModel']:
+    def get_new(self) -> Type["BaseModel"]:
         return type(self).get(self._pk_expr())
 
     @classmethod
-    def get_first(cls) -> Type['BaseModel']:
+    def get_first(cls) -> Type["BaseModel"]:
         return cls.select().first()
 
     @classmethod
-    def get_last(cls) -> Type['BaseModel']:
+    def get_last(cls) -> Type["BaseModel"]:
         return cls.select().order_by(cls.id.desc()).first()
 
     @classmethod
-    def get_inherited_models(cls) -> list[Type['BaseModel']]:
+    def get_inherited_models(cls) -> list[Type["BaseModel"]]:
         return sorted(cls.__subclasses__(), key=lambda x: x.__name__)
 
     @classmethod
@@ -85,9 +94,9 @@ class BaseModel(Model):
         for sub_cls in cls.get_inherited_models():
             name = sub_cls.__name__
             count = sub_cls.select().count()
-            items.append(f'{name}: {count}')
+            items.append(f"{name}: {count}")
 
-        print(', '.join(items))
+        print(", ".join(items))
 
     @classmethod
     def count(cls, filters: Iterable = None) -> int:
@@ -109,37 +118,41 @@ class BaseModel(Model):
                     v = repr(shorten(v))
 
             elif isinstance(field, ForeignKeyField):
-                k = f'{k}_id'
+                k = f"{k}_id"
                 if v:
                     v = v.id
 
-            fields.append(f'{k}={v}')
+            fields.append(f"{k}={v}")
 
-        return self.__class__.__name__ + '(' + ', '.join(fields) + ')'
+        return self.__class__.__name__ + "(" + ", ".join(fields) + ")"
 
 
 class Platform(BaseModel):
     name = TextField(unique=True)
 
     @classmethod
-    def add(cls, name: str) -> 'Platform':
+    def add(cls, name: str) -> "Platform":
         return cls.get_or_create(name=name)[0]
 
 
 class Genre(BaseModel):
     name = TextField(unique=True)
     description = TextField()
-    aliases = TextField(default='')
+    aliases = TextField(default="")
 
     @classmethod
-    def get_by(cls, name: str) -> Optional['Genre']:
+    def get_by(cls, name: str) -> Optional["Genre"]:
         if not name or not name.strip():
-            raise NotDefinedParameterException(parameter_name='name')
+            raise NotDefinedParameterException(parameter_name="name")
 
         return cls.get_or_none(name=name)
 
     @classmethod
-    def add_or_update(cls, name: str, description: str, aliases: str = '') -> tuple[ResultEnum, 'Genre']:
+    def add_or_update(
+        cls, name: str,
+        description: str,
+        aliases: str = "",
+    ) -> tuple[ResultEnum, "Genre"]:
         obj = cls.get_by(name)
         if not obj:
             obj = cls.create(
@@ -166,7 +179,7 @@ class Genre(BaseModel):
 
 class Game(BaseModel):
     name = TextField()
-    platform = ForeignKeyField(Platform, backref='games')
+    platform = ForeignKeyField(Platform, backref="games")
     kind = TextField()
     price = IntegerField(null=True)
     append_date = DateTimeField(default=datetime.now)
@@ -179,26 +192,26 @@ class Game(BaseModel):
         )
 
     @classmethod
-    def get_by(cls, name: str, platform: Platform, kind: str) -> Optional['Game']:
+    def get_by(cls, name: str, platform: Platform, kind: str) -> Optional["Game"]:
         if not name or not name.strip():
-            raise NotDefinedParameterException(parameter_name='name')
+            raise NotDefinedParameterException(parameter_name="name")
 
         if not platform:
-            raise NotDefinedParameterException(parameter_name='platform')
+            raise NotDefinedParameterException(parameter_name="platform")
 
         if not kind or not kind.strip():
-            raise NotDefinedParameterException(parameter_name='kind')
+            raise NotDefinedParameterException(parameter_name="kind")
 
         return cls.get_or_none(name=name, platform=platform, kind=kind)
 
     @classmethod
-    def add(cls, name: str, platform: Platform, kind: str) -> 'Game':
+    def add(cls, name: str, platform: Platform, kind: str) -> "Game":
         obj = cls.get_by(name, platform, kind)
         if not obj:
             obj = cls.create(
                 name=name,
                 platform=platform,
-                kind=kind
+                kind=kind,
             )
 
         return obj
@@ -212,7 +225,7 @@ class Game(BaseModel):
         if isinstance(genre, str):
             genre = Genre.get_by(genre)
             if not genre:
-                raise Exception(f'Неизвестный жанр {genre!r}!')
+                raise Exception(f"Неизвестный жанр {genre!r}!")
 
         if genre in self.get_genres():
             return ResultEnum.NOTHING, genre
@@ -257,15 +270,15 @@ class Game(BaseModel):
         return result
 
     @classmethod
-    def get_games_without_genres(cls) -> list['Game']:
+    def get_games_without_genres(cls) -> list["Game"]:
         sub_query = Game2Genre.select().where(Game2Genre.game == cls.id)
         query = cls.select().where(~fn.EXISTS(sub_query))
         return list(query)
 
 
 class Game2Genre(BaseModel):
-    game = ForeignKeyField(Game, backref='links_to_genres')
-    genre = ForeignKeyField(Genre, backref='links_to_games')
+    game = ForeignKeyField(Game, backref="links_to_genres")
+    genre = ForeignKeyField(Genre, backref="links_to_games")
 
     class Meta:
         indexes = (
@@ -291,7 +304,11 @@ class Settings(BaseModel):
             )
 
     @classmethod
-    def get_value(cls, key: str, get_typing_value_func: Callable = None) -> str | Any | None:
+    def get_value(
+        cls,
+        key: str,
+        get_typing_value_func: Callable = None,
+    ) -> str | Any | None:
         obj = cls.get_or_none(key=key)
         value = obj and obj.value
 
@@ -315,7 +332,7 @@ db.create_tables(BaseModel.get_inherited_models())
 time.sleep(0.050)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     BaseModel.print_count_of_tables()
     # Game: 1689, Game2Genre: 6973, Genre: 78, Platform: 24, Settings: 1
     print()

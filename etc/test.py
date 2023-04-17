@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-__author__ = 'ipetrash'
+__author__ = "ipetrash"
 
 
 import unittest
@@ -10,14 +10,24 @@ from datetime import datetime
 from peewee import SqliteDatabase
 
 from common import FINISHED_GAME
-from db import NotDefinedParameterException, ResultEnum, BaseModel, Platform, Game, Genre, Game2Genre, Settings, db
+from db import (
+    NotDefinedParameterException,
+    ResultEnum,
+    BaseModel,
+    Platform,
+    Game,
+    Genre,
+    Game2Genre,
+    Settings,
+    db,
+)
 
 
 # NOTE: https://docs.peewee-orm.com/en/latest/peewee/database.html#testing-peewee-applications
 class TestCaseDB(unittest.TestCase):
     def setUp(self):
         self.models = BaseModel.get_inherited_models()
-        self.test_db = SqliteDatabase(':memory:')
+        self.test_db = SqliteDatabase(":memory:")
         self.test_db.bind(self.models, bind_refs=False, bind_backrefs=False)
         self.test_db.connect()
         self.test_db.create_tables(self.models)
@@ -28,11 +38,11 @@ class TestCaseDB(unittest.TestCase):
         db.bind(self.models, bind_refs=False, bind_backrefs=False)
 
     def test_platform(self):
-        with self.subTest('cls.count'):
+        with self.subTest("cls.count"):
             self.assertEqual(0, Platform.count())
 
-        with self.subTest('cls.add'):
-            name = 'PC'
+        with self.subTest("cls.add"):
+            name = "PC"
             platform = Platform.add(name)
             self.assertTrue(platform)
             self.assertEqual(name, platform.name)
@@ -42,21 +52,21 @@ class TestCaseDB(unittest.TestCase):
 
             self.assertEqual(1, Platform.count())
 
-            names = [name, 'PS1', 'PS2']
+            names = [name, "PS1", "PS2"]
             for name in names:
                 Platform.add(name)
 
             self.assertEqual(len(names), Platform.count())
 
     def test_game(self):
-        with self.subTest('cls.count'):
+        with self.subTest("cls.count"):
             self.assertEqual(0, Game.count())
 
         kind = FINISHED_GAME
-        platform = Platform.add('PC')
+        platform = Platform.add("PC")
 
-        with self.subTest('cls.add'):
-            name = 'game1'
+        with self.subTest("cls.add"):
+            name = "game1"
 
             game = Game.add(name, platform, kind)
             self.assertEqual(1, Game.count())
@@ -69,53 +79,64 @@ class TestCaseDB(unittest.TestCase):
 
             self.assertEqual(1, Game.count())
 
-        with self.subTest('cls.get_by'):
+        with self.subTest("cls.get_by"):
             self.assertEqual(game, Game.get_by(game.name, game.platform, game.kind))
 
-            self.assertIsNone(Game.get_by(game.name + game.name, game.platform, game.kind))
-            self.assertIsNone(Game.get_by(game.name, Platform.add('<UNKNOWN>'), game.kind + game.kind))
-            self.assertIsNone(Game.get_by(game.name, game.platform, game.kind + game.kind))
+            self.assertIsNone(
+                Game.get_by(game.name + game.name, game.platform, game.kind)
+            )
+            self.assertIsNone(
+                Game.get_by(game.name, Platform.add("<UNKNOWN>"), game.kind + game.kind)
+            )
+            self.assertIsNone(
+                Game.get_by(game.name, game.platform, game.kind + game.kind)
+            )
 
             # Пустые параметры
             with self.assertRaises(NotDefinedParameterException):
-                Game.get_by(name='', platform=platform, kind=kind)
+                Game.get_by(name="", platform=platform, kind=kind)
 
             with self.assertRaises(NotDefinedParameterException):
                 Game.get_by(name=None, platform=platform, kind=kind)
 
             with self.assertRaises(NotDefinedParameterException):
-                Game.get_by(name='   ', platform=platform, kind=kind)
+                Game.get_by(name="   ", platform=platform, kind=kind)
 
             with self.assertRaises(NotDefinedParameterException):
                 Game.get_by(name=game.name, platform=None, kind=kind)
 
             with self.assertRaises(NotDefinedParameterException):
-                Game.get_by(name=game.name, platform=platform, kind='')
+                Game.get_by(name=game.name, platform=platform, kind="")
 
             with self.assertRaises(NotDefinedParameterException):
                 Game.get_by(name=game.name, platform=platform, kind=None)
 
             with self.assertRaises(NotDefinedParameterException):
-                Game.get_by(name=game.name, platform=platform, kind='    ')
+                Game.get_by(name=game.name, platform=platform, kind="    ")
 
-        with self.subTest('self.set_price'):
+        with self.subTest("self.set_price"):
             self.assertIsNone(game.price)
 
             price = 999
             game.set_price(price)
             self.assertEqual(price, game.price)
 
-        with self.subTest('self.append_date'):
-            self.assertTrue('append_date is not datetime', isinstance(game.append_date, datetime))
+        with self.subTest("self.append_date"):
+            self.assertTrue(
+                "append_date is not datetime", isinstance(game.append_date, datetime)
+            )
 
-        with self.subTest('self.modify_price_date'):
-            self.assertTrue('modify_price_date is not datetime', isinstance(game.modify_price_date, datetime))
+        with self.subTest("self.modify_price_date"):
+            self.assertTrue(
+                "modify_price_date is not datetime",
+                isinstance(game.modify_price_date, datetime),
+            )
 
-        genres = ['RPG', 'Action', 'Spy']
+        genres = ["RPG", "Action", "Spy"]
         for name in genres:
-            Genre.add_or_update(name=name, description='')
+            Genre.add_or_update(name=name, description="")
 
-        with self.subTest('self.add_genre / self.get_genres'):
+        with self.subTest("self.add_genre / self.get_genres"):
             self.assertEqual(0, len(game.get_genres()))
             for name in genres:
                 game.add_genre(name)
@@ -133,8 +154,8 @@ class TestCaseDB(unittest.TestCase):
 
             self.assertEqual(len(genres), len(game.get_genres()))
 
-        with self.subTest('self.set_genres'):
-            game = Game.add(name='set_genres', platform=platform, kind=kind)
+        with self.subTest("self.set_genres"):
+            game = Game.add(name="set_genres", platform=platform, kind=kind)
 
             result = game.set_genres([])
             self.assertEqual(
@@ -143,7 +164,7 @@ class TestCaseDB(unittest.TestCase):
                     ResultEnum.DELETED: 0,
                     ResultEnum.NOTHING: 0,
                 },
-                result
+                result,
             )
             self.assertEqual(0, len(game.get_genres()))
 
@@ -154,7 +175,7 @@ class TestCaseDB(unittest.TestCase):
                     ResultEnum.DELETED: 0,
                     ResultEnum.NOTHING: 0,
                 },
-                result
+                result,
             )
             self.assertEqual(3, len(game.get_genres()))
 
@@ -165,25 +186,24 @@ class TestCaseDB(unittest.TestCase):
                     ResultEnum.DELETED: 0,
                     ResultEnum.NOTHING: 3,
                 },
-                result
+                result,
             )
             self.assertEqual(3, len(game.get_genres()))
 
-            result = game.set_genres([
-                genres[0],
-                Genre.add_or_update(name='1234', description='')[1].name
-            ])
+            result = game.set_genres(
+                [genres[0], Genre.add_or_update(name="1234", description="")[1].name]
+            )
             self.assertEqual(
                 {
                     ResultEnum.ADDED: 1,
                     ResultEnum.DELETED: 2,
                     ResultEnum.NOTHING: 1,
                 },
-                result
+                result,
             )
             self.assertEqual(2, len(game.get_genres()))
 
-        with self.subTest('cls.get_games_without_genres'):
+        with self.subTest("cls.get_games_without_genres"):
             Game.truncate_table()
             Game2Genre.truncate_table()
 
@@ -191,38 +211,36 @@ class TestCaseDB(unittest.TestCase):
 
             items = []
             for i in range(5):
-                items.append(
-                    Game.add(f'{name}_{i}', platform, kind)
-                )
+                items.append(Game.add(f"{name}_{i}", platform, kind))
 
             self.assertEqual(len(items), len(Game.get_games_without_genres()))
 
     def test_genre(self):
-        with self.subTest('cls.count'):
+        with self.subTest("cls.count"):
             self.assertEqual(0, Genre.count())
 
-        genres = ['RPG', 'Action', 'Spy']
+        genres = ["RPG", "Action", "Spy"]
 
-        with self.subTest('cls.get_by'):
+        with self.subTest("cls.get_by"):
             self.assertIsNone(Genre.get_by(name=genres[0]))
 
             # Пустые параметры
             with self.assertRaises(NotDefinedParameterException):
-                Genre.get_by(name='')
+                Genre.get_by(name="")
 
             with self.assertRaises(NotDefinedParameterException):
                 Genre.get_by(name=None)
 
             with self.assertRaises(NotDefinedParameterException):
-                Genre.get_by(name='   ')
+                Genre.get_by(name="   ")
 
-        with self.subTest('cls.add_or_update'):
+        with self.subTest("cls.add_or_update"):
             for name in genres:
-                result, genre = Genre.add_or_update(name=name, description='')
+                result, genre = Genre.add_or_update(name=name, description="")
                 self.assertEqual(ResultEnum.ADDED, result)
                 self.assertIsNotNone(genre)
 
-                result, genre = Genre.add_or_update(name=name, description='')
+                result, genre = Genre.add_or_update(name=name, description="")
                 self.assertEqual(ResultEnum.NOTHING, result)
                 self.assertIsNotNone(genre)
 
@@ -237,20 +255,17 @@ class TestCaseDB(unittest.TestCase):
                 self.assertEqual(name, Genre.get_by(name=name).name)
 
     def test_game2genre(self):
-        with self.subTest('cls.count'):
+        with self.subTest("cls.count"):
             self.assertEqual(0, Game2Genre.count())
 
         genres = []
-        for name in ['RPG', 'Action', 'Spy']:
-            _, genre = Genre.add_or_update(name=name, description='')
+        for name in ["RPG", "Action", "Spy"]:
+            _, genre = Genre.add_or_update(name=name, description="")
             genres.append(genre)
 
         kind = FINISHED_GAME
-        platform = Platform.add('PC')
-        games = [
-            Game.add(f'game{i}', platform, kind)
-            for i in range(3)
-        ]
+        platform = Platform.add("PC")
+        games = [Game.add(f"game{i}", platform, kind) for i in range(3)]
 
         for game in games:
             for genre in genres:
@@ -258,40 +273,42 @@ class TestCaseDB(unittest.TestCase):
 
         self.assertEqual(len(genres) * len(games), Game2Genre.count())
 
-        with self.subTest('self.links_to_genres'):
+        with self.subTest("self.links_to_genres"):
             game = games[0]
             game_genres = [link.genre for link in game.links_to_genres]
             self.assertEqual(len(genres), len(game_genres))
             self.assertEqual(genres, game_genres)
 
-        with self.subTest('self.links_to_games'):
+        with self.subTest("self.links_to_games"):
             genre = genres[0]
             genre_games = [link.game for link in genre.links_to_games]
             self.assertEqual(len(games), len(genre_games))
             self.assertEqual(games, genre_games)
 
     def test_settings(self):
-        with self.subTest('cls.count'):
+        with self.subTest("cls.count"):
             self.assertEqual(0, Settings.count())
 
-        with self.subTest('cls.set_value / cls.get_value'):
-            self.assertIsNone(Settings.get_value('abc'))
+        with self.subTest("cls.set_value / cls.get_value"):
+            self.assertIsNone(Settings.get_value("abc"))
 
-            Settings.set_value('abc', '123')
+            Settings.set_value("abc", "123")
             self.assertEqual(1, Settings.count())
 
-            Settings.set_value('abc', '123')
+            Settings.set_value("abc", "123")
             self.assertEqual(1, Settings.count())
 
-            self.assertEqual('123', Settings.get_value('abc'))
-            self.assertEqual(123, Settings.get_value('abc', int))
-            self.assertEqual(123, Settings.get_value('abc', get_typing_value_func=int))
-            self.assertEqual(123, Settings.get_value('abc', get_typing_value_func=lambda x: int(x)))
+            self.assertEqual("123", Settings.get_value("abc"))
+            self.assertEqual(123, Settings.get_value("abc", int))
+            self.assertEqual(123, Settings.get_value("abc", get_typing_value_func=int))
+            self.assertEqual(
+                123, Settings.get_value("abc", get_typing_value_func=lambda x: int(x))
+            )
 
-            Settings.set_value('abc456', 456)
+            Settings.set_value("abc456", 456)
             self.assertEqual(2, Settings.count())
-            self.assertEqual('456', Settings.get_value('abc456'))
+            self.assertEqual("456", Settings.get_value("abc456"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

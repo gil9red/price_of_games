@@ -18,7 +18,9 @@ from app_parser.logic import append_games_to_database, fill_price_of_games
 from common import get_logger, FINISHED_GAME, FINISHED_WATCHED
 from db import Settings, db_create_backup
 from integrator_genres.main import run as fill_genres_of_games
-from third_party.wait import wait
+
+# pip install simple-wait
+from simple_wait import wait
 
 
 log = get_logger("main")

@@ -23,10 +23,7 @@ URL_GENRES = f"{URL_BASE}/api/genres"
 
 
 def get_result_by_number() -> dict[ResultEnum, int]:
-    return {
-        result: 0
-        for result in sorted(ResultEnum, key=lambda x: x.name)
-    }
+    return {result: 0 for result in sorted(ResultEnum, key=lambda x: x.name)}
 
 
 def get_result_as_text(result_by_number: dict[ResultEnum, int]) -> str:

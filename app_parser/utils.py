@@ -121,7 +121,9 @@ def steam_search_game_price_list(
             else:
                 # Только значение цены
                 if "pуб" not in price:
-                    log_common and log_common.warning(f'АХТУНГ! Неизвестный формат цены: "{price}".')
+                    log_common and log_common.warning(
+                        f'АХТУНГ! Неизвестный формат цены: "{price}".'
+                    )
 
                 price = price.replace(" pуб.", "").strip()
 
@@ -179,9 +181,7 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
 
 
 def get_price(
-        game_name: str,
-        log_common: Logger = None,
-        log_append_game: Logger = None
+    game_name: str, log_common: Logger = None, log_append_game: Logger = None
 ) -> int | None:
     def _log_on_found_price(
         game_name: str,

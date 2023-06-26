@@ -19,7 +19,7 @@ DB_DIR_NAME.mkdir(parents=True, exist_ok=True)
 DB_FILE_NAME = DB_DIR_NAME / "games.sqlite"
 
 BACKUP_DIR_LIST = [
-    DIR / 'backup'
+    DIR / "backup",
 ]
 if additional_backup_dir := os.getenv("ADDITIONAL_BACKUP_DIR"):
     BACKUP_DIR_LIST.append(Path(additional_backup_dir))

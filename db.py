@@ -10,7 +10,7 @@ import time
 import shutil
 
 from datetime import datetime
-from typing import Any, Callable, Type, Iterable, Optional
+from typing import Any, Callable, Type, Iterable, Optional, TypeVar
 
 # pip install peewee
 from peewee import (
@@ -59,29 +59,32 @@ db = SqliteQueueDatabase(
     DB_FILE_NAME,
     pragmas={
         "foreign_keys": 1,
-        "journal_mode": "wal",     # WAL-mode
+        "journal_mode": "wal",  # WAL-mode
         "cache_size": -1024 * 64,  # 64MB page-cache
     },
-    use_gevent=False,     # Use the standard library "threading" module.
+    use_gevent=False,  # Use the standard library "threading" module.
     autostart=True,
-    queue_max_size=64,    # Max. # of pending writes that can accumulate.
+    queue_max_size=64,  # Max. # of pending writes that can accumulate.
     results_timeout=5.0,  # Max. time to wait for query to be executed.
 )
+
+
+ChildModel = TypeVar("ChildModel", bound="BaseModel")
 
 
 class BaseModel(Model):
     class Meta:
         database = db
 
-    def get_new(self) -> Type["BaseModel"]:
+    def get_new(self) -> ChildModel:
         return type(self).get(self._pk_expr())
 
     @classmethod
-    def get_first(cls) -> Type["BaseModel"]:
+    def get_first(cls) -> ChildModel:
         return cls.select().first()
 
     @classmethod
-    def get_last(cls) -> Type["BaseModel"]:
+    def get_last(cls) -> ChildModel:
         return cls.select().order_by(cls.id.desc()).first()
 
     @classmethod
@@ -149,7 +152,8 @@ class Genre(BaseModel):
 
     @classmethod
     def add_or_update(
-        cls, name: str,
+        cls,
+        name: str,
         description: str,
         aliases: str = "",
     ) -> tuple[ResultEnum, "Genre"]:
@@ -282,7 +286,7 @@ class Game2Genre(BaseModel):
 
     class Meta:
         indexes = (
-            (('game', 'genre'), True),
+            (("game", "genre"), True),
         )
 
 

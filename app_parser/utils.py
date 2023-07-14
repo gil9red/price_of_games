@@ -107,13 +107,14 @@ def steam_search_game_price_list(
         name = div.select_one(".title").text.strip()
 
         # Ищем тег скидки, чтобы вытащить оригинальную цену, а не ту, что получилась со скидкой
-        price_el = div.select_one(".search_price > span > strike") or div.select_one(".search_price")
-        price = price_el.get_text(strip=True)
+        price_el = div.select_one(".discount_original_price") or div.select_one(".discount_final_price")
 
         # Если цены нет (например, игра еще не продается)
-        if not price:
+        if not price_el:
             price = None
         else:
+            price = price_el.get_text(strip=True)
+
             # Если в цене нет цифры считаем, что это "Free To Play" или что-то подобное
             m = re.search(r"\d", price)
             if not m:
@@ -130,9 +131,9 @@ def steam_search_game_price_list(
                 # "799,99" -> "799.99"
                 price = price.replace(",", ".")
 
-        if isinstance(price, str):
-            price = re.sub(r"[^\d.]", "", price)
-            price = int(float(price))  # Всегда храним как целые числа
+            if isinstance(price, str):
+                price = re.sub(r"[^\d.]", "", price)
+                price = int(float(price))  # Всегда храним как целые числа
 
         game_price_list.append(
             SearchResult(

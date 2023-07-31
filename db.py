@@ -135,7 +135,10 @@ class Platform(BaseModel):
 
     @classmethod
     def add(cls, name: str) -> "Platform":
-        return cls.get_or_create(name=name)[0]
+        obj = cls.get_or_none(name=name)
+        if not obj:
+            obj = cls.create(name=name)
+        return obj
 
 
 class Genre(BaseModel):

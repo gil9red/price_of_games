@@ -150,6 +150,28 @@ $(document).ready(function() {
         });
     });
 
+    let $cbShowCurAndMaxNumberGames = $('#cbShowCurAndMaxNumberGames');
+    if (localStorage.cbShowCurAndMaxNumberGames != null) {
+        let checked = localStorage.cbShowCurAndMaxNumberGames == "true";
+        $cbShowCurAndMaxNumberGames.prop('checked', checked);
+    }
+    function doShowCurAndMaxNumberGames() {
+        let isShowCurAndMaxNumberGames = $cbShowCurAndMaxNumberGames.is(':checked');
+        if (isShowCurAndMaxNumberGames) {
+            $('.finished_game_statistic').removeClass("d-none");
+            $('.finished_watched_game_statistic').removeClass("d-none");
+        } else {
+            $('.finished_game_statistic').addClass("d-none");
+            $('.finished_watched_game_statistic').addClass("d-none");
+        }
+
+        localStorage.cbShowCurAndMaxNumberGames = isShowCurAndMaxNumberGames;
+    }
+    doShowCurAndMaxNumberGames();  // Инициализация от значения
+    $cbShowCurAndMaxNumberGames.change(function() {
+        doShowCurAndMaxNumberGames();
+    });
+
     let fixedRightPanel = $('#fixed_right_panel');
     if (localStorage.fixed_right_panel != null) {
         let visible = localStorage.fixed_right_panel == "true";
@@ -309,8 +331,8 @@ function fill_statistics() {
     $('.finished_watched_game_statistic').html(statistic_2);
 
     // Добавление статистики о количестве игр в таблицах
-    $('.number_finished_games').text(finished_games.length + " " + statistic_1);
-    $('.number_finished_watched_games').text(finished_watched_games.length + " " + statistic_2);
+    $('.number_finished_games').text(finished_games.length);
+    $('.number_finished_watched_games').text(finished_watched_games.length);
     $('.sum_number_games').text(finished_games.length + finished_watched_games.length);
 }
 

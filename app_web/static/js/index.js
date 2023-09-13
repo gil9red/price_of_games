@@ -157,12 +157,16 @@ $(document).ready(function() {
     }
     function doShowCurAndMaxNumberGames() {
         let isShowCurAndMaxNumberGames = $cbShowCurAndMaxNumberGames.is(':checked');
+
+        let $finished_game_statistic = $('.finished_game_statistic');
+        let $finished_watched_game_statistic = $('.finished_watched_game_statistic');
+
         if (isShowCurAndMaxNumberGames) {
-            $('.finished_game_statistic').removeClass("d-none");
-            $('.finished_watched_game_statistic').removeClass("d-none");
+            $finished_game_statistic.removeClass("d-none");
+            $finished_watched_game_statistic.removeClass("d-none");
         } else {
-            $('.finished_game_statistic').addClass("d-none");
-            $('.finished_watched_game_statistic').addClass("d-none");
+            $finished_game_statistic.addClass("d-none");
+            $finished_watched_game_statistic.addClass("d-none");
         }
 
         localStorage.cbShowCurAndMaxNumberGames = isShowCurAndMaxNumberGames;

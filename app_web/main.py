@@ -209,10 +209,7 @@ def rename_game():
             text += f" и найдена ее цена: {price!r}"
 
         # Просто без напряга возвращаем весь список и на странице заменяем все игры
-        result = {
-            logic.FINISHED_GAME: logic.get_finished_games(),
-            logic.FINISHED_WATCHED: logic.get_finished_watched_games(),
-        }
+        result = logic.get_games()
 
     except WebUserAlertException as e:
         status = StatusEnum.WARNING
@@ -414,16 +411,8 @@ def get_games():
 
     log.debug("Call get_games")
 
-    finished_games = logic.get_finished_games()
-    finished_watched_games = logic.get_finished_watched_games()
-
-    data = {
-        logic.FINISHED_GAME: finished_games,
-        logic.FINISHED_WATCHED: finished_watched_games,
-    }
-    log.debug(f"Finished games: {len(finished_games)}")
-    log.debug(f"Watched games: {len(finished_watched_games)}")
-    log.debug(f"Total games: {len(finished_games) + len(finished_watched_games)}")
+    data = logic.get_games()
+    log.debug(f"Total games: {len(data)}")
 
     return jsonify(data)
 

@@ -19,7 +19,7 @@ from app_parser import models
 from app_parser.utils import get_price as get_price_game
 
 
-def get_games_by_kind(kind: str) -> list[models.GameInfo]:
+def get_games() -> list[models.GameInfo]:
     """
     Функция возвращает список игр
 
@@ -27,7 +27,7 @@ def get_games_by_kind(kind: str) -> list[models.GameInfo]:
 
     query = (
         Game.select()
-        .where(Game.kind == kind)
+        .where(Game.kind.in_([FINISHED_GAME, FINISHED_WATCHED]))
         .order_by(Game.append_date.desc())
     )
     return [
@@ -43,24 +43,6 @@ def get_games_by_kind(kind: str) -> list[models.GameInfo]:
         )
         for game in query
     ]
-
-
-def get_finished_games() -> list[models.GameInfo]:
-    """
-    Функция возвращает список завершенных игр как кортеж из (id, name, price)
-
-    """
-
-    return get_games_by_kind(FINISHED_GAME)
-
-
-def get_finished_watched_games() -> list[models.GameInfo]:
-    """
-    Функция возвращает список просмотренных игр как кортеж из (id, name, price)
-
-    """
-
-    return get_games_by_kind(FINISHED_WATCHED)
 
 
 def get_price(game_name: str) -> int | None:

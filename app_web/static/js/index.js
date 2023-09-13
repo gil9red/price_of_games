@@ -977,8 +977,9 @@ function load_tables() {
         success: function(data) {
             console.log(data);
 
-            window.finished_games = data[FINISHED_GAME];
-            window.finished_watched_games = data[FINISHED_WATCHED];
+            window.games = data
+            window.finished_games = window.games.filter((item) => item.kind == FINISHED_GAME);
+            window.finished_watched_games = window.games.filter((item) => item.kind == FINISHED_WATCHED);
 
             fill_game_tables();
             fill_charts();

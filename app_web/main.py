@@ -66,7 +66,7 @@ def index():
     )
 
 
-@app.route("/set_price", methods=["POST"])
+@app.route("/api/set_price", methods=["POST"])
 def set_price():
     """
     Функция устанавливает цену для указанной игры.
@@ -125,7 +125,7 @@ def set_price():
     return jsonify(data)
 
 
-@app.route("/set_genres", methods=["POST"])
+@app.route("/api/set_genres", methods=["POST"])
 def set_genres():
     """
     Функция устанавливает жанры для указанной игры.
@@ -171,7 +171,7 @@ def set_genres():
     return jsonify(data)
 
 
-@app.route("/rename_game", methods=["POST"])
+@app.route("/api/rename_game", methods=["POST"])
 def rename_game():
     """
     Функция изменяет название игры.
@@ -228,7 +228,7 @@ def rename_game():
     return jsonify(data)
 
 
-@app.route("/check_price", methods=["POST"])
+@app.route("/api/check_price", methods=["POST"])
 def check_price():
     """
     Функция запускает проверку цены у указанной игры.
@@ -279,7 +279,7 @@ def check_price():
     return jsonify(data)
 
 
-@app.route("/run_check_prices", methods=["POST"])
+@app.route("/api/run_check_prices", methods=["POST"])
 def run_check_prices():
     """
     Функция запускает проверку новых игр у парсера в main.py
@@ -328,7 +328,7 @@ def run_check_prices():
     return jsonify(data)
 
 
-@app.route("/run_check_genres", methods=["POST"])
+@app.route("/api/run_check_genres", methods=["POST"])
 def run_check_genres():
     """
     Функция запускает проверку новых жанров у игр без жанров
@@ -364,7 +364,7 @@ def run_check_genres():
     return jsonify(data)
 
 
-@app.route("/check_price_all_non_price_games")
+@app.route("/api/check_price_all_non_price_games")
 def check_price_all_non_price_games():
     """
     Функция принудительной проверки цен всех игр для которых не получилось найти цену.
@@ -405,7 +405,7 @@ def check_price_all_non_price_games():
     return jsonify(data)
 
 
-@app.route("/get_games")
+@app.route("/api/get_games")
 def get_games():
     """
     Функция для возврата всех игр в json.
@@ -428,7 +428,7 @@ def get_games():
     return jsonify(data)
 
 
-@app.route("/delete_game", methods=["POST"])
+@app.route("/api/delete_game", methods=["POST"])
 def delete_game():
     """
     Функция для удаления указанной игры.

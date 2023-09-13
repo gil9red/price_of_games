@@ -261,7 +261,7 @@
 
                         <hr/>
 
-                        <form id="form__set_price" method="post" action="/set_price">
+                        <form id="form__set_price" method="post" action="/api/set_price">
                             <h6>Установка цены у игры</h6>
                             <div class="form-group">
                                 <label for="form_name">Название игры:</label>
@@ -354,7 +354,7 @@
                             </button>
                         </div>
                         <div id="more_actions" class="card-body p-2 collapse">
-                            <form id="form__set_genres" method="post" action="/set_genres">
+                            <form id="form__set_genres" method="post" action="/api/set_genres">
                                 <h6>Установка жанров у игры</h6>
                                 <div class="form-group">
                                     <label for="form_genres_name">Название игры:</label>
@@ -450,7 +450,7 @@
                             </button>
 
                             <hr/>
-                            <form id="form__rename_game" method="post" action="/rename_game">
+                            <form id="form__rename_game" method="post" action="/api/rename_game">
                                 <h6>Изменение названия игры</h6>
                                 <div class="form-group">
                                     <label for="form_old_name">Старое название:</label>
@@ -465,7 +465,7 @@
                             </form>
 
                             <hr/>
-                            <form id="form__check_price" method="post" action="/check_price">
+                            <form id="form__check_price" method="post" action="/api/check_price">
                                 <h6>Вызов проверки цены у игры</h6>
                                 <div class="form-group">
                                     <label for="form_check_price">Название игры:</label>
@@ -476,7 +476,7 @@
                             </form>
 
                             <hr/>
-                            <form id="form__check_price_all_non_price_games" action="/check_price_all_non_price_games">
+                            <form id="form__check_price_all_non_price_games" action="/api/check_price_all_non_price_games">
                                 <h6>Вызов проверки цены у всех игр без цены</h6>
                                 <div class="form-group">
                                     <img class="loading" style="display:none" src="{{ url_for('static', filename='images/loading.gif') }}"/>
@@ -485,7 +485,7 @@
                             </form>
 
                             <hr/>
-                            <form id="form__delete_game" method="post" action="/delete_game">
+                            <form id="form__delete_game" method="post" action="/api/delete_game">
                                 <h6>Удаление игры</h6>
                                 <div class="form-group">
                                     <label for="form__delete_game__name">Название игры:</label>

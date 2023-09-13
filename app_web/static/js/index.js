@@ -70,7 +70,7 @@ function showDialogIFrameGamefaqs(src) {
 
 function run_check_prices() {
     $.ajax({
-        url: "/run_check_prices",
+        url: "/api/run_check_prices",
         method: "POST",
         success: on_ajax_success,
         error: data => on_ajax_error(data, 'при запуске проверки цен'),
@@ -87,7 +87,7 @@ function run_check_prices() {
 
 function run_check_genres() {
     $.ajax({
-        url: "/run_check_genres",
+        url: "/api/run_check_genres",
         method: "POST",
         success: on_ajax_success,
         error: data => on_ajax_error(data, 'при запуске проверки жанров игр'),
@@ -972,7 +972,7 @@ function load_tables() {
     setVisibleProgress('#finished_watched_game', true);
 
     $.ajax({
-        url: '/get_games',
+        url: '/api/get_games',
         dataType: "json",  // Тип данных загружаемых с сервера
         success: function(data) {
             console.log(data);

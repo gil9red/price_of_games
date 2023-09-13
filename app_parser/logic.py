@@ -21,7 +21,7 @@ from app_parser.utils import get_price as get_price_game
 
 def get_games_by_kind(kind: str) -> list[models.GameInfo]:
     """
-    Функция возвращает список игр из словарей с ключами: id, name, price, append_date.
+    Функция возвращает список игр
 
     """
 

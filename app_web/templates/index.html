@@ -35,11 +35,9 @@
     <script>
         const FINISHED_GAME = '{{ finished_game }}';
         const FINISHED_WATCHED = '{{ finished_watched }}';
-        const KIND_BY_TITLE = {
-            {{ finished_game }}: '{{ title_finished_game }}',
-            {{ finished_watched }}: '{{ title_finished_watched }}',
-        };
-        const ALL_GENRES = {{all_genres | safe}};
+        const KIND_BY_TITLE = {{ kind_by_title | safe }};
+        const KIND_BY_EMOJI = {{ kind_by_emoji | safe }};
+        const ALL_GENRES = {{ all_genres | safe }};
     </script>
 
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
@@ -181,18 +179,28 @@
 
                 <br>
 
-                <h4 id="finished_game_caption_table" class="text-center">{{ title_finished_game }}&nbsp;<span class="finished_game_statistic"></span>
+                <h4 id="games_caption_table" class="text-center">{{ title_games }}&nbsp;<span class="games_statistic"></span>
                     <div class="row loading-spinner" style="display: none">
                         <div class="spinner-border text-primary m-auto" role="status">
                             <span class="sr-only">Загрузка...</span>
                         </div>
                     </div>
                 </h4>
-                <table id="finished_game" class="table table-striped table-bordered w-100" style="display: none">
-                    <thead class="thead-dark"></thead>
+                <table id="games" class="table table-striped table-bordered w-100" style="display: none">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th></th> <!-- Колонка для кнопки раскрытия деталей -->
+                            <th>Тип</th>
+                            <th>Название</th>
+                            <th>Платформа</th>
+                            <th>Дата добавления</th>
+                            <th>Цена (руб.)</th>
+                        </tr>
+                    </thead>
                     <tfoot>
                         <tr>
                             <th></th> <!-- Колонка для кнопки раскрытия деталей -->
+                            <th class="p-0 column-kind"></th>
                             <th class="p-0"></th>
                             <th class="p-0"></th>
                             <th class="text-right">Итого:</th>
@@ -200,60 +208,11 @@
                         </tr>
                     </tfoot>
                 </table>
-                <br>
-                <br>
-
-                <h4 id="finished_watched_game_caption_table" class="text-center">{{ title_finished_watched }}&nbsp;<span class="finished_watched_game_statistic"></span>
-                    <div class="row loading-spinner" style="display: none">
-                        <div class="spinner-border text-primary m-auto" role="status">
-                            <span class="sr-only">Загрузка...</span>
-                        </div>
-                    </div>
-                </h4>
-                <table id="finished_watched_game" class="table table-striped table-bordered w-100" style="display: none">
-                    <thead class="thead-dark"></thead>
-                    <tfoot>
-                        <tr>
-                            <th></th> <!-- Колонка для кнопки раскрытия деталей -->
-                            <th class="p-0"></th>
-                            <th class="p-0"></th>
-                            <th class="text-right">Итого:</th>
-                            <th></th>
-                        </tr>
-                    </tfoot>
-                </table>
-                <br>
-                <br>
-                <br>
             </div>
 
             <div id="fixed_right_panel" class="col-3 p-0 bg-dark text-white collapse">
                 <div class="sticky-top vh-100 overflow-auto">
                     <div class="pt-2 pl-2 pr-2">
-                        <div class="custom-control custom-checkbox">
-                            <input id="checkbox_visible_finished_games" class="custom-control-input" type="checkbox" onclick="set_visible_finished_game($(this).is(':checked'))" checked>
-                            <label for="checkbox_visible_finished_games" class="custom-control-label">
-                                {{ title_finished_game }}
-                            </label>
-                        </div>
-                        <button class="btn btn-secondary btn-sm btn-block" onclick="document.location.href='#finished_game_caption_table'">
-                            Перейти к таблице
-                        </button>
-
-                        <hr/>
-
-                        <div class="custom-control custom-checkbox">
-                            <input id="checkbox_visible_finished_watched_games" class="custom-control-input" type="checkbox" onclick="set_visible_finished_watched_game($(this).is(':checked'))" checked/>
-                            <label for="checkbox_visible_finished_watched_games" class="custom-control-label">
-                                {{ title_finished_watched }}
-                            </label>
-                        </div>
-                        <button class="btn btn-secondary btn-sm btn-block" onclick="document.location.href='#finished_watched_game_caption_table'">
-                            Перейти к таблице
-                        </button>
-
-                        <hr/>
-
                         <button class="btn btn-primary btn-sm btn-block" onclick="run_check_prices()">
                             <img class="run_check loading" style="display:none" src="{{ url_for('static', filename='images/loading.gif') }}"/>
                             Запуск проверки новых игр

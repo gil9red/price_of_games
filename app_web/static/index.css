@@ -119,6 +119,7 @@ table.dataTable tr.dt-hasChild td.dt-control::before {
     display: none;
 }
 
+.kind:hover,
 .genre:hover,
 .platform:hover {
     background-color: var(--blue);
@@ -191,4 +192,8 @@ table.dataTable tr.dt-hasChild td.dt-control::before {
 
 .dialog .content {
     overflow: hidden;
+}
+
+.column-kind {
+    max-width: 30px;
 }

@@ -49,13 +49,19 @@ def index():
 
     return render_template(
         "index.html",
+
+        # Parameters to template
         last_run_date=Settings.get_value("last_run_date"),
         db_file_name=config.DB_FILE_NAME,
         backup_dir_list=list(map(str, config.BACKUP_DIR_LIST)),
+        title_games="Завершенные игры",
         finished_game=FINISHED_GAME,
         finished_watched=FINISHED_WATCHED,
-        title_finished_game=TITLE_FINISHED_GAME,
-        title_finished_watched=TITLE_FINISHED_WATCHED,
+        kind_by_title=KIND_BY_TITLE,
+        kind_by_emoji={
+            FINISHED_GAME: "🎮",
+            FINISHED_WATCHED: "📺",
+        },
         all_genres={
             genre.name: {
                 "description": genre.description,

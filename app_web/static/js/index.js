@@ -1,8 +1,9 @@
 const COLUMN_DETAIL = 0;
-const COLUMN_NAME = 1;
-const COLUMN_PLATFORM = 2;
-const COLUMN_APPEND_DATE = 3;
-const COLUMN_PRICE = 4;
+const COLUMN_KIND = 1;
+const COLUMN_NAME = 2;
+const COLUMN_PLATFORM = 3;
+const COLUMN_APPEND_DATE = 4;
+const COLUMN_PRICE = 5;
 
 
 $.noty.defaults.theme = 'defaultTheme';
@@ -160,13 +161,16 @@ $(document).ready(function() {
 
         let $finished_game_statistic = $('.finished_game_statistic');
         let $finished_watched_game_statistic = $('.finished_watched_game_statistic');
+        let $games_statistic = $('.games_statistic');
 
         if (isShowCurAndMaxNumberGames) {
             $finished_game_statistic.removeClass("d-none");
             $finished_watched_game_statistic.removeClass("d-none");
+            $games_statistic.removeClass("d-none");
         } else {
             $finished_game_statistic.addClass("d-none");
             $finished_watched_game_statistic.addClass("d-none");
+            $games_statistic.addClass("d-none");
         }
 
         localStorage.cbShowCurAndMaxNumberGames = isShowCurAndMaxNumberGames;
@@ -333,11 +337,12 @@ function fill_statistics() {
 
     $('.finished_game_statistic').html(statistic_1);
     $('.finished_watched_game_statistic').html(statistic_2);
+    $('.games_statistic').html(statistic_for_table(window.games));
 
     // Добавление статистики о количестве игр в таблицах
-    $('.number_finished_games').text(finished_games.length);
-    $('.number_finished_watched_games').text(finished_watched_games.length);
-    $('.sum_number_games').text(finished_games.length + finished_watched_games.length);
+    $('.number_finished_games').text(window.finished_games.length);
+    $('.number_finished_watched_games').text(window.finished_watched_games.length);
+    $('.sum_number_games').text(window.games.length);
 }
 
 function price_render(data, type, row, meta) {
@@ -419,33 +424,92 @@ function platform_render(data, type, row, meta) {
     return `<span class="platform">${data}</span>`;
 }
 
-function createTags(elementJQuery, items, tableEl, queryTag) {
-    let tagify = new Tagify(elementJQuery[0], {
+function kind_render(data, type, row, meta) {
+    let emoji = KIND_BY_EMOJI[data];
+    return `<span class="kind">${emoji}</span>`;
+}
+
+function createTags(elementJQuery, items, tableEl, queryTag, preprocessOptionsFunc = null) {
+    let options = {
         whitelist: items,
         enforceWhitelist: true,
         skipInvalid: true,
         dropdown: {
-            enabled: 0,
+            enabled: 0, // Показывать при фокусе
             closeOnSelect: false,
             maxItems: items.length,
         },
         callbacks: {
             // Удаление тега при клике на него
-            "click": (e) => e.detail.tagify.removeTags(e.detail.tag),
+            click: (e) => e.detail.tagify.removeTags(e.detail.tag),
         },
-    });
+    };
+
+    if (preprocessOptionsFunc != null) {
+        preprocessOptionsFunc(options);
+    }
+
+    let tagify = new Tagify(
+        elementJQuery[0],
+        options
+    );
 
     tableEl.on('click', queryTag, function () {
-        let text = $(this).text();
-        tagify.addTags(text);
+        let value = $(this).text();
+        tagify.addTags(value);
     });
+}
+
+function createFilterOfKinds(table, tableEl) {
+    // Под колонку типа добавлен фильтр
+    let column = table.api().column(COLUMN_KIND);
+
+    let $filter = $('<input placeholder="...">')
+        .appendTo($(column.footer()).empty())
+        .on('change', function () {
+            let val = $(this).val();
+            if (val) {
+                let values = JSON.parse(val).map(x => '^' + $.fn.dataTable.util.escapeRegex(x.value) + '$');
+                let query = values.join('|');
+                column.search(
+                    query,
+                    true,  // regexp
+                    false  // smart
+                ).draw();
+            } else {
+                column.search("").draw();
+            }
+        });
+
+    let values = [];
+    column
+        .data()
+        .unique()
+        .sort()
+        .each(function (d, j) {
+            // Значение в фильтре типов будут сами эмодзи
+            let title = KIND_BY_EMOJI[d];
+            values.push(title);
+        });
+
+
+    function preprocessOptionsFunc(options) {
+        options.dropdown.closeOnSelect = true;
+
+        // Удаление всех тегов, чтобы при добавлении был только выбранный
+        // Типов всего 2, поэтому фильтрация только по одному имеет смысл
+        options.callbacks.add = (e) => e.detail.tagify.removeTags();
+    };
+
+    // Инициализация
+    createTags($filter, values, tableEl, '.kind', preprocessOptionsFunc);
 }
 
 function createFilterOfPlatforms(table, tableEl) {
     // Под колонку платформы добавлен фильтр
     let columnPlatform = table.api().column(COLUMN_PLATFORM);
 
-    let filterPlatform = $('<input placeholder="Платформы...">')
+    let filterPlatform = $('<input placeholder="...">')
         .appendTo($(columnPlatform.footer()).empty())
         .on('change', function () {
             let val = $(this).val();
@@ -470,11 +534,6 @@ function createFilterOfPlatforms(table, tableEl) {
         .each(function (d, j) {
             platforms.push(d);
         });
-
-    let commonCallbacks = {
-        // Удаление тега при клике на него
-        "click": (e) => e.detail.tagify.removeTags(e.detail.tag),
-    };
 
     // Инициализация платформ
     createTags(filterPlatform, platforms, tableEl, '.platform');
@@ -525,7 +584,7 @@ function createFilterOfGenres(table, tableEl) {
     createTags(filterGenres, genres, tableEl, '.genre');
 }
 
-function fill_table(table_selector, total_class, items) {
+function fill_table(table_selector, items) {
     let tableEl = $(table_selector);
 
     if ($.fn.dataTable.isDataTable(table_selector)) {
@@ -554,10 +613,11 @@ function fill_table(table_selector, total_class, items) {
                 defaultContent: '',
                 render: for_filter_render,
             },
-            { title: "Название", data: 'name' },
-            { title: "Платформа", data: 'platform', render: platform_render },
-            { title: "Дата добавления", data: 'append_date', render: append_date_render },
-            { title: "Цена (руб.)", data: 'price', type: 'num', render: price_render },
+            { data: "kind", render: kind_render, orderable: false },
+            { data: "name" },
+            { data: 'platform', render: platform_render },
+            { data: 'append_date', render: append_date_render },
+            { data: 'price', type: 'num', render: price_render },
         ],
         order: [
             // Сортировка по убыванию даты добавления
@@ -599,6 +659,7 @@ function fill_table(table_selector, total_class, items) {
             setVisibleProgress(table_selector, false);
         },
         initComplete: function () {
+            createFilterOfKinds(this, tableEl);
             createFilterOfPlatforms(this, tableEl);
             createFilterOfGenres(this, tableEl);
 
@@ -684,8 +745,7 @@ function fill_table(table_selector, total_class, items) {
 }
 
 function fill_game_tables() {
-    fill_table('#finished_game', 'total_price_finished_games', window.finished_games);
-    fill_table('#finished_watched_game', 'total_price_finished_watched_games', window.finished_watched_games);
+    fill_table("#games", window.games);
 
     // Функция для подсчета итоговых сумм всех игр
     update_total_price_all_tables();
@@ -960,10 +1020,10 @@ function fill_genres() {
             },
             callbacks: {
                 // Удаление тега при клике на него
-                "click": (e) => e.detail.tagify.removeTags(e.detail.tag),
+                click: (e) => e.detail.tagify.removeTags(e.detail.tag),
 
                 // Управление состояний кнопок формы
-                "change": (e) => updateStatesFormSetGenres(),
+                change: (e) => updateStatesFormSetGenres(),
             },
         });
     }
@@ -971,9 +1031,7 @@ function fill_genres() {
 
 // Функция загружает все игры, перезаполняет таблицы игр, подсчитывает итого и статистику
 function load_tables() {
-    // TODO: Переиспользование селекторов таблиц
-    setVisibleProgress('#finished_game', true);
-    setVisibleProgress('#finished_watched_game', true);
+    setVisibleProgress('#games', true);
 
     $.ajax({
         url: '/api/get_games',
@@ -993,10 +1051,6 @@ function load_tables() {
 }
 
 $(document).ready(function() {
-    // По умолчанию, флаги всегда стоят
-    $('#checkbox_visible_finished_games').prop('checked', true);
-    $('#checkbox_visible_finished_watched_games').prop('checked', true);
-
     fill_genres();
 
     load_tables();

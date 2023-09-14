@@ -605,6 +605,7 @@ function fill_table(table_selector, items) {
             [5, 10, 25, 50, -1],
             ["5 записей", "10 записей", "25 записей", "50 записей", "Все записи"]
         ],
+        rowId: "id",  // Заполняет в строках id из поля id в data
         columns: [
             {
                 class: 'dt-control',
@@ -1039,7 +1040,7 @@ function load_tables() {
         success: function(data) {
             console.log(data);
 
-            window.games = data
+            window.games = data;
             window.finished_games = window.games.filter((item) => item.kind == FINISHED_GAME);
             window.finished_watched_games = window.games.filter((item) => item.kind == FINISHED_WATCHED);
 

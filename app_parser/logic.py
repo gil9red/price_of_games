@@ -19,6 +19,22 @@ from app_parser import models
 from app_parser.utils import get_price as get_price_game
 
 
+def get_game_info(game: int | Game) -> models.GameInfo:
+    if isinstance(game, int):
+        game = Game.get_by_id(game)
+
+    return models.GameInfo(
+        id=game.id,
+        name=game.name,
+        kind=game.kind,
+        platform=game.platform.name,
+        price=game.price,
+        append_date=game.append_date.strftime("%d/%m/%Y %H:%M:%S"),
+        append_date_timestamp=int(game.append_date.timestamp()),
+        genres=[genre.name for genre in game.get_genres()],
+    )
+
+
 def get_games() -> list[models.GameInfo]:
     """
     Функция возвращает список игр
@@ -26,23 +42,12 @@ def get_games() -> list[models.GameInfo]:
     """
 
     query = (
-        Game.select()
+        Game
+        .select()
         .where(Game.kind.in_([FINISHED_GAME, FINISHED_WATCHED]))
         .order_by(Game.append_date.desc())
     )
-    return [
-        models.GameInfo(
-            id=game.id,
-            name=game.name,
-            kind=game.kind,
-            platform=game.platform.name,
-            price=game.price,
-            append_date=game.append_date.strftime("%d/%m/%Y %H:%M:%S"),
-            append_date_timestamp=int(game.append_date.timestamp()),
-            genres=[genre.name for genre in game.get_genres()],
-        )
-        for game in query
-    ]
+    return [get_game_info(game) for game in query]
 
 
 def get_price(game_name: str) -> int | None:

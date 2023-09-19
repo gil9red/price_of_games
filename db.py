@@ -82,10 +82,8 @@ def create_trigger_before_delete(
     delete_from_table_name = get_table_db_name(delete_from_table)
     name = f"trigger_{in_table_name}__delete_{delete_from_table_name}"
 
-    db.execute_sql(f"DROP TRIGGER IF EXISTS {name}")
-
     sql = f"""
-    CREATE TRIGGER {name}
+    CREATE TRIGGER IF NOT EXISTS {name}
         BEFORE DELETE
             ON {in_table_name}
         FOR EACH ROW

@@ -40,7 +40,7 @@ function update_rows_table_by_response(rs) {
             if (is_exist) {
                 row.data(game).draw();
             } else {
-                get_table().row.add(game).draw();
+                row.table().row.add(game).draw();
             }
         }
     );

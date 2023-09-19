@@ -38,9 +38,9 @@ function update_rows_table_by_response(rs) {
         (game, row) => {
             let is_exist = row.any();
             if (is_exist) {
-                row.data(game).draw();
+                row.data(game).draw("full-hold"); // full-hold сохраняет пагинацию
             } else {
-                row.table().row.add(game).draw();
+                row.table().row.add(game).draw(); // Тут пагинация вернется к первой странице
             }
         }
     );
@@ -52,7 +52,7 @@ function delete_rows_table_by_response(rs) {
         (game, row) => {
             let is_exist = row.any();
             if (is_exist) {
-                row.remove().draw();
+                row.remove().draw("full-hold"); // full-hold сохраняет пагинацию
             }
         }
     );

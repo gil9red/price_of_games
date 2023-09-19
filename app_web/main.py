@@ -15,6 +15,7 @@ from flask import render_template, request, jsonify, send_from_directory
 import config
 
 from app_parser import logic
+from app_parser import models
 from app_parser.main import run as run_check_of_price
 from app_web.app import app, log
 from common import WebUserAlertException, FINISHED_GAME, FINISHED_WATCHED
@@ -41,6 +42,18 @@ KIND_BY_TITLE = {
     FINISHED_GAME: TITLE_FINISHED_GAME,
     FINISHED_WATCHED: TITLE_FINISHED_WATCHED,
 }
+
+
+def prepare_response(
+    status: StatusEnum,
+    text: str,
+    result: None | list[int | models.GameInfo]
+) -> dict:
+    return {
+        "status": status,
+        "text": text,
+        "result": result,
+    }
 
 
 @app.route("/")
@@ -111,21 +124,18 @@ def set_price():
         text = (
             f"Игре {name!r} установлена цена {price!r} (предыдущая цена: {old_price!r})"
         )
-        result = {
-            "new_price": price,
-            "modify_id_games": modify_id_games,
-        }
+        result = logic.get_games_info(modify_id_games)
 
     except WebUserAlertException as e:
         status = StatusEnum.WARNING
         text = str(e)
         result = None
 
-    data = {
-        "status": status,
-        "text": text,
-        "result": result,
-    }
+    data = prepare_response(
+        status=status,
+        text=text,
+        result=result,
+    )
     log.debug(data)
 
     return jsonify(data)
@@ -158,20 +168,18 @@ def set_genres():
 
         status = StatusEnum.OK
         text = f"В игре {name!r} успешно изменен список жанров"
-        result = {
-            "modify_id_games": modify_id_games,
-        }
+        result = logic.get_games_info(modify_id_games)
 
     except WebUserAlertException as e:
         status = StatusEnum.WARNING
         text = str(e)
         result = None
 
-    data = {
-        "status": status,
-        "text": text,
-        "result": result,
-    }
+    data = prepare_response(
+        status=status,
+        text=text,
+        result=result,
+    )
     log.debug(data)
 
     return jsonify(data)
@@ -214,19 +222,21 @@ def rename_game():
         if price:
             text += f" и найдена ее цена: {price!r}"
 
-        # Просто без напряга возвращаем весь список и на странице заменяем все игры
-        result = logic.get_games()
+        # NOTE: Формат подразумевает список
+        # Указываем game_id, чтобы в функции перечитался объект из базы
+        result = [logic.get_game_info(game=game_id)]
 
     except WebUserAlertException as e:
         status = StatusEnum.WARNING
         text = str(e)
         result = None
 
-    data = {
-        "status": status,
-        "text": text,
-        "result": result,
-    }
+    data = prepare_response(
+        status=status,
+        text=text,
+        result=result,
+    )
+    log.debug(data)
 
     return jsonify(data)
 
@@ -262,21 +272,18 @@ def check_price():
         else:
             status = StatusEnum.OK
             text = f"Для игры {name!r} найдена и установлена цена: {price!r}"
-            result = {
-                "new_price": price,
-                "id_games_with_changed_price": price_update_result.game_ids,
-            }
+            result = logic.get_games_info(price_update_result.game_ids)
 
     except WebUserAlertException as e:
         status = StatusEnum.WARNING
         text = str(e)
         result = None
 
-    data = {
-        "status": status,
-        "text": text,
-        "result": result,
-    }
+    data = prepare_response(
+        status=status,
+        text=text,
+        result=result,
+    )
     log.debug(data)
 
     return jsonify(data)
@@ -295,24 +302,23 @@ def run_check_prices():
     text = "<b>Проверка новых игр завершена.</b>"
 
     try:
-        added_finished_games, added_watched_games = run_check_of_price()
-        if added_finished_games or added_watched_games:
+        added_finished_game_ids, added_watched_game_ids = run_check_of_price()
+        if added_finished_game_ids or added_watched_game_ids:
             text += f"""
                 <br>
                 <table border="0">
                     <tr>
                         <td>Добавлено пройденных игр:</td>
-                        <td align="right" style="width: 20px">{added_finished_games}</td>
+                        <td align="right" style="width: 20px">{len(added_finished_game_ids)}</td>
                     </tr>
                     <tr>
                         <td>Добавлено просмотренных игр:</td>
-                        <td align="right" style="width: 20px">{added_watched_games}</td>
+                        <td align="right" style="width: 20px">{len(added_watched_game_ids)}</td>
                     </tr>
                 </table>
             """
-            result = dict(
-                added_finished_games=added_finished_games,
-                added_watched_games=added_watched_games,
+            result = logic.get_games_info(
+                added_finished_game_ids + added_watched_game_ids
             )
         else:
             text += "<br>Новых игр нет"
@@ -321,11 +327,11 @@ def run_check_prices():
         status = StatusEnum.WARNING
         text = f'<b>Проверка новых игр завершена ошибкой: "{e}".</b>'
 
-    data = {
-        "status": status,
-        "text": text,
-        "result": result,
-    }
+    data = prepare_response(
+        status=status,
+        text=text,
+        result=result,
+    )
     log.debug(data)
 
     return jsonify(data)
@@ -344,12 +350,9 @@ def run_check_genres():
     text = "<b>Проверка заполнения жанров играм завершена.</b>"
 
     try:
-        added = run_check_of_genres()
-        if added:
-            text += f"<br>Обновлено игр: {added}"
-            result = dict(
-                added=added,
-            )
+        if ids := run_check_of_genres():
+            text += f"<br>Обновлено игр: {len(ids)}"
+            result = logic.get_games_info(ids)
         else:
             text += "<br>Без изменений"
 
@@ -357,11 +360,11 @@ def run_check_genres():
         status = StatusEnum.WARNING
         text = f'<b>Проверка новых жанров у игр завершена ошибкой: "{e}".</b>'
 
-    data = {
-        "status": status,
-        "text": text,
-        "result": result,
-    }
+    data = prepare_response(
+        status=status,
+        text=text,
+        result=result,
+    )
     log.debug(data)
 
     return jsonify(data)
@@ -377,32 +380,35 @@ def check_price_all_non_price_games():
     log.debug("Call check_price_all_non_price_games")
 
     try:
-        games_with_changed_price = logic.check_price_all_non_price_games()
-        log.debug(games_with_changed_price)
+        game_ids: list[int] = []
+        for result in logic.check_price_all_non_price_games():
+            for game_id in result.game_ids:
+                if game_id not in game_ids:
+                    game_ids.append(game_id)
+
+        log.debug(game_ids)
 
         status = StatusEnum.OK
 
-        if games_with_changed_price:
-            text = f"Цена найдена для {len(games_with_changed_price)} игр"
+        if game_ids:
+            text = f"Цена найдена для {len(game_ids)} игр"
         else:
             text = "Не удалось найти цену для игр"
 
         text = text.strip("<br>")
 
-        result = {
-            "games_with_changed_price": games_with_changed_price,
-        }
+        result = logic.get_games_info(game_ids)
 
     except WebUserAlertException as e:
         status = StatusEnum.WARNING
         text = str(e)
         result = None
 
-    data = {
-        "status": status,
-        "text": text,
-        "result": result,
-    }
+    data = prepare_response(
+        status=status,
+        text=text,
+        result=result,
+    )
     log.debug(data)
 
     return jsonify(data)
@@ -444,20 +450,21 @@ def delete_game():
 
         status = StatusEnum.OK
         text = f"Удалена игра #{game_id} {game.name!r} ({game.platform.name!r}, {KIND_BY_TITLE[game.kind]!r})"
-        result = {
-            "id_game": game_id,
-        }
+
+        # NOTE: Формат подразумевает список
+        # Указываем game_id, чтобы в функции перечитался объект из базы
+        result = [logic.get_game_info(game=game_id)]
 
     except WebUserAlertException as e:
         status = StatusEnum.WARNING
         text = str(e)
         result = None
 
-    data = {
-        "status": status,
-        "text": text,
-        "result": result,
-    }
+    data = prepare_response(
+        status=status,
+        text=text,
+        result=result,
+    )
     log.debug(data)
 
     return jsonify(data)

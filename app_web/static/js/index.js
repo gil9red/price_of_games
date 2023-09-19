@@ -5,15 +5,60 @@ const COLUMN_PLATFORM = 3;
 const COLUMN_APPEND_DATE = 4;
 const COLUMN_PRICE = 5;
 
+const TABLE_ID = "#games";
+
 
 $.noty.defaults.theme = 'defaultTheme';
 $.noty.defaults.layout = 'bottomRight';
 $.noty.defaults.timeout = 6000;
 
 
-function on_ajax_success(data) {
-    console.log(data);
+function get_table() {
+    return $(TABLE_ID).DataTable();
+}
 
+function get_table_row_by_id(id) {
+    return get_table().row("#" + id);
+}
+
+function process_games_from_response(rs, callback) {
+    let ok = rs.status == 'ok';
+
+    if (ok && rs.result != null) {
+        for (let game of rs.result) {
+            let row = get_table_row_by_id(game.id);
+            callback(game, row);
+        }
+    }
+}
+
+function update_rows_table_by_response(rs) {
+    process_games_from_response(
+        rs,
+        (game, row) => {
+            let is_exist = row.any();
+            if (is_exist) {
+                row.data(game).draw();
+            } else {
+                get_table().row.add(game).draw();
+            }
+        }
+    );
+}
+
+function delete_rows_table_by_response(rs) {
+    process_games_from_response(
+        rs,
+        (game, row) => {
+            let is_exist = row.any();
+            if (is_exist) {
+                row.remove().draw();
+            }
+        }
+    );
+}
+
+function on_ajax_success(data, callback=update_rows_table_by_response) {
     let ok = data.status == 'ok';
     if (data.text) {
         noty({
@@ -22,10 +67,7 @@ function on_ajax_success(data) {
         });
     }
 
-    let isReloadTableOnAjax = $('#cbReloadTableOnAjax').is(':checked');
-    if (isReloadTableOnAjax && ok && data.result) {
-        load_tables();
-    }
+    callback(data);
 }
 
 function on_ajax_error(data, reason) {
@@ -235,16 +277,16 @@ function toPrettyPrice(num) {
     return num.toMoney(2, 3, ' ', ',').replace(/,00$/, '');
 }
 
-function update_total_price_all_tables() {
+function update_total_price_all_tables(finished_games, finished_watched_games) {
     let total_price_of_finished_game = 0;
-    for (let row of window.finished_games) {
+    for (let row of finished_games) {
         if (row.price) {
             total_price_of_finished_game += row.price;
         }
     }
 
     let total_price_of_finished_watched_game = 0;
-    for (let row of window.finished_watched_games) {
+    for (let row of finished_watched_games) {
         if (row.price) {
             total_price_of_finished_watched_game += row.price;
         }
@@ -331,18 +373,19 @@ function statistic_for_table(items) {
     return `(${number_price_rows} / ${all_rows_number} (${percent}%))`
 }
 
-function fill_statistics() {
-    let statistic_1 = statistic_for_table(window.finished_games);
-    let statistic_2 = statistic_for_table(window.finished_watched_games);
+function fill_statistics(finished_games, finished_watched_games) {
+    let games = finished_games.concat(finished_watched_games);
+    let statistic_1 = statistic_for_table(finished_games);
+    let statistic_2 = statistic_for_table(finished_watched_games);
 
     $('.finished_game_statistic').html(statistic_1);
     $('.finished_watched_game_statistic').html(statistic_2);
-    $('.games_statistic').html(statistic_for_table(window.games));
+    $('.games_statistic').html(statistic_for_table(games));
 
     // Добавление статистики о количестве игр в таблицах
-    $('.number_finished_games').text(window.finished_games.length);
-    $('.number_finished_watched_games').text(window.finished_watched_games.length);
-    $('.sum_number_games').text(window.games.length);
+    $('.number_finished_games').text(finished_games.length);
+    $('.number_finished_watched_games').text(finished_watched_games.length);
+    $('.sum_number_games').text(games.length);
 }
 
 function price_render(data, type, row, meta) {
@@ -659,6 +702,28 @@ function fill_table(table_selector, items) {
 
             setVisibleProgress(table_selector, false);
         },
+        drawCallback: function (settings) {
+            let finished_games = [];
+            let finished_watched_games = [];
+
+            this.api().rows().every(function (rowIdx, tableLoop, rowLoop) {
+                let data = this.data();
+                if (data.kind == FINISHED_GAME) {
+                    finished_games.push(data);
+                } else {
+                    finished_watched_games.push(data);
+                }
+            });
+
+            // Функция для подсчета итоговых сумм всех игр
+            update_total_price_all_tables(finished_games, finished_watched_games);
+
+            // Добавление статистики о играх в таблице
+            fill_statistics(finished_games, finished_watched_games);
+
+            // Рисование графиков
+            fill_charts(finished_games, finished_watched_games);
+        },
         initComplete: function () {
             createFilterOfKinds(this, tableEl);
             createFilterOfPlatforms(this, tableEl);
@@ -743,16 +808,6 @@ function fill_table(table_selector, items) {
 
         updateStatesFormSetGenres();
     });
-}
-
-function fill_game_tables() {
-    fill_table("#games", window.games);
-
-    // Функция для подсчета итоговых сумм всех игр
-    update_total_price_all_tables();
-
-    // Добавление статистики о играх в таблице
-    fill_statistics();
 }
 
 function callStatisticsByGames(games) {
@@ -845,21 +900,21 @@ function createOrUpdateCharts(chartId, title, labels, datasets, options) {
     );
 }
 
-function fill_charts() {
+function fill_charts(finished_games, finished_watched_games) {
     let [
         platform_by_total_price_of_finished_games,
         platform_by_number_of_finished_games,
         total_price_of_finished_games,
         genre_by_number_of_finished_games,
         genre_by_total_price_of_finished_games
-    ] = callStatisticsByGames(window.finished_games);
+    ] = callStatisticsByGames(finished_games);
     let [
         platform_by_total_price_of_finished_watched_games,
         platform_by_number_of_finished_watched_games,
         total_price_of_finished_watched_games,
         genre_by_number_of_finished_watched_games,
         genre_by_total_price_of_finished_watched_games
-    ] = callStatisticsByGames(window.finished_watched_games);
+    ] = callStatisticsByGames(finished_watched_games);
 
     let backgroundColor = [
         '#ff6384',
@@ -892,8 +947,8 @@ function fill_charts() {
             {
                 label: 'Категория по играм',
                 data: [
-                    window.finished_games.length,
-                    window.finished_watched_games.length
+                    finished_games.length,
+                    finished_watched_games.length
                 ],
                 backgroundColor: backgroundColor
             },
@@ -1032,21 +1087,13 @@ function fill_genres() {
 
 // Функция загружает все игры, перезаполняет таблицы игр, подсчитывает итого и статистику
 function load_tables() {
-    setVisibleProgress('#games', true);
+    // Пока запрос грузится с сайта и таблица рендерит данные
+    setVisibleProgress(TABLE_ID, true);
 
     $.ajax({
         url: '/api/get_games',
         dataType: "json",  // Тип данных загружаемых с сервера
-        success: function(data) {
-            console.log(data);
-
-            window.games = data;
-            window.finished_games = window.games.filter((item) => item.kind == FINISHED_GAME);
-            window.finished_watched_games = window.games.filter((item) => item.kind == FINISHED_WATCHED);
-
-            fill_game_tables();
-            fill_charts();
-        },
+        success: data => fill_table(TABLE_ID, data),
         error: data => on_ajax_error(data, 'при загрузке игр'),
     });
 }
@@ -1232,7 +1279,7 @@ $(document).ready(function() {
             data: data,
             dataType: "json",  // Тип данных загружаемых с сервера
             success: function(data) {
-                on_ajax_success(data);
+                on_ajax_success(data, delete_rows_table_by_response);
 
                 // Очищение полей формы
                 thisForm.reset();

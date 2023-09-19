@@ -35,6 +35,10 @@ def get_game_info(game: int | Game) -> models.GameInfo:
     )
 
 
+def get_games_info(games: list[int | Game]) -> list[models.GameInfo]:
+    return [get_game_info(game) for game in games]
+
+
 def get_games() -> list[models.GameInfo]:
     """
     Функция возвращает список игр
@@ -221,14 +225,15 @@ def check_price_all_non_price_games() -> list[models.PriceUpdateResult]:
 
 
 def append_games_to_database(
-    finished_game_list: list[models.Game], finished_watched_game_list: list[models.Game]
-) -> tuple[int, int]:
+    finished_game_list: list[models.Game],
+    finished_watched_game_list: list[models.Game],
+) -> tuple[list[int], list[int]]:
     """
-    Функция для добавление игр в таблицу базы. Если игра уже есть в базе, то запрос игнорируется.
+    Функция для добавления игр в таблицу базы. Если игра уже есть в базе, то запрос игнорируется.
 
     """
 
-    def insert_game(game: models.Game) -> bool:
+    def insert_game(game: models.Game) -> int | None:
         name = game.name
 
         platform = Platform.add(game.platform)
@@ -244,27 +249,28 @@ def append_games_to_database(
             .exists()
         )
         if has:
-            return False
+            return
 
         log_common.info(f"Добавляю новую игру {name!r} ({game.platform}, {game.kind})")
         log_append_game.info(
             f"Добавляю новую игру {name!r} ({game.platform}, {game.kind})"
         )
 
-        Game.add(name, platform, game.kind)
-        return True
+        return Game.add(name, platform, game.kind).id
 
     # Добавление в базу пройденных игр
-    added_finished_games = 0
+    added_finished_game_ids: list[int] = []
     for game in finished_game_list:
-        added_finished_games += insert_game(game)
+        if game_id := insert_game(game):
+            added_finished_game_ids.append(game_id)
 
     # Добавление в базу просмотренных игр
-    added_watched_games = 0
+    added_watched_game_ids: list[int] = []
     for game in finished_watched_game_list:
-        added_watched_games += insert_game(game)
+        if game_id := insert_game(game):
+            added_watched_game_ids.append(game_id)
 
-    return added_finished_games, added_watched_games
+    return added_finished_game_ids, added_watched_game_ids
 
 
 def get_game_list_with_price(game_name: str) -> list[Game]:

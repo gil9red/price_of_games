@@ -26,14 +26,16 @@ from simple_wait import wait
 log = get_logger("main")
 
 
-def run() -> tuple[int, int]:
+def run() -> tuple[list[int], list[int]]:
     # Перед выполнением, запоминаем дату и время, чтобы иметь потом представление когда
     # в последний раз выполнялось заполнение списка
     Settings.set_value("last_run_date", datetime.now())
 
     # Получение игр из файла gist
     games = get_games()
-    finished_game_list = [game for game in games if game.kind == FINISHED_GAME]
+    finished_game_list = [
+        game for game in games if game.kind == FINISHED_GAME
+    ]
     finished_watched_game_list = [
         game for game in games if game.kind == FINISHED_WATCHED
     ]
@@ -45,14 +47,15 @@ def run() -> tuple[int, int]:
     )
 
     # Добавление в базу новых игр
-    added_finished_games, added_watched_games = append_games_to_database(
-        finished_game_list, finished_watched_game_list
+    added_finished_game_ids, added_watched_game_ids = append_games_to_database(
+        finished_game_list,
+        finished_watched_game_list
     )
-    if added_finished_games:
-        log.debug("Добавлено пройденных игр: %s", added_finished_games)
+    if added_finished_game_ids:
+        log.debug("Добавлено пройденных игр: %s", added_finished_game_ids)
 
-    if added_watched_games:
-        log.debug("Добавлено просмотренных игр: %s", added_watched_games)
+    if added_watched_game_ids:
+        log.debug("Добавлено просмотренных игр: %s", added_watched_game_ids)
 
     # Заполнение цен игр
     fill_price_of_games()
@@ -61,10 +64,10 @@ def run() -> tuple[int, int]:
     fill_genres_of_games()
 
     # Создание дубликата базы
-    if added_finished_games or added_watched_games:
+    if added_finished_game_ids or added_watched_game_ids:
         db_create_backup(log)
 
-    return added_finished_games, added_watched_games
+    return added_finished_game_ids, added_watched_game_ids
 
 
 if __name__ == "__main__":

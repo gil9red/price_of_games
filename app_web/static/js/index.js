@@ -115,7 +115,7 @@ function run_check_prices() {
     $.ajax({
         url: "/api/run_check_prices",
         method: "POST",
-        success: on_ajax_success,
+        success: data => on_ajax_success(data),
         error: data => on_ajax_error(data, 'при запуске проверки цен'),
 
         beforeSend: function() {
@@ -132,7 +132,7 @@ function run_check_genres() {
     $.ajax({
         url: "/api/run_check_genres",
         method: "POST",
-        success: on_ajax_success,
+        success: data => on_ajax_success(data),
         error: data => on_ajax_error(data, 'при запуске проверки жанров игр'),
 
         beforeSend: function() {
@@ -1246,7 +1246,7 @@ $(document).ready(function() {
             method: method,  // HTTP метод, по умолчанию GET
             data: data,
             dataType: "json",  // Тип данных загружаемых с сервера
-            success: on_ajax_success,
+            success: data => on_ajax_success(data),
             error: data => on_ajax_error(data, 'при проверки цен всех игр без цены'),
 
             beforeSend: function() {

@@ -47,7 +47,7 @@ KIND_BY_TITLE = {
 def prepare_response(
     status: StatusEnum,
     text: str,
-    result: None | list[int | models.GameInfo]
+    result: None | list[models.GameInfo]
 ) -> dict:
     return {
         "status": status,
@@ -452,8 +452,7 @@ def delete_game():
         text = f"Удалена игра #{game_id} {game.name!r} ({game.platform.name!r}, {KIND_BY_TITLE[game.kind]!r})"
 
         # NOTE: Формат подразумевает список
-        # Указываем game_id, чтобы в функции перечитался объект из базы
-        result = [logic.get_game_info(game=game_id)]
+        result = [logic.get_game_info(game)]
 
     except WebUserAlertException as e:
         status = StatusEnum.WARNING

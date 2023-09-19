@@ -69,6 +69,34 @@ db = SqliteQueueDatabase(
 )
 
 
+def create_trigger_before_delete(
+    in_table: Type[Model],
+    for_table_column_name: str,
+    delete_from_table: Type[Model],
+    delete_from_table_column_name: str
+):
+    def get_table_db_name(model: Type[Model]) -> str:
+        return model._meta.name
+
+    in_table_name = get_table_db_name(in_table)
+    delete_from_table_name = get_table_db_name(delete_from_table)
+    name = f"trigger_{in_table_name}__delete_{delete_from_table_name}"
+
+    db.execute_sql(f"DROP TRIGGER IF EXISTS {name}")
+
+    sql = f"""
+    CREATE TRIGGER {name}
+        BEFORE DELETE
+            ON {in_table_name}
+        FOR EACH ROW
+    BEGIN 
+        DELETE FROM {delete_from_table_name}
+              WHERE {delete_from_table_column_name} = old.{for_table_column_name};
+    END;
+    """
+    db.execute_sql(sql)
+
+
 ChildModel = TypeVar("ChildModel", bound="BaseModel")
 
 
@@ -333,6 +361,10 @@ class Settings(BaseModel):
 
 db.connect()
 db.create_tables(BaseModel.get_inherited_models())
+
+# Создание триггеров для автоматического удаления из Game2Genre
+create_trigger_before_delete(Game, "id", Game2Genre, "game_id")
+create_trigger_before_delete(Genre, "id", Game2Genre, "genre_id")
 
 # Задержка в 50мс, чтобы дать время на запуск SqliteQueueDatabase и создание таблиц
 # Т.к. в SqliteQueueDatabase запросы на чтение выполняются сразу, а на запись попадают в очередь

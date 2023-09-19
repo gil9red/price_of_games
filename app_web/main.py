@@ -446,13 +446,13 @@ def delete_game():
         game = Game.get_by_id(game_id)
         log.debug(f"Действие будет выполнено над: {game}")
 
+        # NOTE: Формат подразумевает список
+        result = [logic.get_game_info(game)]
+
         logic.delete_game(game)
 
         status = StatusEnum.OK
         text = f"Удалена игра #{game_id} {game.name!r} ({game.platform.name!r}, {KIND_BY_TITLE[game.kind]!r})"
-
-        # NOTE: Формат подразумевает список
-        result = [logic.get_game_info(game)]
 
     except WebUserAlertException as e:
         status = StatusEnum.WARNING

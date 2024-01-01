@@ -382,7 +382,7 @@ def fill_price_of_games():
     platform_pc = Platform.get(Platform.name == "PC")
 
     for game in games_list:
-        # Для PC поиск цены выполняется в стиме, для остальных платформ это не поддержано
+        # Для PC поиск цены выполняется в стиме/gog, для остальных платформ это не поддержано
         if game.platform == platform_pc:
             check_and_fill_price_of_game(game.name)
             time.sleep(3)

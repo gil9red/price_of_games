@@ -11,6 +11,7 @@ from logging import Logger
 from dataclasses import dataclass
 from datetime import datetime
 from urllib.parse import urljoin
+from typing import Callable
 
 from bs4 import BeautifulSoup
 import requests
@@ -19,6 +20,7 @@ from app_parser.models import Game
 from config import BACKUP_DIR_LIST
 from common import log_common
 from third_party.mini_played_games_parser import parse_played_games
+from third_party.get_price_game.from_gog import get_games as get_games_from_gog
 
 
 @dataclass
@@ -71,8 +73,19 @@ def get_games() -> list[Game]:
     return items
 
 
+def get_prepared_price(price: str) -> int:
+    # "799,99" -> "799.99"
+    price = price.replace(",", ".")
+
+    price = re.sub(r"[^\d.]", "", price)
+    price = int(float(price))  # Всегда храним как целые числа
+
+    return price
+
+
 def steam_search_game_price_list(
-    name: str, log_common: Logger = None
+    name: str,
+    log_common: Logger = None,
 ) -> list[SearchResult]:
     """
     Функция принимает название игры, после ищет его в стиме и возвращает результат как список
@@ -127,18 +140,43 @@ def steam_search_game_price_list(
                     )
 
                 price = price.replace(" pуб.", "").strip()
-
-                # "799,99" -> "799.99"
-                price = price.replace(",", ".")
-
-            if isinstance(price, str):
-                price = re.sub(r"[^\d.]", "", price)
-                price = int(float(price))  # Всегда храним как целые числа
+                price = get_prepared_price(price)
 
         game_price_list.append(
             SearchResult(
                 name=name,
                 price=price,
+            )
+        )
+
+    log_common and log_common.debug(
+        f"game_price_list ({len(game_price_list)}): {game_price_list}"
+    )
+
+    time.sleep(0.5)
+
+    return game_price_list
+
+
+def gog_search_game_price_list(
+    name: str,
+    log_common: Logger = None
+) -> list[SearchResult]:
+    """
+    Функция принимает название игры, после ищет его в gog и возвращает результат как список
+    кортежей из (название игры, цена).
+
+    """
+
+    log_common and log_common.debug(f'Поиск в gog "{name}"')
+
+    game_price_list = []
+
+    for game, price in get_games_from_gog(name):
+        game_price_list.append(
+            SearchResult(
+                name=name,
+                price=get_prepared_price(price),
             )
         )
 
@@ -181,8 +219,28 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
     return name_1 == name_2
 
 
+def _search_price_from_game_price_list(
+    game_price_list: list[SearchResult],
+    _log_on_found_price: Callable[[str, SearchResult], None],
+) -> int | None:
+    # Сначала пытаемся найти игру по полному совпадению
+    for result in game_price_list:
+        if game_name == result.name:
+            _log_on_found_price(game_name, result)
+            return result.price
+
+    # Если по полному совпадению на нашли, пытаемся найти предварительно очищая названия игр от лишних символов
+    for result in game_price_list:
+        # Если нашли игру, запоминаем цену и прерываем сравнение с другими найденными играми
+        if smart_comparing_names(game_name, result.name):
+            _log_on_found_price(game_name, result)
+            return result.price
+
+
 def get_price(
-    game_name: str, log_common: Logger = None, log_append_game: Logger = None
+    game_name: str,
+    log_common: Logger = None,
+    log_append_game: Logger = None,
 ) -> int | None:
     def _log_on_found_price(
         game_name: str,
@@ -197,30 +255,30 @@ def get_price(
 
     # Поищем игру и ее цену в стиме
     game_price_list = steam_search_game_price_list(game_name, log_common)
+    price = _search_price_from_game_price_list(
+        game_price_list,
+        _log_on_found_price,
+    )
+    if price:
+        return price
 
-    # Сначала пытаемся найти игру по полному совпадению
-    for result in game_price_list:
-        if game_name == result.name:
-            _log_on_found_price(game_name, result)
-            return result.price
-
-    # Если по полному совпадению на нашли, пытаемся найти предварительно очищая названия игр от лишних символов
-    for result in game_price_list:
-        # Если нашли игру, запоминаем цену и прерываем сравнение с другими найденными играми
-        if smart_comparing_names(game_name, result.name):
-            _log_on_found_price(game_name, result)
-            return result.price
-
-    return
+    # Поищем игру и ее цену в gog
+    game_price_list = gog_search_game_price_list(game_name, log_common)
+    return _search_price_from_game_price_list(
+        game_price_list,
+        _log_on_found_price,
+    )
 
 
 if __name__ == "__main__":
-    game_name = "JUMP FORCE"
-    print(steam_search_game_price_list(game_name))
+    game_name = "Prodeus"
+    print("steam:", steam_search_game_price_list(game_name))
+    print("gog:", gog_search_game_price_list(game_name))
     print(get_price(game_name))
 
     print()
 
     game_name = "Alone in the Dark: Illumination"
-    print(steam_search_game_price_list(game_name))
+    print("steam:", steam_search_game_price_list(game_name))
+    print("gog:", gog_search_game_price_list(game_name))
     print(get_price(game_name))

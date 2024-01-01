@@ -133,13 +133,6 @@ def steam_search_game_price_list(
             if not m:
                 price = 0
             else:
-                # Только значение цены
-                if "pуб" not in price:
-                    log_common and log_common.warning(
-                        f'АХТУНГ! Неизвестный формат цены: "{price}".'
-                    )
-
-                price = price.replace(" pуб.", "").strip()
                 price = get_prepared_price(price)
 
         game_price_list.append(
@@ -263,6 +256,8 @@ def get_price(
     )
     if price is not None:
         return price
+
+    log_common and log_common.info("Не удалось найти в стиме, поиск в GOG")
 
     # Поищем игру и ее цену в gog
     game_price_list = gog_search_game_price_list(game_name, log_common)

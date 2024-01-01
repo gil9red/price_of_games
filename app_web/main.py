@@ -326,6 +326,7 @@ def run_check_prices():
     except Exception as e:
         status = StatusEnum.WARNING
         text = f'<b>Проверка новых игр завершена ошибкой: "{e}".</b>'
+        log.exception("Проверка новых игр завершена ошибкой:")
 
     data = prepare_response(
         status=status,
@@ -359,6 +360,7 @@ def run_check_genres():
     except Exception as e:
         status = StatusEnum.WARNING
         text = f'<b>Проверка новых жанров у игр завершена ошибкой: "{e}".</b>'
+        log.exception("Проверка новых жанров у игр завершена ошибкой:")
 
     data = prepare_response(
         status=status,

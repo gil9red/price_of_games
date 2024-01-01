@@ -284,7 +284,8 @@ def get_game_list_with_price(game_name: str) -> list[Game]:
 
 
 def check_and_fill_price_of_game(
-    game_name: str, cache=True
+    game_name: str,
+    cache: bool = True,
 ) -> models.PriceUpdateResult:
     """
     Функция ищет цену игры и при нахождении ее ставит ей цену в базе.

@@ -332,7 +332,7 @@ def check_and_fill_price_of_game(
                 price=other_price,
             )
 
-    # Поищем игру и ее цену в стиме
+    # Поищем игру и ее цену в стиме/gog
     other_price = get_price_game(game_name, log_common, log_append_game)
 
     # Отметим что игра искалась

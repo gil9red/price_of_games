@@ -220,6 +220,7 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
 
 
 def _search_price_from_game_price_list(
+    game_name: str,
     game_price_list: list[SearchResult],
     _log_on_found_price: Callable[[str, SearchResult], None],
 ) -> int | None:
@@ -256,6 +257,7 @@ def get_price(
     # Поищем игру и ее цену в стиме
     game_price_list = steam_search_game_price_list(game_name, log_common)
     price = _search_price_from_game_price_list(
+        game_name,
         game_price_list,
         _log_on_found_price,
     )
@@ -265,6 +267,7 @@ def get_price(
     # Поищем игру и ее цену в gog
     game_price_list = gog_search_game_price_list(game_name, log_common)
     return _search_price_from_game_price_list(
+        game_name,
         game_price_list,
         _log_on_found_price,
     )

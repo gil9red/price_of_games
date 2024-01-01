@@ -259,7 +259,7 @@ def get_price(
         game_price_list,
         _log_on_found_price,
     )
-    if price:
+    if price is not None:
         return price
 
     # Поищем игру и ее цену в gog

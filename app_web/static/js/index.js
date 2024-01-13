@@ -815,6 +815,7 @@ function callStatisticsByGames(games) {
     let platform_by_number = new Map();
     let genre_by_number = new Map();
     let genre_by_total_price = new Map();
+    let hour_by_number = new Map();
     let total_price = 0;
 
     for (let row of games) {
@@ -831,6 +832,12 @@ function callStatisticsByGames(games) {
             ? platform_by_number.get(platform_name)
             : 0;
         platform_by_number.set(platform_name, number + 1);
+
+        let hour = new Date(row.append_date_timestamp * 1000).getHours();
+        let numberByHour = hour_by_number.has(hour)
+            ? hour_by_number.get(hour)
+            : 0;
+        hour_by_number.set(hour, numberByHour + 1);
 
         for (let genre_name of row.genres) {
             let number = genre_by_number.has(genre_name)
@@ -850,7 +857,8 @@ function callStatisticsByGames(games) {
         platform_by_number,
         total_price,
         genre_by_number,
-        genre_by_total_price
+        genre_by_total_price,
+        hour_by_number
     ];
 }
 
@@ -906,14 +914,16 @@ function fill_charts(finished_games, finished_watched_games) {
         platform_by_number_of_finished_games,
         total_price_of_finished_games,
         genre_by_number_of_finished_games,
-        genre_by_total_price_of_finished_games
+        genre_by_total_price_of_finished_games,
+        hour_by_number_of_finished_games
     ] = callStatisticsByGames(finished_games);
     let [
         platform_by_total_price_of_finished_watched_games,
         platform_by_number_of_finished_watched_games,
         total_price_of_finished_watched_games,
         genre_by_number_of_finished_watched_games,
-        genre_by_total_price_of_finished_watched_games
+        genre_by_total_price_of_finished_watched_games,
+        hour_by_number_of_finished_watched_games
     ] = callStatisticsByGames(finished_watched_games);
 
     let backgroundColor = [
@@ -1046,6 +1056,25 @@ function fill_charts(finished_games, finished_watched_games) {
             data: Array.from(
                 genre_by_price.values()
             ).slice(0, numberOfTop),
+        }],
+        options
+    );
+
+    let hour_by_number = sortReversedMapByValue(
+        sumMaps(hour_by_number_of_finished_games, hour_by_number_of_finished_watched_games)
+    );
+    createOrUpdateCharts(
+        'chartHourByNumber',
+        `Игры по часам`,
+        // labels
+        Array.from(
+            hour_by_number.keys()
+        ),
+        // datasets
+        [{
+            data: Array.from(
+                hour_by_number.values()
+            ),
         }],
         options
     );

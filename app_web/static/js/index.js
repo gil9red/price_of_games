@@ -880,7 +880,11 @@ function sortReversedMapByValue(map) {
     return new Map([...map.entries()].sort((a, b) => b[1] - a[1]));
 }
 
-function createOrUpdateCharts(chartId, title, labels, datasets, options) {
+function sortMapByKey(map) {
+    return new Map([...map.entries()].sort((a, b) => a[0] - b[0]));
+}
+
+function createOrUpdateCharts(chartId, title, labels, datasets, options, type="pie") {
     let thisOptions = structuredClone(options);
     thisOptions.plugins.title.text = title;
 
@@ -898,7 +902,7 @@ function createOrUpdateCharts(chartId, title, labels, datasets, options) {
     window[keyChartId] = new Chart(
         document.getElementById(chartId),
         {
-            type: 'pie',
+            type: type,
             data: {
                 labels: labels,
                 datasets: datasets
@@ -1060,23 +1064,25 @@ function fill_charts(finished_games, finished_watched_games) {
         options
     );
 
-    let hour_by_number = sortReversedMapByValue(
+    let hour_by_number = sortMapByKey(
         sumMaps(hour_by_number_of_finished_games, hour_by_number_of_finished_watched_games)
     );
     createOrUpdateCharts(
-        'chartHourByNumber',
-        `Игры по часам`,
+        "chartHourByNumber",
+        "Игры по часам",
         // labels
         Array.from(
             hour_by_number.keys()
         ),
         // datasets
         [{
+            label: "Игр",
             data: Array.from(
                 hour_by_number.values()
             ),
         }],
-        options
+        options,
+        "bar"
     );
 }
 

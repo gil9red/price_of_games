@@ -10,7 +10,7 @@ from logging.handlers import RotatingFileHandler
 
 from flask import Flask
 
-from config import DIR_LOG
+from config import DIR_LOGS
 
 
 app = Flask("web__price_of_games")
@@ -23,7 +23,7 @@ formatter = logging.Formatter(
 )
 
 file_handler = RotatingFileHandler(
-    DIR_LOG / "web.log", maxBytes=10_000_000, backupCount=5, encoding="utf-8"
+    DIR_LOGS / "web.log", maxBytes=10_000_000, backupCount=5, encoding="utf-8"
 )
 file_handler.setLevel(logging.DEBUG)
 file_handler.setFormatter(formatter)

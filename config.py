@@ -10,8 +10,8 @@ from pathlib import Path
 
 DIR = Path(__file__).resolve().parent
 
-DIR_LOG = DIR / "logs"
-DIR_LOG.mkdir(parents=True, exist_ok=True)
+DIR_LOGS = DIR / "logs"
+DIR_LOGS.mkdir(parents=True, exist_ok=True)
 
 DB_DIR_NAME = DIR / "database"
 DB_DIR_NAME.mkdir(parents=True, exist_ok=True)

@@ -9,7 +9,7 @@ import sys
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
-from config import DIR_LOG
+from config import DIR_LOGS
 from third_party import mini_played_games_parser
 
 
@@ -25,7 +25,7 @@ FINISHED_WATCHED = mini_played_games_parser.FINISHED_WATCHED
 
 def get_logger(
     logger_name: str,
-    dir_name: Path = DIR_LOG,
+    dir_name: Path = DIR_LOGS,
     log_stdout: bool = True,
     log_file: bool = True,
 ) -> logging.Logger:

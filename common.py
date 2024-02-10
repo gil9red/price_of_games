@@ -6,6 +6,7 @@ __author__ = "ipetrash"
 
 import logging
 import sys
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
 from config import DIR_LOG
@@ -39,7 +40,9 @@ def get_logger(
         dir_name.mkdir(parents=True, exist_ok=True)
         file_name = dir_name / f"{logger_name}.log"
 
-        fh = logging.FileHandler(file_name, encoding="utf-8")
+        fh = RotatingFileHandler(
+            file_name, maxBytes=10_000_000, backupCount=5, encoding="utf-8"
+        )
         fh.setLevel(logging.DEBUG)
         fh.setFormatter(formatter)
         log.addHandler(fh)

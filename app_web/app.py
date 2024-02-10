@@ -23,7 +23,7 @@ formatter = logging.Formatter(
 )
 
 file_handler = RotatingFileHandler(
-    DIR_LOG / "web.log", maxBytes=10000000, backupCount=5, encoding="utf-8"
+    DIR_LOG / "web.log", maxBytes=10_000_000, backupCount=5, encoding="utf-8"
 )
 file_handler.setLevel(logging.DEBUG)
 file_handler.setFormatter(formatter)

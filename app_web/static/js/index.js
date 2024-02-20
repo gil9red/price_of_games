@@ -816,6 +816,7 @@ function callStatisticsByGames(games) {
     let genre_by_number = new Map();
     let genre_by_total_price = new Map();
     let hour_by_number = new Map();
+    let year_by_number = new Map();
     let total_price = 0;
 
     for (let row of games) {
@@ -833,11 +834,19 @@ function callStatisticsByGames(games) {
             : 0;
         platform_by_number.set(platform_name, number + 1);
 
-        let hour = new Date(row.append_date_timestamp * 1000).getHours();
+        let append_date = new Date(row.append_date_timestamp * 1000);
+
+        let hour = append_date.getHours();
         let numberByHour = hour_by_number.has(hour)
             ? hour_by_number.get(hour)
             : 0;
         hour_by_number.set(hour, numberByHour + 1);
+
+        let year = append_date.getFullYear();
+        let numberByYear = year_by_number.has(year)
+            ? year_by_number.get(year)
+            : 0;
+        year_by_number.set(year, numberByYear + 1);
 
         for (let genre_name of row.genres) {
             let number = genre_by_number.has(genre_name)
@@ -858,7 +867,8 @@ function callStatisticsByGames(games) {
         total_price,
         genre_by_number,
         genre_by_total_price,
-        hour_by_number
+        hour_by_number,
+        year_by_number
     ];
 }
 
@@ -919,7 +929,8 @@ function fill_charts(finished_games, finished_watched_games) {
         total_price_of_finished_games,
         genre_by_number_of_finished_games,
         genre_by_total_price_of_finished_games,
-        hour_by_number_of_finished_games
+        hour_by_number_of_finished_games,
+        year_by_number_of_finished_games
     ] = callStatisticsByGames(finished_games);
     let [
         platform_by_total_price_of_finished_watched_games,
@@ -927,7 +938,8 @@ function fill_charts(finished_games, finished_watched_games) {
         total_price_of_finished_watched_games,
         genre_by_number_of_finished_watched_games,
         genre_by_total_price_of_finished_watched_games,
-        hour_by_number_of_finished_watched_games
+        hour_by_number_of_finished_watched_games,
+        year_by_number_of_finished_watched_games
     ] = callStatisticsByGames(finished_watched_games);
 
     let backgroundColor = [
@@ -1081,6 +1093,54 @@ function fill_charts(finished_games, finished_watched_games) {
                 hour_by_number.values()
             ),
         }],
+        options,
+        "bar"
+    );
+
+    let year_by_number = sortMapByKey(
+        sumMaps(year_by_number_of_finished_games, year_by_number_of_finished_watched_games)
+    );
+    let all_year_by_number_of_finished_games = new Map();
+    let all_year_by_number_of_finished_watched_games = new Map();
+    for (let year of year_by_number.keys()) {
+        let value_of_finished_games = year_by_number_of_finished_games.has(year)
+            ? year_by_number_of_finished_games.get(year)
+            : 0;
+        all_year_by_number_of_finished_games.set(year, value_of_finished_games);
+
+        let value_of_finished_watched_games = year_by_number_of_finished_watched_games.has(year)
+            ? year_by_number_of_finished_watched_games.get(year)
+            : 0;
+        all_year_by_number_of_finished_watched_games.set(year, value_of_finished_watched_games);
+    }
+    createOrUpdateCharts(
+        "chartYearByNumber",
+        "Игры по годам",
+        // labels
+        Array.from(
+            year_by_number.keys()
+        ),
+        // datasets
+        [
+            {
+                label: "Всего",
+                data: Array.from(
+                    year_by_number.values()
+                ),
+            },
+            {
+                label: "Пройденных",
+                data: Array.from(
+                    all_year_by_number_of_finished_games.values()
+                ),
+            },
+            {
+                label: "Просмотренных",
+                data: Array.from(
+                    all_year_by_number_of_finished_watched_games.values()
+                ),
+            },
+        ],
         options,
         "bar"
     );

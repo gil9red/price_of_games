@@ -81,6 +81,9 @@
     width: 300px;
     height: 300px;
 }
+    .chart-wrapper.long-width {
+        width: 600px;
+    }
 
 /* Изменение стиля кнопок отображения/скрытия деталей строк таблицы */
 table.dataTable td.dt-control:before,

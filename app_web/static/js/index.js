@@ -1069,7 +1069,7 @@ function fill_charts(finished_games, finished_watched_games) {
     );
     createOrUpdateCharts(
         "chartHourByNumber",
-        "Игры по часам",
+        "Игры по часам в сутках",
         // labels
         Array.from(
             hour_by_number.keys()

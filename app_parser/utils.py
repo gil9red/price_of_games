@@ -20,7 +20,7 @@ from app_parser.models import Game
 from config import BACKUP_DIR_LIST
 from common import log_common
 from third_party.mini_played_games_parser import parse_played_games
-from third_party.get_price_game.from_gog import get_games as get_games_from_gog
+from third_party.get_price_game.from_gog_v2 import get_games as get_games_from_gog
 
 
 @dataclass

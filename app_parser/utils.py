@@ -223,7 +223,7 @@ def _search_price_from_game_price_list(
             _log_on_found_price(game_name, result)
             return result.price
 
-    # Если по полному совпадению на нашли, пытаемся найти предварительно очищая названия игр от лишних символов
+    # Если по полному совпадению не нашли, пытаемся найти предварительно очищая названия игр от лишних символов
     for result in game_price_list:
         # Если нашли игру, запоминаем цену и прерываем сравнение с другими найденными играми
         if smart_comparing_names(game_name, result.name):

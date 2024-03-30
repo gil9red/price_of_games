@@ -247,6 +247,9 @@ def get_price(
             f"Нашли игру: {game_name!r} ({result.name}) -> {result.price}"
         )
 
+    # Префикс может мешать в поиске, т.к. в названиях магазинов его не включают
+    game_name = game_name.replace(" (DLC)", "")
+
     # Поищем игру и ее цену в стиме
     game_price_list = steam_search_game_price_list(game_name, log_common)
     price = _search_price_from_game_price_list(

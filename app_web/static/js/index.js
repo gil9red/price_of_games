@@ -724,7 +724,7 @@ function fill_table(table_selector, items) {
             // Рисование графиков
             fill_charts(finished_games, finished_watched_games);
         },
-        initComplete: function () {
+        initComplete: function (settings, json) {
             createFilterOfKinds(this, tableEl);
             createFilterOfPlatforms(this, tableEl);
             createFilterOfGenres(this, tableEl);

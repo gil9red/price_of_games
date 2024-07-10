@@ -507,8 +507,7 @@ function createFilterOfKinds(table, tableEl) {
     // Под колонку типа добавлен фильтр
     let column = table.api().column(COLUMN_KIND);
 
-    let $filter = $('<input placeholder="...">')
-        .appendTo($(column.footer()).empty())
+    let $filterKind = $(".column-kind > input")
         .on('change', function () {
             let val = $(this).val();
             if (val) {
@@ -522,7 +521,11 @@ function createFilterOfKinds(table, tableEl) {
             } else {
                 column.search("").draw();
             }
-        });
+        })
+    ;
+
+    // Применение фильтра
+    $filterKind.trigger("change");
 
     let values = [];
     column
@@ -533,7 +536,8 @@ function createFilterOfKinds(table, tableEl) {
             // Значение в фильтре типов будут сами эмодзи
             let title = KIND_BY_EMOJI[d];
             values.push(title);
-        });
+        })
+    ;
 
 
     function preprocessOptionsFunc(options) {
@@ -545,15 +549,14 @@ function createFilterOfKinds(table, tableEl) {
     };
 
     // Инициализация
-    createTags($filter, values, tableEl, '.kind', preprocessOptionsFunc);
+    createTags($filterKind, values, tableEl, '.kind', preprocessOptionsFunc);
 }
 
 function createFilterOfPlatforms(table, tableEl) {
     // Под колонку платформы добавлен фильтр
     let columnPlatform = table.api().column(COLUMN_PLATFORM);
 
-    let filterPlatform = $('<input placeholder="...">')
-        .appendTo($(columnPlatform.footer()).empty())
+    let $filterPlatform = $(".column-platform > input")
         .on('change', function () {
             let val = $(this).val();
             if (val) {
@@ -567,7 +570,11 @@ function createFilterOfPlatforms(table, tableEl) {
             } else {
                 columnPlatform.search("").draw();
             }
-        });
+        })
+    ;
+
+    // Применение фильтра
+    $filterPlatform.trigger("change");
 
     let platforms = [];
     columnPlatform
@@ -579,7 +586,7 @@ function createFilterOfPlatforms(table, tableEl) {
         });
 
     // Инициализация платформ
-    createTags(filterPlatform, platforms, tableEl, '.platform');
+    createTags($filterPlatform, platforms, tableEl, '.platform');
 }
 
 function createFilterOfGenres(table, tableEl) {
@@ -589,8 +596,7 @@ function createFilterOfGenres(table, tableEl) {
     // Но поиск будет в колонке деталей - там размещен рендер для поиска жанров
     let columnDetail = table.api().column(COLUMN_DETAIL);
 
-    let filterGenres = $('<input placeholder="Жанры...">')
-        .appendTo($(columnName.footer()).empty())
+    let $filterGenres = $(".column-name > input")
         .on('change', function () {
             let val = $(this).val();
             if (val) {
@@ -604,7 +610,11 @@ function createFilterOfGenres(table, tableEl) {
             } else {
                 columnDetail.search("").draw();
             }
-        });
+        })
+    ;
+
+    // Применение фильтра
+    $filterGenres.trigger("change");
 
     // Заполнение жанров из текущей таблицы
     let uniqueGenres = new Set();
@@ -624,10 +634,15 @@ function createFilterOfGenres(table, tableEl) {
     }
 
     // Инициализация жанров
-    createTags(filterGenres, genres, tableEl, '.genre');
+    createTags($filterGenres, genres, tableEl, '.genre');
 }
 
 function fill_table(table_selector, items) {
+    function get_state_key(settings) {
+        // NOTE: Стандартный ключ DataTable
+        return `DataTables_${settings.sInstance}_${location.pathname}`;
+    }
+
     let tableEl = $(table_selector);
 
     if ($.fn.dataTable.isDataTable(table_selector)) {
@@ -672,6 +687,83 @@ function fill_table(table_selector, items) {
         },
         select: {
             toggleable: false,  // Нельзя убирать выделение повторным кликом
+        },
+        stateSave: true,
+        stateDuration: 0, // Без ограничения срока хранения
+        stateSaveCallback: function (settings, data) {
+            let key = get_state_key(settings);
+
+            // Убрана фильтрация по столбцам, чтобы ее делать
+            // из тегов после их загрузки из data.custom_filters
+            for (let column of data.columns) {
+                column.search.search = "";
+            }
+
+            if (data.custom_filters == null) {
+                data.custom_filters = {
+                    kinds: [],
+                    genres: [],
+                    platforms: [],
+                };
+            }
+
+            function get_tagify_items(tagify_el) {
+                return tagify_el.__tagify.value.map((obj) => obj.value);
+            }
+
+            // Под колонку типа добавлен фильтр
+            let columnKind = this.api().column(COLUMN_KIND);
+            let inputKind = $(columnKind.footer()).find("input")[0];
+            if (inputKind && inputKind.__tagify) {
+                data.custom_filters.kinds = get_tagify_items(inputKind);
+            } else {
+                data.custom_filters.kinds = [];
+            }
+
+            // Под колонку названия добавлен фильтр по жанрам
+            let columnName = this.api().column(COLUMN_NAME);
+            let inputName = $(columnName.footer()).find("input")[0];
+            if (inputName && inputName.__tagify) {
+                data.custom_filters.genres = get_tagify_items(inputName);
+            } else {
+                data.custom_filters.genres = [];
+            }
+
+            // Под колонку платформы добавлен фильтр
+            let columnPlatform = this.api().column(COLUMN_PLATFORM);
+            let inputPlatform = $(columnPlatform.footer()).find("input")[0];
+            if (inputPlatform && inputPlatform.__tagify) {
+                data.custom_filters.platforms = get_tagify_items(inputPlatform);
+            } else {
+                data.custom_filters.platforms = [];
+            }
+
+            localStorage.setItem(key, JSON.stringify(data));
+        },
+        stateLoadCallback: function (settings) {
+            let key = get_state_key(settings);
+
+            // NOTE: childRows и пагинация не восстанавливаются. Возможно, из-за последующих .draw()
+
+            let data = JSON.parse(localStorage.getItem(key));
+
+            function set_tagify_items($tagify_el, items) {
+                let value = items.length > 0
+                    ? JSON.stringify(
+                        items.map(x => ({value: x}))
+                    )
+                    : ""
+                ;
+                $tagify_el.attr("value", value);
+            }
+
+            if (data != null && data.custom_filters != null) {
+                set_tagify_items($(".column-kind > input"), data.custom_filters.kinds);
+                set_tagify_items($(".column-name > input"), data.custom_filters.genres);
+                set_tagify_items($(".column-platform > input"), data.custom_filters.platforms);
+            }
+
+            return data;
         },
         language: {
             // NOTE: https://datatables.net/plug-ins/i18n/Russian.html

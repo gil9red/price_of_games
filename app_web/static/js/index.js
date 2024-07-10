@@ -714,7 +714,7 @@ function fill_table(table_selector, items) {
             // Под колонку типа добавлен фильтр
             let columnKind = this.api().column(COLUMN_KIND);
             let inputKind = $(columnKind.footer()).find("input")[0];
-            if (inputKind && inputKind.__tagify) {
+            if (inputKind != null && inputKind.__tagify != null) {
                 data.custom_filters.kinds = get_tagify_items(inputKind);
             } else {
                 data.custom_filters.kinds = [];
@@ -723,7 +723,7 @@ function fill_table(table_selector, items) {
             // Под колонку названия добавлен фильтр по жанрам
             let columnName = this.api().column(COLUMN_NAME);
             let inputName = $(columnName.footer()).find("input")[0];
-            if (inputName && inputName.__tagify) {
+            if (inputName != null && inputName.__tagify != null) {
                 data.custom_filters.genres = get_tagify_items(inputName);
             } else {
                 data.custom_filters.genres = [];
@@ -732,7 +732,7 @@ function fill_table(table_selector, items) {
             // Под колонку платформы добавлен фильтр
             let columnPlatform = this.api().column(COLUMN_PLATFORM);
             let inputPlatform = $(columnPlatform.footer()).find("input")[0];
-            if (inputPlatform && inputPlatform.__tagify) {
+            if (inputPlatform != null && inputPlatform.__tagify != null) {
                 data.custom_filters.platforms = get_tagify_items(inputPlatform);
             } else {
                 data.custom_filters.platforms = [];

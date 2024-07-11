@@ -472,15 +472,21 @@ function kind_render(data, type, row, meta) {
     return `<span class="kind">${emoji}</span>`;
 }
 
-function createTags(elementJQuery, items, tableEl, queryTag, preprocessOptionsFunc = null) {
+function createTags(
+        $element,
+        getTagsFunc,
+        tableEl,
+        queryTag,
+        preprocessOptionsFunc = null,
+) {
     let options = {
-        whitelist: items,
+        whitelist: getTagsFunc(),
         enforceWhitelist: true,
         skipInvalid: true,
         dropdown: {
             enabled: 0, // Показывать при фокусе
             closeOnSelect: false,
-            maxItems: items.length,
+            maxItems: Infinity,
         },
         callbacks: {
             // Удаление тега при клике на него
@@ -492,10 +498,25 @@ function createTags(elementJQuery, items, tableEl, queryTag, preprocessOptionsFu
         preprocessOptionsFunc(options);
     }
 
-    let tagify = new Tagify(
-        elementJQuery[0],
-        options
-    );
+    let tagify = new Tagify($element[0], options);
+    tagify.custom__need_reread_whitelist = true;
+
+    tagify.on("dropdown:show", function (e) {
+        tagify.custom__need_reread_whitelist = false;
+    });
+
+    tagify.on("dropdown:hide", function (e) {
+        tagify.custom__need_reread_whitelist = true;
+    });
+
+    let origFilterListItems = tagify.dropdown.filterListItems;
+    tagify.dropdown.filterListItems = function (value, options) {
+        if (tagify.custom__need_reread_whitelist) {
+            // Подмена на актуальный список
+            tagify.settings.whitelist = getTagsFunc();
+        }
+        return origFilterListItems(value, options);
+    };
 
     tableEl.on('click', queryTag, function () {
         let value = $(this).text();
@@ -527,29 +548,33 @@ function createFilterOfKinds(table, tableEl) {
     // Применение фильтра
     $filterKind.trigger("change");
 
-    let values = [];
-    column
-        .data()
-        .unique()
-        .sort()
-        .each(function (d, j) {
-            // Значение в фильтре типов будут сами эмодзи
-            let title = KIND_BY_EMOJI[d];
-            values.push(title);
-        })
-    ;
+    function getTags() {
+        let values = [];
+        table
+            .api()
+            .column(COLUMN_KIND, {search: "applied"})
+            .data()
+            .unique()
+            .sort()
+            .each(function (value, index) {
+                // Значение в фильтре типов будут сами эмодзи
+                let title = KIND_BY_EMOJI[value];
+                values.push(title);
+            })
+        ;
+        return values;
+    }
 
-
-    function preprocessOptionsFunc(options) {
+    function preprocessOptions(options) {
         options.dropdown.closeOnSelect = true;
 
         // Удаление всех тегов, чтобы при добавлении был только выбранный
         // Типов всего 2, поэтому фильтрация только по одному имеет смысл
         options.callbacks.add = (e) => e.detail.tagify.removeTags();
-    };
+    }
 
     // Инициализация
-    createTags($filterKind, values, tableEl, '.kind', preprocessOptionsFunc);
+    createTags($filterKind, getTags, tableEl, '.kind', preprocessOptions);
 }
 
 function createFilterOfPlatforms(table, tableEl) {
@@ -576,17 +601,23 @@ function createFilterOfPlatforms(table, tableEl) {
     // Применение фильтра
     $filterPlatform.trigger("change");
 
-    let platforms = [];
-    columnPlatform
-        .data()
-        .unique()
-        .sort()
-        .each(function (d, j) {
-            platforms.push(d);
-        });
+    function getTags() {
+        let platforms = [];
+        table
+            .api()
+            .column(COLUMN_PLATFORM, {search: "applied"})
+            .data()
+            .unique()
+            .sort()
+            .each(function (value, index) {
+                platforms.push(value);
+            })
+        ;
+        return platforms;
+    }
 
     // Инициализация платформ
-    createTags($filterPlatform, platforms, tableEl, '.platform');
+    createTags($filterPlatform, getTags, tableEl, '.platform');
 }
 
 function createFilterOfGenres(table, tableEl) {
@@ -616,25 +647,37 @@ function createFilterOfGenres(table, tableEl) {
     // Применение фильтра
     $filterGenres.trigger("change");
 
-    // Заполнение жанров из текущей таблицы
-    let uniqueGenres = new Set();
-    table.api().rows().every(function (rowIdx, tableLoop, rowLoop) {
-        for (let name of this.data().genres) {
-            uniqueGenres.add(name);
-        }
-    });
+    function getTags() {
+        // Заполнение жанров из текущей таблицы
+        let uniqueGenres = new Set();
+        table
+            .api()
+            .rows({search: "applied"})
+            .every(function (rowIdx, tableLoop, rowLoop) {
+                for (let name of this.data().genres) {
+                    uniqueGenres.add(name);
+                }
+            })
+        ;
 
-    let genres = new Array();
-    for (let name of Array.from(uniqueGenres).sort()) {
-        genres.push({
-            value: name,
-            searchBy: ALL_GENRES[name].aliases, // Для альтернативного поиска жанров
-            title: get_genre_description(name), // Для всплывающих подсказок при наведении мышки
-        });
+        let genres = new Array();
+        for (let name of Array.from(uniqueGenres).sort()) {
+            genres.push({
+                value: name,
+                searchBy: ALL_GENRES[name].aliases, // Для альтернативного поиска жанров
+                title: get_genre_description(name), // Для всплывающих подсказок при наведении мышки
+            });
+        }
+
+        return genres;
+    }
+
+    function preprocessOptions(options) {
+        options.dropdown.closeOnSelect = true;
     }
 
     // Инициализация жанров
-    createTags($filterGenres, genres, tableEl, '.genre');
+    createTags($filterGenres, getTags, tableEl, '.genre', preprocessOptions);
 }
 
 function fill_table(table_selector, items) {
@@ -786,7 +829,7 @@ function fill_table(table_selector, items) {
         },
         footerCallback: function (tfoot, data, start, end, display) {
             // Собираем цены с учетом поиска и фильтров и выводим в итоговую сумму
-            let column_price = this.api().column(COLUMN_PRICE, {search: 'applied'});
+            let column_price = this.api().column(COLUMN_PRICE, {search: "applied"});
             let total = column_price.data().reduce((a, b) => a + b, 0);
             $(column_price.footer()).html(
                 toPrettyPrice(total)
@@ -1259,7 +1302,7 @@ function fill_genres() {
             dropdown: {
                 enabled: 0,
                 closeOnSelect: false,
-                maxItems: genres.length,
+                maxItems: Infinity,
             },
             callbacks: {
                 // Удаление тега при клике на него

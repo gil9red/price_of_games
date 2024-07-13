@@ -681,11 +681,6 @@ function createFilterOfGenres(table, tableEl) {
 }
 
 function fill_table(table_selector, items) {
-    function get_state_key(settings) {
-        // NOTE: Стандартный ключ DataTable
-        return `DataTables_${settings.sInstance}_${location.pathname}`;
-    }
-
     let tableEl = $(table_selector);
 
     if ($.fn.dataTable.isDataTable(table_selector)) {
@@ -733,9 +728,7 @@ function fill_table(table_selector, items) {
         },
         stateSave: true,
         stateDuration: 0, // Без ограничения срока хранения
-        stateSaveCallback: function (settings, data) {
-            let key = get_state_key(settings);
-
+        stateSaveParams: function (settings, data) {
             // Убрана фильтрация по столбцам, чтобы ее делать
             // из тегов после их загрузки из data.custom_filters
             for (let column of data.columns) {
@@ -780,15 +773,9 @@ function fill_table(table_selector, items) {
             } else {
                 data.custom_filters.platforms = [];
             }
-
-            localStorage.setItem(key, JSON.stringify(data));
         },
-        stateLoadCallback: function (settings) {
-            let key = get_state_key(settings);
-
+        stateLoadParams: function (settings, data) {
             // NOTE: childRows и пагинация не восстанавливаются. Возможно, из-за последующих .draw()
-
-            let data = JSON.parse(localStorage.getItem(key));
 
             function set_tagify_items($tagify_el, items) {
                 let value = items.length > 0
@@ -805,8 +792,6 @@ function fill_table(table_selector, items) {
                 set_tagify_items($(".column-name > input"), data.custom_filters.genres);
                 set_tagify_items($(".column-platform > input"), data.custom_filters.platforms);
             }
-
-            return data;
         },
         language: {
             // NOTE: https://datatables.net/plug-ins/i18n/Russian.html

@@ -35,6 +35,11 @@
     padding-left: 2px;
 }
 
+.dataTables_wrapper ::selection {
+  color: var(--indigo);
+  background: var(--light);
+}
+
 .dataTables_length > label,
 .dataTables_length > label > select {
     width: 100% !important;

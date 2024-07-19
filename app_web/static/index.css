@@ -35,7 +35,7 @@
     padding-left: 2px;
 }
 
-.dataTables_wrapper ::selection {
+.dataTables_wrapper tbody > tr ::selection {
   color: var(--indigo);
   background: var(--light);
 }

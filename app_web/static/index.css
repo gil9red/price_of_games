@@ -36,8 +36,8 @@
 }
 
 .dataTables_wrapper tbody > tr ::selection {
-  color: var(--indigo);
-  background: var(--light);
+    color: var(--light);
+    background: var(--indigo);
 }
 
 .dataTables_length > label,

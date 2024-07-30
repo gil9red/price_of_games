@@ -66,6 +66,7 @@ def get_games() -> list[Game]:
     errors = []
     platforms = parse_played_games(content_gist, errors=errors)
     for error_text in errors:
+        log_common.info(f"Отправка уведомления: {error_text!r}")
         add_notify(name="Цены игр", message=error_text)
 
     items = []

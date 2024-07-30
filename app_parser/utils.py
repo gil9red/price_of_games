@@ -19,6 +19,7 @@ import requests
 from app_parser.models import Game
 from config import BACKUP_DIR_LIST
 from common import log_common
+from third_party.add_notify_telegram import add_notify
 from third_party.mini_played_games_parser import parse_played_games
 from third_party.get_price_game.from_gog_v2 import get_games as get_games_from_gog
 
@@ -62,13 +63,18 @@ def get_games() -> list[Game]:
         except Exception:
             log_common.exception("Error:")
 
-    platforms = parse_played_games(content_gist)
+    errors = []
+    platforms = parse_played_games(content_gist, errors=errors)
+    for error_text in errors:
+        add_notify(name="Цены игр", message=error_text)
 
     items = []
     for platform, categories in platforms.items():
         for category, games in categories.items():
             for game in games:
-                items.append(Game(name=game, platform=platform, kind=category))
+                items.append(
+                    Game(name=game, platform=platform, kind=category)
+                )
 
     return items
 

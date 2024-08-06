@@ -205,3 +205,9 @@ table.dataTable tr.dt-hasChild td.dt-control::before {
 .column-kind {
     max-width: 30px;
 }
+
+/* Уменьшение отступа слева и справа в элементах выпадающего списка */
+.dropdown-item {
+    padding-left: 0.7rem;
+    padding-right: 0.7rem;
+}

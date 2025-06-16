@@ -63,7 +63,7 @@ def run() -> tuple[list[int], list[int]]:
     # Заполнение жанров игр
     fill_genres_of_games()
 
-    # Создание дубликата базы
+    # Создание бекапа базы
     if added_finished_game_ids or added_watched_game_ids:
         db_create_backup(log)
 

@@ -14,6 +14,7 @@ from config import DIR_LOGS
 
 
 app = Flask("web__price_of_games")
+app.json.sort_keys = False
 
 log: logging.Logger = app.logger
 log.handlers.clear()

@@ -431,6 +431,21 @@ def get_games():
     return jsonify(data)
 
 
+@app.route("/api/search/<text>")
+def get_api_search(text: str):
+    """
+    Функция для возврата списка игр по названию.
+
+    """
+
+    log.debug("Call get_api_search")
+
+    items = logic.search(text)
+    log.debug(f"Found: {len(items)}")
+
+    return jsonify(items)
+
+
 @app.route("/api/delete_game", methods=["POST"])
 def delete_game():
     """

@@ -16,7 +16,7 @@ from common import (
 from db import ResultEnum, Game, Platform
 
 from app_parser import models
-from app_parser.utils import get_price as get_price_game
+from app_parser.utils import get_price as get_price_game, smart_comparing_names
 
 
 def get_game_info(game: int | Game) -> models.GameInfo:
@@ -52,6 +52,15 @@ def get_games() -> list[models.GameInfo]:
         .order_by(Game.append_date.desc())
     )
     return [get_game_info(game) for game in query]
+
+
+def search(text: str) -> list[models.GameInfo]:
+    """
+    Функция возвращает список игр
+
+    """
+
+    return [game for game in get_games() if smart_comparing_names(game.name, text)]
 
 
 def get_price(game_name: str) -> int | None:

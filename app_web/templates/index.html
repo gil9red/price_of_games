@@ -94,7 +94,11 @@
                         <a class="nav-item nav-link" id="nav-debug-tab" data-toggle="tab" href="#nav-debug" role="tab" aria-controls="nav-debug" aria-selected="false">
                             <span class="glyphicon glyphicon-wrench"></span> Отладка
                         </a>
-                        <a class="ml-auto collapsed glyphicon-eye-close p-0" data-toggle="collapse" href="#fixed_right_panel" role="button" aria-expanded="false" aria-controls="fixed_right_panel"></a>
+
+                        <a class="ml-auto mr-2" href="{{ url_for('lenta.index') }}" title="Лента игр">
+                            <img class="mt-1" src="{{ url_for('lenta.static', filename='images/favicon.png') }}" width="25" height="25">
+                        </a>
+                        <a class="collapsed glyphicon-eye-close" data-toggle="collapse" href="#fixed_right_panel" role="button" aria-expanded="false" aria-controls="fixed_right_panel"></a>
                     </div>
                 </nav>
                 <div class="tab-content" id="nav-tabContent">

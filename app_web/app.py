@@ -10,10 +10,13 @@ from logging.handlers import RotatingFileHandler
 
 from flask import Flask
 
+from app_web.lenta.main import bp as lenta_bp
 from config import DIR_LOGS
 
 
 app = Flask("web__price_of_games")
+app.register_blueprint(lenta_bp, url_prefix='/lenta')
+
 app.json.sort_keys = False
 
 log: logging.Logger = app.logger

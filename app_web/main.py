@@ -35,12 +35,9 @@ def check_form_params(form: dict, *args):
             raise WebUserAlertException(text)
 
 
-TITLE_FINISHED_GAME = "Пройденные игры"
-TITLE_FINISHED_WATCHED = "Просмотренные игры"
-
-KIND_BY_TITLE = {
-    FINISHED_GAME: TITLE_FINISHED_GAME,
-    FINISHED_WATCHED: TITLE_FINISHED_WATCHED,
+KIND_BY_TITLE: dict[str, str] = {
+    FINISHED_GAME: "Пройденные игры",
+    FINISHED_WATCHED: "Просмотренные игры",
 }
 
 

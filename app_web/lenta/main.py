@@ -32,14 +32,14 @@ def get_games() -> list[Game]:
     return list(Game.select().order_by(Game.append_date.desc()))
 
 
-def get_all_finished_by_year(year: int) -> list[Game]:
+def get_games_by_year(year: int) -> list[Game]:
     return [game for game in get_games() if game.append_date.year == year]
 
 
 def get_day_by_games(year: int) -> dict[str, list[Game]]:
     day_by_games = defaultdict(list)
 
-    for game in get_all_finished_by_year(year):
+    for game in get_games_by_year(year):
         day = game.append_date.strftime("%d/%m/%Y")
         day_by_games[day].append(game)
 

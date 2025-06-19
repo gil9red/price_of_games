@@ -6,9 +6,9 @@ __author__ = "ipetrash"
 
 import json
 import re
-import os.path
 
 from enum import Enum
+from pathlib import Path
 
 from flask import render_template, request, jsonify, send_from_directory
 
@@ -486,7 +486,8 @@ def delete_game():
 @app.route("/favicon.ico")
 def favicon():
     return send_from_directory(
-        os.path.join(app.root_path, "static/images"), "favicon.png"
+        directory=Path(app.root_path) / "static/images",
+        path="favicon.png",
     )
 
 

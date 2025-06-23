@@ -10,6 +10,7 @@ from pathlib import Path
 
 from flask import Blueprint, render_template, send_from_directory
 
+from app_web.auth import auth
 from db import Game, Platform
 from third_party.mini_played_games_parser import FINISHED_GAME, FINISHED_WATCHED
 
@@ -61,6 +62,7 @@ bp: Blueprint = Blueprint(
 
 
 @bp.route("/")
+@auth.login_required
 def index():
     year_by_number: list[tuple[int, int]] = get_year_by_number()
     last_year: int = year_by_number[0][0] if year_by_number else date.today().year

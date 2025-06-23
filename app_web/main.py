@@ -17,7 +17,10 @@ import config
 from app_parser import logic
 from app_parser import models
 from app_parser.main import run as run_check_of_price
+
 from app_web.app import app, log
+from app_web.auth import auth
+
 from common import WebUserAlertException, FINISHED_GAME, FINISHED_WATCHED
 from db import Game, Genre, Settings
 from integrator_genres.main import fill_from_current_games as run_check_of_genres
@@ -54,6 +57,7 @@ def prepare_response(
 
 
 @app.route("/")
+@auth.login_required
 def index():
     log.debug("Call index")
 
@@ -494,7 +498,4 @@ def favicon():
 if __name__ == "__main__":
     # app.debug = True
 
-    app.run(port=config.PORT_WEB)
-
-    # # Public IP
-    # app.run(host='0.0.0.0')
+    app.run(host="0.0.0.0", port=config.PORT_WEB)

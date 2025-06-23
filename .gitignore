@@ -112,3 +112,4 @@ backup/
 logs/
 database/
 users.json
+SECRET_KEY.txt

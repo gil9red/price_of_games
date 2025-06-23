@@ -6,18 +6,22 @@ __author__ = "ipetrash"
 
 import logging
 import sys
+
+from datetime import timedelta
 from logging.handlers import RotatingFileHandler
 
 from flask import Flask
 
 from app_web.lenta import bp as lenta_bp
-from config import DIR_LOGS
+from config import DIR_LOGS, SECRET_KEY
 
 
 app = Flask("web__price_of_games")
-app.register_blueprint(lenta_bp, url_prefix='/lenta')
-
 app.json.sort_keys = False
+app.permanent_session_lifetime = timedelta(days=365)
+app.secret_key = SECRET_KEY
+
+app.register_blueprint(lenta_bp, url_prefix='/lenta')
 
 log: logging.Logger = app.logger
 log.handlers.clear()

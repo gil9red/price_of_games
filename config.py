@@ -4,7 +4,9 @@
 __author__ = "ipetrash"
 
 
+import json
 import os.path
+
 from pathlib import Path
 
 
@@ -30,4 +32,19 @@ PORT_WEB: int = int(
 
 PORT_GET_GAME_GENRES: int = int(
     os.environ.get("PORT_GET_GAME_GENRES", 5501)
+)
+
+SECRET_KEY = (
+    os.environ.get("SECRET_KEY")
+    or (DIR / "SECRET_KEY.txt").read_text("utf-8").strip()
+)
+if not SECRET_KEY:
+    raise Exception("SECRET_KEY must be set in the SECRET_KEY.txt file or in an environment variable")
+
+# Example:
+# {
+#     "<LOGIN>": "<PASSWORD>"
+# }
+USERS: dict[str, str] = json.loads(
+    (DIR / "users.json").read_text("utf-8")
 )

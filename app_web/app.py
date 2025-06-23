@@ -10,7 +10,7 @@ from logging.handlers import RotatingFileHandler
 
 from flask import Flask
 
-from app_web.lenta.main import bp as lenta_bp
+from app_web.lenta import bp as lenta_bp
 from config import DIR_LOGS
 
 

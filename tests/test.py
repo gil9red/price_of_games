@@ -21,7 +21,7 @@ from db import (
     Settings,
     db,
 )
-from app_web.lenta.main import (
+from app_web.lenta import (
     get_games,
     get_games_by_year,
     get_day_by_games,

@@ -27,7 +27,7 @@ from playhouse.shortcuts import model_to_dict
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from config import BACKUP_DIR_LIST, DB_FILE_NAME, DB_DIR_NAME
-from third_party.shorten import shorten
+from third_party.db_peewee_meta_model import MetaModel
 
 
 class NotDefinedParameterException(Exception):
@@ -98,62 +98,9 @@ def create_trigger_before_delete(
 ChildModel = TypeVar("ChildModel", bound="BaseModel")
 
 
-class BaseModel(Model):
+class BaseModel(MetaModel):
     class Meta:
         database = db
-
-    def get_new(self) -> ChildModel:
-        return type(self).get(self._pk_expr())
-
-    @classmethod
-    def get_first(cls) -> ChildModel:
-        return cls.select().first()
-
-    @classmethod
-    def get_last(cls) -> ChildModel:
-        return cls.select().order_by(cls.id.desc()).first()
-
-    @classmethod
-    def get_inherited_models(cls) -> list[Type["BaseModel"]]:
-        return sorted(cls.__subclasses__(), key=lambda x: x.__name__)
-
-    @classmethod
-    def print_count_of_tables(cls):
-        items = []
-        for sub_cls in cls.get_inherited_models():
-            name = sub_cls.__name__
-            count = sub_cls.select().count()
-            items.append(f"{name}: {count}")
-
-        print(", ".join(items))
-
-    @classmethod
-    def count(cls, filters: Iterable = None) -> int:
-        query = cls.select()
-        if filters:
-            query = query.filter(*filters)
-        return query.count()
-
-    def to_dict(self) -> dict:
-        return model_to_dict(self)
-
-    def __str__(self):
-        fields = []
-        for k, field in self._meta.fields.items():
-            v = getattr(self, k)
-
-            if isinstance(field, (TextField, CharField)):
-                if v:
-                    v = repr(shorten(v))
-
-            elif isinstance(field, ForeignKeyField):
-                k = f"{k}_id"
-                if v:
-                    v = v.id
-
-            fields.append(f"{k}={v}")
-
-        return self.__class__.__name__ + "(" + ", ".join(fields) + ")"
 
 
 class Platform(BaseModel):

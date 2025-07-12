@@ -22,7 +22,7 @@ URL_GAME = f"{URL_BASE}/api/game"
 URL_GENRES = f"{URL_BASE}/api/genres"
 
 
-def get_result_by_number() -> dict[ResultEnum, int]:
+def get_empty_result_by_number() -> dict[ResultEnum, int]:
     return {result: 0 for result in sorted(ResultEnum, key=lambda x: x.name)}
 
 
@@ -67,7 +67,7 @@ def process_game(game: Game, genres: list[str]) -> list[ResultEnum]:
 def fill_genres():
     log.info("Запуск заполнения жанров")
 
-    result_by_number = get_result_by_number()
+    result_by_number = get_empty_result_by_number()
 
     rs = requests.get(URL_GENRES)
     for item in rs.json():
@@ -83,7 +83,7 @@ def fill_genres():
 def fill_from_current_games() -> list[int]:
     log.info("Запуск заполнения жанров у игр")
 
-    result_by_number = get_result_by_number()
+    result_by_number = get_empty_result_by_number()
     ids: list[int] = []
 
     for game in Game.get_games_without_genres():

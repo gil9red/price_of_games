@@ -20,6 +20,9 @@ log = get_logger(Path(__file__).resolve().parent.name)
 URL_BASE = f"http://127.0.0.1:{PORT_GET_GAME_GENRES}"
 URL_GAME = f"{URL_BASE}/api/game"
 URL_GENRES = f"{URL_BASE}/api/genres"
+URL_BASE: str = f"http://127.0.0.1:{PORT_GET_GAME_GENRES}"
+URL_GAME: str = f"{URL_BASE}/api/game"
+URL_GENRES: str = f"{URL_BASE}/api/genres"
 
 
 def get_empty_result_by_number() -> dict[ResultEnum, int]:
@@ -67,7 +70,7 @@ def process_game(game: Game, genres: list[str]) -> list[ResultEnum]:
 def fill_genres():
     log.info("Запуск заполнения жанров")
 
-    result_by_number = get_empty_result_by_number()
+    result_by_number: dict[ResultEnum, int] = get_empty_result_by_number()
 
     rs = requests.get(URL_GENRES)
     for item in rs.json():
@@ -83,7 +86,7 @@ def fill_genres():
 def fill_from_current_games() -> list[int]:
     log.info("Запуск заполнения жанров у игр")
 
-    result_by_number = get_empty_result_by_number()
+    result_by_number: dict[ResultEnum, int] = get_empty_result_by_number()
     ids: list[int] = []
 
     for game in Game.get_games_without_genres():

@@ -124,7 +124,7 @@ def steam_search_game_price_list(
     game_price_list = []
 
     for div in root.select(".search_result_row"):
-        name = div.select_one(".title").text.strip()
+        game: str = div.select_one(".title").text.strip()
 
         # Ищем тег скидки, чтобы вытащить оригинальную цену, а не ту, что получилась со скидкой
         price_el = div.select_one(".discount_original_price") or div.select_one(".discount_final_price")
@@ -144,7 +144,7 @@ def steam_search_game_price_list(
 
         game_price_list.append(
             SearchResult(
-                name=name,
+                name=game,
                 price=price,
             )
         )
@@ -175,7 +175,7 @@ def gog_search_game_price_list(
     for game, price in get_games_from_gog(name):
         game_price_list.append(
             SearchResult(
-                name=name,
+                name=game,
                 price=get_prepared_price(price),
             )
         )

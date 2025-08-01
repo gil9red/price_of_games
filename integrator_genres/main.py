@@ -127,7 +127,10 @@ def actualize_current_games() -> list[int]:
 
     for game in Game.select():
         old_genres: list[str] = [genre.name for genre in game.get_genres()]
-        new_genres: list[str] = game_by_genres[game.name]
+        new_genres: list[str] = game_by_genres.get(game.name, [])
+        if not new_genres:
+            continue
+
         result: dict[ResultEnum, int] = game.set_genres(new_genres)
 
         if result[ResultEnum.ADDED] > 0 or result[ResultEnum.DELETED] > 0:

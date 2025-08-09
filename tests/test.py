@@ -353,7 +353,7 @@ class TestCaseDbLenta(ATestCaseDb):
     def test_get_day_by_games(self):
         now = datetime.now()
         year: int = now.year
-        day: str = now.strftime("%d/%m/%Y")
+        day: str = now.strftime("%d.%m.%Y")
 
         self.assertEqual(0, len(get_day_by_games(year)))
 

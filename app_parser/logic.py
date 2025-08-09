@@ -29,7 +29,7 @@ def get_game_info(game: int | Game) -> models.GameInfo:
         kind=game.kind,
         platform=game.platform.name,
         price=game.price,
-        append_date=game.append_date.strftime("%d/%m/%Y %H:%M:%S"),
+        append_date=game.append_date.strftime("%d.%m.%Y %H:%M:%S"),
         append_date_timestamp=int(game.append_date.timestamp()),
         genres=[genre.name for genre in game.get_genres()],
     )

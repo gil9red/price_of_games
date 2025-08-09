@@ -41,7 +41,7 @@ def get_day_by_games(year: int) -> dict[str, list[Game]]:
     day_by_games = defaultdict(list)
 
     for game in get_games_by_year(year):
-        day = game.append_date.strftime("%d/%m/%Y")
+        day = game.append_date.strftime("%d.%m.%Y")
         day_by_games[day].append(game)
 
     return day_by_games

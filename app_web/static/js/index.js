@@ -477,7 +477,7 @@ function createTags(
         getTagsFunc,
         tableEl,
         queryTag,
-        preprocessOptionsFunc = null,
+        preprocessOptionsFunc = null
 ) {
     let options = {
         whitelist: getTagsFunc(),

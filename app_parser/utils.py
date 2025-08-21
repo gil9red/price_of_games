@@ -6,6 +6,7 @@ __author__ = "ipetrash"
 
 import time
 import re
+import unicodedata
 
 from logging import Logger
 from dataclasses import dataclass
@@ -210,11 +211,21 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
     def clear_name(name: str) -> str:
         return re.sub(r"\W", "", name)
 
+    # SOURCE: https://stackoverflow.com/a/518232/5909792
+    def strip_accents(s: str) -> str:
+        return "".join(
+            c
+            for c in unicodedata.normalize("NFD", s)
+            if unicodedata.category(c) != "Mn"
+        )
+
     name_1 = clear_name(name_1)
     name_1 = remove_postfix(name_1)
+    name_1 = strip_accents(name_1)
 
     name_2 = clear_name(name_2)
     name_2 = remove_postfix(name_2)
+    name_2 = strip_accents(name_2)
 
     return name_1 == name_2
 
@@ -279,6 +290,12 @@ def get_price(
 
 
 if __name__ == "__main__":
+    assert smart_comparing_names("Half-Life 2", "Half-Life 2")
+    assert smart_comparing_names(
+        "Alone in the Dark: Illumination", " Alone in the dark  ILLUMINATION"
+    )
+    assert smart_comparing_names("Abzû", "ABZU")
+
     game_name = "Prodeus"
     print("steam:", steam_search_game_price_list(game_name))
     print("gog:", gog_search_game_price_list(game_name))

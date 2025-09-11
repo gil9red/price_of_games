@@ -207,6 +207,10 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
                 return text[: -len(postfix)]
         return text
 
+    # NOTE: Вызывать после clear_name
+    def remove_version(text: str) -> str:
+        return re.sub(r"v\d+", "", text)
+
     # Удаление символов кроме буквенных, цифр и _: "the witcher®3:___ вася! wild hunt" -> "thewitcher3___васяwildhunt"
     def clear_name(name: str) -> str:
         return re.sub(r"\W", "", name)
@@ -221,10 +225,12 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
 
     name_1 = clear_name(name_1)
     name_1 = remove_postfix(name_1)
+    name_1 = remove_version(name_1)
     name_1 = strip_accents(name_1)
 
     name_2 = clear_name(name_2)
     name_2 = remove_postfix(name_2)
+    name_2 = remove_version(name_2)
     name_2 = strip_accents(name_2)
 
     return name_1 == name_2
@@ -290,11 +296,16 @@ def get_price(
 
 
 if __name__ == "__main__":
+    # TODO: В тесты
     assert smart_comparing_names("Half-Life 2", "Half-Life 2")
     assert smart_comparing_names(
         "Alone in the Dark: Illumination", " Alone in the dark  ILLUMINATION"
     )
     assert smart_comparing_names("Abzû", "ABZU")
+    assert smart_comparing_names("Death Must Die", "Death Must Die v0.7")
+    assert smart_comparing_names("Magic Rune Stone v0.9.20", "Magic Rune Stone")
+
+    quit()
 
     game_name = "Prodeus"
     print("steam:", steam_search_game_price_list(game_name))

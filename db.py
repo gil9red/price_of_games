@@ -28,6 +28,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 
 from config import BACKUP_DIR_LIST, DB_FILE_NAME, DB_DIR_NAME
 from third_party.db_peewee_meta_model import MetaModel
+from third_party.ttl_cache import ttl_cache
 
 
 class NotDefinedParameterException(Exception):
@@ -118,6 +119,14 @@ class Genre(BaseModel):
     name = TextField(unique=True)
     description = TextField()
     aliases = TextField(default="")
+
+    # TODO: Немного неэффективно, но пока так
+    # TODO: Можно попробовать в BaseModel перекрыть методы типа get_by_id и get_or_none, добавив кэширование
+    #       Возможно, peewee внутри по другому работает с методами
+    @classmethod
+    @ttl_cache(ttl_seconds=5 * 60)
+    def get_from_cache(cls, genre_id: int) -> "Genre":
+        return cls.get_by_id(genre_id)
 
     @classmethod
     def get_by(cls, name: str) -> Optional["Genre"]:
@@ -214,7 +223,10 @@ class Game(BaseModel):
         return ResultEnum.ADDED, genre
 
     def get_genres(self) -> list[Genre]:
-        items: list[Genre] = [link.genre for link in self.links_to_genres]
+        items: list[Genre] = [
+            Genre.get_from_cache(link.genre_id)
+            for link in self.links_to_genres.select(Game2Genre.genre_id)
+        ]
         items.sort(key=lambda x: x.name)
         return items
 

@@ -10,7 +10,7 @@ import time
 import shutil
 
 from datetime import datetime
-from typing import Any, Callable, Type, Iterable, Optional, TypeVar
+from typing import Any, Callable, Type, Optional, TypeVar
 
 # pip install peewee
 from peewee import (
@@ -19,11 +19,9 @@ from peewee import (
     ForeignKeyField,
     DateTimeField,
     BooleanField,
-    CharField,
     IntegerField,
     fn,
 )
-from playhouse.shortcuts import model_to_dict
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from config import BACKUP_DIR_LIST, DB_FILE_NAME, DB_DIR_NAME
@@ -74,7 +72,7 @@ def create_trigger_before_delete(
     in_table: Type[Model],
     for_table_column_name: str,
     delete_from_table: Type[Model],
-    delete_from_table_column_name: str
+    delete_from_table_column_name: str,
 ):
     def get_table_db_name(model: Type[Model]) -> str:
         return model._meta.name

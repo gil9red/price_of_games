@@ -64,19 +64,18 @@ def get_games() -> list[Game]:
         except Exception:
             log_common.exception("Error:")
 
-    errors = []
+    errors: list[str] = []
     platforms = parse_played_games(content_gist, errors=errors)
     for error_text in errors:
         log_common.info(f"Отправка уведомления: {error_text!r}")
         add_notify(name="Цены игр", message=error_text)
 
-    items = []
+    items: list[Game] = []
     for platform, categories in platforms.items():
         for category, games in categories.items():
-            for game in games:
-                items.append(
-                    Game(name=game, platform=platform, kind=category)
-                )
+            for name in games:
+                game = Game(name=name, platform=platform, kind=category)
+                items.append(game)
 
     return items
 
@@ -93,7 +92,7 @@ def get_prepared_price(price: str) -> int:
 
 def steam_search_game_price_list(
     name: str,
-    log_common: Logger = None,
+    log_common: Logger | None = None,
 ) -> list[SearchResult]:
     """
     Функция принимает название игры, после ищет его в стиме и возвращает результат как список
@@ -128,7 +127,9 @@ def steam_search_game_price_list(
         game: str = div.select_one(".title").text.strip()
 
         # Ищем тег скидки, чтобы вытащить оригинальную цену, а не ту, что получилась со скидкой
-        price_el = div.select_one(".discount_original_price") or div.select_one(".discount_final_price")
+        price_el = div.select_one(".discount_original_price") or div.select_one(
+            ".discount_final_price"
+        )
 
         # Если цены нет (например, игра еще не продается)
         if not price_el:
@@ -161,7 +162,7 @@ def steam_search_game_price_list(
 
 def gog_search_game_price_list(
     name: str,
-    log_common: Logger = None
+    log_common: Logger | None = None,
 ) -> list[SearchResult]:
     """
     Функция принимает название игры, после ищет его в gog и возвращает результат как список
@@ -193,7 +194,7 @@ def gog_search_game_price_list(
 def smart_comparing_names(name_1: str, name_2: str) -> bool:
     """
     Функция для сравнивания двух названий игр.
-    Возвращает True, если совпадают, иначе -- False.
+    Возвращает True, если совпадают, иначе - False.
 
     """
 
@@ -257,8 +258,8 @@ def _search_price_from_game_price_list(
 
 def get_price(
     game_name: str,
-    log_common: Logger = None,
-    log_append_game: Logger = None,
+    log_common: Logger | None = None,
+    log_append_game: Logger | None = None,
 ) -> int | None:
     def _log_on_found_price(
         game_name: str,

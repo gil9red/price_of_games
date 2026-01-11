@@ -202,20 +202,6 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
     name_1 = name_1.lower()
     name_2 = name_2.lower()
 
-    def remove_postfix(text: str) -> str:
-        for postfix in ("dlc", "expansion"):
-            if text.endswith(postfix):
-                return text[: -len(postfix)]
-        return text
-
-    # NOTE: Вызывать после clear_name
-    def remove_version(text: str) -> str:
-        return re.sub(r"v\d+", "", text)
-
-    # Удаление символов кроме буквенных, цифр и _: "the witcher®3:___ вася! wild hunt" -> "thewitcher3___васяwildhunt"
-    def clear_name(name: str) -> str:
-        return re.sub(r"\W", "", name)
-
     # SOURCE: https://stackoverflow.com/a/518232/5909792
     def strip_accents(s: str) -> str:
         return "".join(
@@ -224,17 +210,28 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
             if unicodedata.category(c) != "Mn"
         )
 
-    name_1 = clear_name(name_1)
-    name_1 = remove_postfix(name_1)
-    name_1 = remove_version(name_1)
-    name_1 = strip_accents(name_1)
+    def process_name(name: str) -> str:
+        # Удаление символов кроме буквенных, цифр и _:
+        # "the witcher®3:___ вася! wild hunt" -> "thewitcher3___васяwildhunt"
+        name = re.sub(r"\W", "", name)
 
-    name_2 = clear_name(name_2)
-    name_2 = remove_postfix(name_2)
-    name_2 = remove_version(name_2)
-    name_2 = strip_accents(name_2)
+        # Удаление постфиксов
+        for postfix in (
+            "dlc",
+            "expansion",
+            "коллекционноеиздание",
+            "collectorsedition",
+        ):
+            name = name.removesuffix(postfix)
 
-    return name_1 == name_2
+        # Удаление версии
+        name = re.sub(r"v\d+", "", name)
+
+        name = strip_accents(name)
+
+        return name
+
+    return process_name(name_1) == process_name(name_2)
 
 
 def _search_price_from_game_price_list(
@@ -297,25 +294,32 @@ def get_price(
 
 
 if __name__ == "__main__":
-    # TODO: В тесты
-    assert smart_comparing_names("Half-Life 2", "Half-Life 2")
-    assert smart_comparing_names(
-        "Alone in the Dark: Illumination", " Alone in the dark  ILLUMINATION"
-    )
-    assert smart_comparing_names("Abzû", "ABZU")
-    assert smart_comparing_names("Death Must Die", "Death Must Die v0.7")
-    assert smart_comparing_names("Magic Rune Stone v0.9.20", "Magic Rune Stone")
+    for name_1, name_2 in [
+        ("Half-Life 2", "Half-Life 2"),
+        ("Alone in the Dark: Illumination", " Alone in the dark  ILLUMINATION"),
+        ("Abzû", "ABZU"),
+        ("Death Must Die", "Death Must Die v0.7"),
+        ("Magic Rune Stone v0.9.20", "Magic Rune Stone"),
+        ("Final Fantasy XV: Ardyn (DLC)", "Final Fantasy XV: Ardyn"),
+        (
+            "Nightmares from the Deep: The Cursed Heart (Collector's Edition)",
+            "Nightmares from the Deep: The Cursed Heart",
+        ),
+        (
+            "Nightmares from the Deep: The Cursed Heart (Коллекционное издание)",
+            "Nightmares from the Deep: The Cursed Heart",
+        ),
+    ]:
+        assert smart_comparing_names(name_1, name_2), f"{name_1!r} != {name_2!r}"
 
-    quit()
-
-    game_name = "Prodeus"
-    print("steam:", steam_search_game_price_list(game_name))
-    print("gog:", gog_search_game_price_list(game_name))
-    print(get_price(game_name))
-
-    print()
-
-    game_name = "Alone in the Dark: Illumination"
-    print("steam:", steam_search_game_price_list(game_name))
-    print("gog:", gog_search_game_price_list(game_name))
-    print(get_price(game_name))
+    # game_name = "Prodeus"
+    # print("steam:", steam_search_game_price_list(game_name))
+    # print("gog:", gog_search_game_price_list(game_name))
+    # print(get_price(game_name))
+    #
+    # print()
+    #
+    # game_name = "Alone in the Dark: Illumination"
+    # print("steam:", steam_search_game_price_list(game_name))
+    # print("gog:", gog_search_game_price_list(game_name))
+    # print(get_price(game_name))

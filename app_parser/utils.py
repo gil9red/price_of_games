@@ -211,17 +211,19 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
         )
 
     def process_name(name: str) -> str:
+        name = re.sub(
+            r"(\w+('\w+)?)\s+(Edition|Издание)",
+            "",
+            name,
+            flags=re.IGNORECASE,
+        )
+
         # Удаление символов кроме буквенных, цифр и _:
         # "the witcher®3:___ вася! wild hunt" -> "thewitcher3___васяwildhunt"
         name = re.sub(r"\W", "", name)
 
         # Удаление постфиксов
-        for postfix in (
-            "dlc",
-            "expansion",
-            "коллекционноеиздание",
-            "collectorsedition",
-        ):
+        for postfix in ("dlc", "expansion"):
             name = name.removesuffix(postfix)
 
         # Удаление версии
@@ -308,6 +310,32 @@ if __name__ == "__main__":
         (
             "Nightmares from the Deep: The Cursed Heart (Коллекционное издание)",
             "Nightmares from the Deep: The Cursed Heart",
+        ),
+        ("Divinity: Original Sin - Enhanced Edition", "Divinity: Original Sin"),
+        ("Divinity: Original Sin 2 - Definitive Edition", "Divinity: Original Sin 2"),
+        ("DUSK '82: ULTIMATE EDITION", "DUSK '82"),
+        ("Mass Effect: Legendary Edition", "Mass Effect"),
+        ("Mass Effect 2: Legendary Edition - Genesis (DLC)", "Mass Effect 2: Genesis"),
+        ("Icewind Dale: Enhanced Edition", "Icewind Dale"),
+        (
+            "Icewind Dale: Enhanced Edition - Heart of Winter (DLC)",
+            "Icewind Dale - Heart of Winter",
+        ),
+        ("The Secret of Monkey Island: Special Edition", "The Secret of Monkey Island"),
+        (
+            "Monkey Island 2 Special Edition: LeChuck's Revenge",
+            "Monkey Island 2: LeChuck's Revenge",
+        ),
+        ("Doom 3: BFG Edition", "Doom 3"),
+        ("Killer is Dead: Nightmare Edition", "Killer is Dead"),
+        ("Titan Quest Anniversary Edition", "Titan Quest"),
+        (
+            "Нашёптанные секреты: Маскарад отравителя Коллекционное издание",
+            "Нашёптанные секреты: Маскарад отравителя",
+        ),
+        (  # NOTE: Алгоритм убирает одно слово вместе с словом "Edition"
+            "Frog Fractions: Game of the Decade Edition",
+            "Frog Fractions: Game of the",
         ),
     ]:
         assert smart_comparing_names(name_1, name_2), f"{name_1!r} != {name_2!r}"

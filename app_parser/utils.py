@@ -209,7 +209,8 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
     def to_roman(n: int) -> str:
         # Диапазон чисел от 1..4999
         if not (0 < n < 5000):
-            return str(n)  # NOTE: Не валидная ситуация, но для текущего сценария это нормально
+            # NOTE: Не валидная ситуация, но для текущего сценария это нормально
+            return str(n)
 
         result: str = ""
         for numeral, integer in (
@@ -262,6 +263,7 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
         return name.lower()
 
     if "/" in name_1 or "/" in name_2:
+
         def _get_names(name: str) -> list[str]:
             return name.strip("/").split("/")
 

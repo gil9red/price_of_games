@@ -432,7 +432,7 @@ def get_games():
     return jsonify(data)
 
 
-@app.route("/api/search/<text>")
+@app.route("/api/search/<path:text>")
 def get_api_search(text: str):
     """
     Функция для возврата списка игр по названию.

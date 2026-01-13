@@ -261,6 +261,15 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
 
         return name.lower()
 
+    if "/" in name_1 or "/" in name_2:
+        def _get_names(name: str) -> list[str]:
+            return name.strip("/").split("/")
+
+        for part_name_1 in _get_names(name_1):
+            for part_name_2 in _get_names(name_2):
+                if process_name(part_name_1) == process_name(part_name_2):
+                    return True
+
     return process_name(name_1) == process_name(name_2)
 
 

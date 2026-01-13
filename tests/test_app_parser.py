@@ -58,8 +58,11 @@ class TestCaseUtils(unittest.TestCase):
                 "Нашёптанные секреты: Маскарад отравителя Коллекционное издание",
                 "Нашёптанные секреты: Маскарад отравителя",
             ),
+            ("Breath of Fire III", "Breath of Fire 3"),
+            ("Breath of Fire 3", "Breath of Fire III"),
             ("Final Fantasy 9", "Final Fantasy IX"),
             ("Final Fantasy XV", "Final Fantasy 15"),
+            ("NieR Replicant ver.1.22474487139...", "NieR Replicant ver.1.22474487139..."),
             (  # NOTE: Алгоритм убирает одно слово вместе со словом "Edition"
                 "Frog Fractions: Game of the Decade Edition",
                 "Frog Fractions: Game of the",
@@ -68,42 +71,42 @@ class TestCaseUtils(unittest.TestCase):
                 "Whispered Secrets: Poisoner's Masquerade Collector's Edition / Нашёптанные секреты: Маскарад отравителя Коллекционное издание",
                 "Whispered Secrets: Poisoner's Masquerade Collector's Edition / Нашёптанные секреты: Маскарад отравителя Коллекционное издание",
             ),
-            # (
-            #     "Нашёптанные секреты: Маскарад отравителя Коллекционное издание / Whispered Secrets: Poisoner's Masquerade Collector's Edition",
-            #     "Whispered Secrets: Poisoner's Masquerade Collector's Edition / Нашёптанные секреты: Маскарад отравителя Коллекционное издание",
-            # ),
-            # (
-            #     "Whispered Secrets: Poisoner's Masquerade Collector's Edition",
-            #     "Whispered Secrets: Poisoner's Masquerade Collector's Edition / Нашёптанные секреты: Маскарад отравителя Коллекционное издание",
-            # ),
-            # (
-            #     "Whispered Secrets: Poisoner's Masquerade Collector's Edition",
-            #     "Whispered Secrets: Poisoner's Masquerade / Нашёптанные секреты: Маскарад отравителя",
-            # ),
-            # (
-            #     "Whispered Secrets: Poisoner's Masquerade",
-            #     "Whispered Secrets: Poisoner's Masquerade Collector's Edition / Нашёптанные секреты: Маскарад отравителя Коллекционное издание",
-            # ),
-            # (
-            #     "Whispered Secrets: Poisoner's Masquerade Collector's Edition / Нашёптанные секреты: Маскарад отравителя Коллекционное издание",
-            #     "Whispered Secrets: Poisoner's Masquerade",
-            # ),
-            # (
-            #     "Нашёптанные секреты: Маскарад отравителя Коллекционное издание",
-            #     "Whispered Secrets: Poisoner's Masquerade Collector's Edition / Нашёптанные секреты: Маскарад отравителя Коллекционное издание",
-            # ),
-            # (
-            #     "Нашёптанные секреты: Маскарад отравителя",
-            #     "Whispered Secrets: Poisoner's Masquerade / Нашёптанные секреты: Маскарад отравителя",
-            # ),
-            # (
-            #     "Нашёптанные секреты: Маскарад отравителя",
-            #     "Whispered Secrets: Poisoner's Masquerade Collector's Edition / Нашёптанные секреты: Маскарад отравителя Коллекционное издание",
-            # ),
-            # (
-            #     "Whispered Secrets: Poisoner's Masquerade Collector's Edition / Нашёптанные секреты: Маскарад отравителя Коллекционное издание",
-            #     "Нашёптанные секреты: Маскарад отравителя",
-            # ),
+            (
+                "Нашёптанные секреты: Маскарад отравителя Коллекционное издание / Whispered Secrets: Poisoner's Masquerade Collector's Edition",
+                "Whispered Secrets: Poisoner's Masquerade Collector's Edition / Нашёптанные секреты: Маскарад отравителя Коллекционное издание",
+            ),
+            (
+                "Whispered Secrets: Poisoner's Masquerade Collector's Edition",
+                "Whispered Secrets: Poisoner's Masquerade Collector's Edition / Нашёптанные секреты: Маскарад отравителя Коллекционное издание",
+            ),
+            (
+                "Whispered Secrets: Poisoner's Masquerade Collector's Edition",
+                "Whispered Secrets: Poisoner's Masquerade / Нашёптанные секреты: Маскарад отравителя",
+            ),
+            (
+                "Whispered Secrets: Poisoner's Masquerade",
+                "Whispered Secrets: Poisoner's Masquerade Collector's Edition / Нашёптанные секреты: Маскарад отравителя Коллекционное издание",
+            ),
+            (
+                "Whispered Secrets: Poisoner's Masquerade Collector's Edition / Нашёптанные секреты: Маскарад отравителя Коллекционное издание",
+                "Whispered Secrets: Poisoner's Masquerade",
+            ),
+            (
+                "Нашёптанные секреты: Маскарад отравителя Коллекционное издание",
+                "Whispered Secrets: Poisoner's Masquerade Collector's Edition / Нашёптанные секреты: Маскарад отравителя Коллекционное издание",
+            ),
+            (
+                "Нашёптанные секреты: Маскарад отравителя",
+                "Whispered Secrets: Poisoner's Masquerade / Нашёптанные секреты: Маскарад отравителя",
+            ),
+            (
+                "Нашёптанные секреты: Маскарад отравителя",
+                "Whispered Secrets: Poisoner's Masquerade Collector's Edition / Нашёптанные секреты: Маскарад отравителя Коллекционное издание",
+            ),
+            (
+                "Whispered Secrets: Poisoner's Masquerade Collector's Edition / Нашёптанные секреты: Маскарад отравителя Коллекционное издание",
+                "Нашёптанные секреты: Маскарад отравителя",
+            ),
         ]:
             with self.subTest(name_1=name_1, name_2=name_2):
                 self.assertTrue(

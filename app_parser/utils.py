@@ -198,10 +198,6 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
 
     """
 
-    # Приведение строк к одному регистру
-    name_1 = name_1.lower()
-    name_2 = name_2.lower()
-
     # SOURCE: https://stackoverflow.com/a/518232/5909792
     def strip_accents(s: str) -> str:
         return "".join(
@@ -210,7 +206,32 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
             if unicodedata.category(c) != "Mn"
         )
 
+    def to_roman(n: int) -> str:
+        result = ""
+        for numeral, integer in (
+                ("M", 1000),
+                ("CM", 900),
+                ("D", 500),
+                ("CD", 400),
+                ("C", 100),
+                ("XC", 90),
+                ("L", 50),
+                ("XL", 40),
+                ("X", 10),
+                ("IX", 9),
+                ("V", 5),
+                ("IV", 4),
+                ("I", 1),
+        ):
+            while n >= integer:
+                result += numeral
+                n -= integer
+        return result
+
     def process_name(name: str) -> str:
+        # Приведение к одному регистру
+        name = name.lower()
+
         name = re.sub(
             r"(\w+('\w+)?)\s+(Edition|Издание)",
             "",
@@ -229,9 +250,12 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
         # Удаление версии
         name = re.sub(r"v\d+", "", name)
 
+        # Замена арабских цифр на римские для более точного сравнения
+        name = re.sub(r"\d+", lambda m: to_roman(int(m.group())), name)
+
         name = strip_accents(name)
 
-        return name
+        return name.lower()
 
     return process_name(name_1) == process_name(name_2)
 
@@ -333,6 +357,8 @@ if __name__ == "__main__":
             "Нашёптанные секреты: Маскарад отравителя Коллекционное издание",
             "Нашёптанные секреты: Маскарад отравителя",
         ),
+        ("Final Fantasy 9", "Final Fantasy IX"),
+        ("Final Fantasy XV", "Final Fantasy 15"),
         (  # NOTE: Алгоритм убирает одно слово вместе с словом "Edition"
             "Frog Fractions: Game of the Decade Edition",
             "Frog Fractions: Game of the",

@@ -207,7 +207,11 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
         )
 
     def to_roman(n: int) -> str:
-        result = ""
+        # Диапазон чисел от 1..4999
+        if not (0 < n < 5000):
+            return str(n)  # NOTE: Не валидная ситуация, но для текущего сценария это нормально
+
+        result: str = ""
         for numeral, integer in (
             ("M", 1000),
             ("CM", 900),

@@ -439,7 +439,7 @@ def get_api_search(text: str):
 
     """
 
-    log.debug("Call get_api_search")
+    log.debug(f"Call get_api_search(text={text!r})")
 
     items = logic.search(text)
     log.debug(f"Found: {len(items)}")

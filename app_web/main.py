@@ -47,7 +47,7 @@ KIND_BY_TITLE: dict[str, str] = {
 def prepare_response(
     status: StatusEnum,
     text: str,
-    result: None | list[models.GameInfo]
+    result: None | list[models.GameInfo],
 ) -> dict:
     return {
         "status": status,
@@ -63,7 +63,6 @@ def index():
 
     return render_template(
         "index.html",
-
         # Parameters to template
         last_run_date=Settings.get_value("last_run_date"),
         db_file_name=config.DB_FILE_NAME,

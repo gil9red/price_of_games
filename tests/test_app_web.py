@@ -322,10 +322,7 @@ class TestCaseDbLenta(ATestCaseDb):
     def create_games() -> list[Game]:
         kind = FINISHED_GAME
         platform = Platform.add("PC")
-        games: list[Game] = [
-            Game.add(f"game_{i}", platform, kind)
-            for i in range(5)
-        ]
+        games: list[Game] = [Game.add(f"game_{i}", platform, kind) for i in range(5)]
         games.sort(key=lambda obj: obj.append_date, reverse=True)
 
         return games

@@ -19,6 +19,12 @@ class TestCaseUtils(unittest.TestCase):
             ("Death Must Die", "Death Must Die v0.7"),
             ("Magic Rune Stone v0.9.20", "Magic Rune Stone"),
             ("Final Fantasy XV: Ardyn (DLC)", "Final Fantasy XV: Ardyn"),
+            ("Silent Hill: Alchemilla (MOD)", "Silent Hill: Alchemilla"),
+            ("Final Fantasy III (Remake)", "Final Fantasy III (Pixel Remaster)"),
+            ("Final Fantasy III (Remake)", "Final Fantasy III"),
+            ("Final Fantasy III (Pixel Remaster)", "Final Fantasy III"),
+            ("Alone in the Dark (2008)", "Alone in the Dark (2024)"),
+            ("Alone in the Dark (2008)", "Alone in the Dark"),
             (
                 "Nightmares from the Deep: The Cursed Heart (Collector's Edition)",
                 "Nightmares from the Deep: The Cursed Heart",
@@ -71,6 +77,14 @@ class TestCaseUtils(unittest.TestCase):
                 "Frog Fractions: Game of the",
             ),
             (
+                "Nightmares from the Deep 3: Davy Jones (Collector's Edition)",
+                "Nightmares from the Deep 3: Davy Jones Collector's Edition",
+            ),
+            (
+                "Nightmares from the Deep 3: Davy Jones (Collector’s Edition)",
+                "Nightmares from the Deep 3: Davy Jones (Collector's Edition)",
+            ),
+            (
                 "Whispered Secrets: Poisoner's Masquerade Collector's Edition / Нашёптанные секреты: Маскарад отравителя Коллекционное издание",
                 "Whispered Secrets: Poisoner's Masquerade Collector's Edition / Нашёптанные секреты: Маскарад отравителя Коллекционное издание",
             ),
@@ -113,6 +127,18 @@ class TestCaseUtils(unittest.TestCase):
         ]:
             with self.subTest(name_1=name_1, name_2=name_2):
                 self.assertTrue(
+                    smart_comparing_names(name_1, name_2),
+                    f"{name_1!r} != {name_2!r}",
+                )
+
+    def test_smart_comparing_names_false(self):
+        for name_1, name_2 in [
+            ("Half-Life 2", "ABZU"),
+            ("Alone in the Dark: Illumination", "Half-Life 2"),
+            ("Abzû", "Alone in the dark  ILLUMINATION"),
+        ]:
+            with self.subTest(name_1=name_1, name_2=name_2):
+                self.assertFalse(
                     smart_comparing_names(name_1, name_2),
                     f"{name_1!r} != {name_2!r}",
                 )

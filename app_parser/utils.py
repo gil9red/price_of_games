@@ -237,8 +237,18 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
         # Приведение к одному регистру
         name = name.lower()
 
+        # Удаление всех символов, кроме буквенных, цифр, круглых скобок, пробелов, табуляций и переводов строк
+        name = re.sub(r"[^\w\s()]+", "", name)
+
+        # Удаление скобок и их содержимого:
+        # "XXX (Full Edition)" -> "XXX"
+        # "XXX (DLC)" -> "XXX"
+        # "XXX (2015)" -> "XXX"
+        name = re.sub(r"\(.+?\)", "", name)
+
+        # Удаление постфиксов "XXX Edition" и "XXX Издание"
         name = re.sub(
-            r"(\w+('\w+)?)\s+(Edition|Издание)",
+            r"\w+\s*(Edition|Издание)",
             "",
             name,
             flags=re.IGNORECASE,
@@ -246,11 +256,7 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
 
         # Удаление символов кроме буквенных, цифр и _:
         # "the witcher®3:___ вася! wild hunt" -> "thewitcher3___васяwildhunt"
-        name = re.sub(r"\W", "", name)
-
-        # Удаление постфиксов
-        for postfix in ("dlc", "expansion"):
-            name = name.removesuffix(postfix)
+        name = re.sub(r"\W+", "", name)
 
         # Удаление версии
         name = re.sub(r"v\d+", "", name)

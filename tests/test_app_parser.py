@@ -72,6 +72,18 @@ class TestCaseUtils(unittest.TestCase):
                 "NieR Replicant ver.1.22474487139...",
                 "NieR Replicant ver.1.22474487139...",
             ),
+            (
+                "Titan Quest: The Immortal Throne (DLC)",
+                "The Titan Quest: The Immortal Throne (DLC)",
+            ),
+            (
+                "Titan Quest: The Immortal Throne, The (DLC)",
+                "Titan Quest: The Immortal Throne (DLC)",
+            ),
+            (
+                "The Titan Quest: The Immortal Throne (DLC)",
+                "Titan Quest: The Immortal Throne, The (DLC)",
+            ),
             (  # NOTE: Алгоритм убирает одно слово вместе со словом "Edition"
                 "Frog Fractions: Game of the Decade Edition",
                 "Frog Fractions: Game of the",

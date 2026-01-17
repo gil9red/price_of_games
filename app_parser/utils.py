@@ -246,13 +246,11 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
         # "XXX (2015)" -> "XXX"
         name = re.sub(r"\(.+?\)", "", name)
 
+        # Удаление The
+        name = re.sub(r"\bThe\b", "", name, flags=re.IGNORECASE)
+
         # Удаление постфиксов "XXX Edition" и "XXX Издание"
-        name = re.sub(
-            r"\w+\s*(Edition|Издание)",
-            "",
-            name,
-            flags=re.IGNORECASE,
-        )
+        name = re.sub(r"\w+\s*(Edition|Издание)", "", name, flags=re.IGNORECASE)
 
         # Удаление символов кроме буквенных, цифр и _:
         # "the witcher®3:___ вася! wild hunt" -> "thewitcher3___васяwildhunt"

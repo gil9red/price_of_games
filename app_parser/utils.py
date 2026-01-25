@@ -234,6 +234,9 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
         return result
 
     def process_name(name: str) -> str:
+        # Замена & на and
+        name = name.replace("&", "and")
+
         # Приведение к одному регистру
         name = name.lower()
 

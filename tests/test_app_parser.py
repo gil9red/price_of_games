@@ -68,6 +68,7 @@ class TestCaseUtils(unittest.TestCase):
             ("Breath of Fire 3", "Breath of Fire III"),
             ("Final Fantasy 9", "Final Fantasy IX"),
             ("Final Fantasy XV", "Final Fantasy 15"),
+            ("Might and Magic: Heroes VI", "Might & Magic: Heroes VI"),
             (
                 "NieR Replicant ver.1.22474487139...",
                 "NieR Replicant ver.1.22474487139...",

@@ -201,7 +201,7 @@ def delete_game(game: Game):
         raise WebUserAlertException(error_text)
 
 
-def set_checked_price_of_game(game_name: str, check=True):
+def set_checked_price_of_game(game_name: str, check: bool = True):
     game_name = game_name.strip()
 
     for game in Game.select().where(Game.name == game_name):
@@ -330,8 +330,8 @@ def check_and_fill_price_of_game(
                 f"из базы, взяв ее из аналога c id={other_id} в категории {other_kind!r}"
             )
 
-            # Отметим что игра искалась в стиме (чтобы она не искалась в нем, если будет вызвана проверка)
-            set_checked_price_of_game(game_name)
+            # Отметим, что игра искалась (чтобы она не искалась в нем, если будет вызвана проверка)
+            set_checked_price_of_game(game_name, check=True)
 
             log_common.info(f"Нашли игру: {game_name!r} -> {other_price}")
             log_append_game.info(f"Нашли игру: {game_name!r} -> {other_price}")
@@ -345,8 +345,8 @@ def check_and_fill_price_of_game(
     # Поищем игру и ее цену в стиме/gog
     other_price = get_price_game(game_name, log_common, log_append_game)
 
-    # Отметим что игра искалась
-    set_checked_price_of_game(game_name)
+    # Отметим, что игра искалась
+    set_checked_price_of_game(game_name, check=True)
 
     if other_price is None:
         log_common.info(
@@ -368,8 +368,6 @@ def check_and_fill_price_of_game(
 def fill_price_of_games():
     """
     Функция проходит по играм в базе без указанной цены, пытается найти цены и если удачно, обновляет значение.
-
-    Сайтом для поиска цен является стим.
 
     """
 
@@ -398,7 +396,7 @@ def fill_price_of_games():
             time.sleep(3)
         else:
             # Отмечаем, что игру искать не нужно
-            set_checked_price_of_game(game.name)
+            set_checked_price_of_game(game.name, check=True)
 
 
 if __name__ == "__main__":

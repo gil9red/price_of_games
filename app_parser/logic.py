@@ -412,41 +412,6 @@ def fill_price_of_games():
 
 
 if __name__ == "__main__":
-
-    import concurrent.futures
-    import threading
-
-    from datetime import datetime
-
-    items = ["Tales of the Moon","Tales of ARISE","Tales of Berseria Remastered","Легенды Сейкю","Tales of Xillia Remastered","Tales of Zestiria","Tales of Berseria™","Tales Of Glory","Tales of Berseria™ - Tales of Legacy Bundle","Tales of Symphonia","Tales of Maj'Eyal","The Last Spell - Tales of Torment","Tales of Graces f Remastered","Tales of Escape","Tales of Autumn","Tales of Lyfael","Tales of Lagoona","Tales of Isenberg","Tales of Terror","Tales of Yore","Tales of Virginia","Tales of Fablecraft","Tales of Destruction","Tales of Novariel","Tales of Cosmos","Tales of Fire","Tales of Agaris","Tales of Fearless","Tales of Morrow","Tales Of Shadowland","Tales of War","Tales of Terrarum","Tales of Landor","Tales of ARISE - Tales of Series Battle BGM Pack","Tales of Old: Dominus","The Tales of Bayun","Tales of Rein Ravine","神灵石之劫 Tales of Spark","Tales of the Mirror","Tales of Vesperia: Definitive Edition","Tales of Spark: Probation","Tales of the Forgotten","Tales of the Elements","Tales of Maana: Lucy","冒险村传说（Tales of Legends）","Tales of the Neon Sea","Tales of the Lumminai","鸿源战纪 - Tales of Hongyuan","Tales of a Spymaster","Tales of Tomorrow: Experiment","Tales of the Black Forest","Tales of the Tavern","Tales of Valkyrie","Tales of Mathasia","Tales of Zestiria - Adventure Items","Tales Of Polygonia","TalesOfVengeance","Tales of Vaalundr","Tales of Farhollow","Tales of Lazo","Tales of Grimace","Tales of Arcrath","Tales of Mahabharata","Tales of Legendary Lust: Aphrodisia","Where Winds Meet","AIRHEART - Tales of broken Wings","Tales Of Glory 2 - Retaliation","Tales of Zestiria - Attachments Set"]
-
-
-    def task(game: str):
-        """A sample I/O-bound task (e.g., a network request or file read)."""
-        print(f"Task {game!r}: started by thread {threading.current_thread().name}", flush=True)
-        rs = search(game)
-        print(f"Task {game!r}: finished", rs, flush=True)
-        return rs
-
-
-    dt = datetime.now()
-    print(dt)
-
-    # items = ['Tales of Vesperia: Definitive Edition']
-
-    # Use ThreadPoolExecutor to run the tasks concurrently
-    with concurrent.futures.ThreadPoolExecutor(max_workers=200) as executor:
-        # The .map() method applies the function 'task' to each item in 'data'
-        results = executor.map(task, items)
-
-    # Results are returned in the order of the original input list
-    print("Results:", list(results))
-
-    print(datetime.now() - dt, datetime.now())
-    # 0:01:49.045501 2026-02-20 20:54:09.877335
-
-    quit()
-
     from peewee import fn
 
     # Вывести счетчик игр

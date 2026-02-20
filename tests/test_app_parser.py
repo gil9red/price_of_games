@@ -137,6 +137,10 @@ class TestCaseUtils(unittest.TestCase):
                 "Whispered Secrets: Poisoner's Masquerade Collector's Edition / Нашёптанные секреты: Маскарад отравителя Коллекционное издание",
                 "Нашёптанные секреты: Маскарад отравителя",
             ),
+            (
+                "Outlast: Whistleblower (DLC)",
+                "Outlast: Whistleblower DLC",
+            ),
         ]:
             with self.subTest(name_1=name_1, name_2=name_2):
                 self.assertTrue(

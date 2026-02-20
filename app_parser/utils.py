@@ -240,6 +240,8 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
         # Приведение к одному регистру
         name = name.lower()
 
+        name = name.removesuffix(" dlc")
+
         # Удаление всех символов, кроме буквенных, цифр, круглых скобок, пробелов, табуляций и переводов строк
         name = re.sub(r"[^\w\s()]+", "", name)
 

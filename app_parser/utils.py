@@ -311,7 +311,7 @@ def get_price(
     def _log_on_found_price(
         game_name: str,
         result: SearchResult,
-    ):
+    ) -> None:
         log_common and log_common.info(
             f"Нашли игру: {game_name!r} ({result.name}) -> {result.price}"
         )

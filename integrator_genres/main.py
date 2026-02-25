@@ -65,7 +65,7 @@ def process_game(game: Game, genres: list[str]) -> list[ResultEnum]:
     return results
 
 
-def fill_genres():
+def fill_genres() -> None:
     log.info("Запуск заполнения жанров")
 
     result_by_number: dict[ResultEnum, int] = get_empty_result_by_number()
@@ -143,7 +143,7 @@ def actualize_current_games() -> list[int]:
     return ids
 
 
-def run():
+def run() -> None:
     fill_genres()
     actualize_current_games()
 

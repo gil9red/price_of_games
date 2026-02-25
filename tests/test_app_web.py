@@ -32,19 +32,19 @@ from app_web.lenta import (
 
 # NOTE: https://docs.peewee-orm.com/en/latest/peewee/database.html#testing-peewee-applications
 class ATestCaseDb(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.models = BaseModel.get_inherited_models()
         self.test_db = SqliteDatabase(":memory:")
         self.test_db.bind(self.models, bind_refs=False, bind_backrefs=False)
         self.test_db.connect()
         self.test_db.create_tables(self.models)
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         db.bind(self.models, bind_refs=False, bind_backrefs=False)
 
 
 class TestCaseDb(ATestCaseDb):
-    def test_platform(self):
+    def test_platform(self) -> None:
         with self.subTest("cls.count"):
             self.assertEqual(0, Platform.count())
 
@@ -65,7 +65,7 @@ class TestCaseDb(ATestCaseDb):
 
             self.assertEqual(len(names), Platform.count())
 
-    def test_game(self):
+    def test_game(self) -> None:
         with self.subTest("cls.count"):
             self.assertEqual(0, Game.count())
 
@@ -222,7 +222,7 @@ class TestCaseDb(ATestCaseDb):
 
             self.assertEqual(len(items), len(Game.get_games_without_genres()))
 
-    def test_genre(self):
+    def test_genre(self) -> None:
         with self.subTest("cls.count"):
             self.assertEqual(0, Genre.count())
 
@@ -261,7 +261,7 @@ class TestCaseDb(ATestCaseDb):
                 self.assertIsNotNone(Genre.get_by(name=name))
                 self.assertEqual(name, Genre.get_by(name=name).name)
 
-    def test_game2genre(self):
+    def test_game2genre(self) -> None:
         with self.subTest("cls.count"):
             self.assertEqual(0, Game2Genre.count())
 
@@ -292,7 +292,7 @@ class TestCaseDb(ATestCaseDb):
             self.assertEqual(len(games), len(genre_games))
             self.assertEqual(games, genre_games)
 
-    def test_settings(self):
+    def test_settings(self) -> None:
         with self.subTest("cls.count"):
             self.assertEqual(0, Settings.count())
 
@@ -327,7 +327,7 @@ class TestCaseDbLenta(ATestCaseDb):
 
         return games
 
-    def test_get_games(self):
+    def test_get_games(self) -> None:
         self.assertEqual(0, len(get_games()))
 
         games: list[Game] = self.create_games()
@@ -335,7 +335,7 @@ class TestCaseDbLenta(ATestCaseDb):
         self.assertEqual(len(games), len(actual))
         self.assertEqual(games, actual)
 
-    def test_get_games_by_year(self):
+    def test_get_games_by_year(self) -> None:
         year = datetime.now().year
 
         self.assertEqual(0, len(get_games_by_year(year)))
@@ -347,7 +347,7 @@ class TestCaseDbLenta(ATestCaseDb):
 
         self.assertEqual(0, len(get_games_by_year(year - 1)))
 
-    def test_get_day_by_games(self):
+    def test_get_day_by_games(self) -> None:
         now = datetime.now()
         year: int = now.year
         day: str = now.strftime("%d.%m.%Y")
@@ -358,7 +358,7 @@ class TestCaseDbLenta(ATestCaseDb):
         actual: dict[str, list[Game]] = get_day_by_games(year)
         self.assertEqual({day: games}, actual)
 
-    def test_get_year_by_number(self):
+    def test_get_year_by_number(self) -> None:
         year = datetime.now().year
 
         self.assertEqual(0, len(get_year_by_number()))
@@ -367,7 +367,7 @@ class TestCaseDbLenta(ATestCaseDb):
         actual: list[tuple[int, int]] = get_year_by_number()
         self.assertEqual([(year, len(games))], actual)
 
-    def test_get_platforms(self):
+    def test_get_platforms(self) -> None:
         self.assertEqual(0, len(get_platforms()))
 
         items: list[str] = ["PS1", "PS2", "Android", "PC"]

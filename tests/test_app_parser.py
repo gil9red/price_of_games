@@ -11,7 +11,7 @@ from app_parser.utils import smart_comparing_names
 
 
 class TestCaseUtils(unittest.TestCase):
-    def test_smart_comparing_names(self):
+    def test_smart_comparing_names(self) -> None:
         for name_1, name_2 in [
             ("Half-Life 2", "Half-Life 2"),
             ("Alone in the Dark: Illumination", " Alone in the dark  ILLUMINATION"),
@@ -148,7 +148,7 @@ class TestCaseUtils(unittest.TestCase):
                     f"{name_1!r} != {name_2!r}",
                 )
 
-    def test_smart_comparing_names_false(self):
+    def test_smart_comparing_names_false(self) -> None:
         for name_1, name_2 in [
             ("Half-Life 2", "ABZU"),
             ("Alone in the Dark: Illumination", "Half-Life 2"),

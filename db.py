@@ -30,7 +30,7 @@ from third_party.ttl_cache import ttl_cache
 
 
 class NotDefinedParameterException(Exception):
-    def __init__(self, parameter_name: str):
+    def __init__(self, parameter_name: str) -> None:
         self.parameter_name = parameter_name
         text = f'Parameter "{self.parameter_name}" must be defined!'
 
@@ -44,7 +44,7 @@ class ResultEnum(enum.Enum):
     DELETED = enum.auto()
 
 
-def db_create_backup(log: logging.Logger):
+def db_create_backup(log: logging.Logger) -> None:
     for path in BACKUP_DIR_LIST:
         zip_name = path / f"{datetime.today().date()}.sqlite"
 
@@ -73,7 +73,7 @@ def create_trigger_before_delete(
     for_table_column_name: str,
     delete_from_table: Type[Model],
     delete_from_table_column_name: str,
-):
+) -> None:
     def get_table_db_name(model: Type[Model]) -> str:
         return model._meta.name
 
@@ -203,7 +203,7 @@ class Game(BaseModel):
 
         return obj
 
-    def set_price(self, value: int):
+    def set_price(self, value: int) -> None:
         self.price = value
         self.modify_price_date = datetime.now()
         self.save()
@@ -281,7 +281,7 @@ class Settings(BaseModel):
     value = TextField()
 
     @classmethod
-    def set_value(cls, key: str, value: Any):
+    def set_value(cls, key: str, value: Any) -> None:
         obj = cls.get_or_none(key=key)
         if obj:
             if cls.get_value(key) != value:
@@ -308,7 +308,7 @@ class Settings(BaseModel):
         return value
 
     @classmethod
-    def remove_value(cls, key: str):
+    def remove_value(cls, key: str) -> None:
         obj = cls.get_or_none(key=key)
         if obj:
             obj.delete_instance()

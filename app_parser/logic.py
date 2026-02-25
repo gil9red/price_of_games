@@ -203,7 +203,7 @@ def delete_game(game: Game):
         raise WebUserAlertException(error_text)
 
 
-def set_checked_price_of_game(game_name: str, check: bool = True):
+def set_checked_price_of_game(game_name: str, check: bool = True) -> None:
     game_name = game_name.strip()
 
     for game in Game.select().where(Game.name == game_name):
@@ -377,7 +377,7 @@ def check_and_fill_price_of_game(
     )
 
 
-def fill_price_of_games():
+def fill_price_of_games() -> None:
     """
     Функция проходит по играм в базе без указанной цены, пытается найти цены и если удачно, обновляет значение.
 

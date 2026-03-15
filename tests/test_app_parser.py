@@ -5,6 +5,7 @@ __author__ = "ipetrash"
 
 
 import unittest
+from inspect import cleandoc
 
 # TODO: Другие модули
 from app_parser.utils import smart_comparing_names
@@ -164,16 +165,17 @@ class TestCaseUtils(unittest.TestCase):
 
 class TestCaseThirdParty(unittest.TestCase):
     def test_parse_played_games(self):
-        text = """
-PC:
-  Foo 1-3
-? Bar
-  Bar
-  Bar
-- Bar
-@ Bar 2
-@-Bar 2
+        text: str = """
+            PC:
+              Foo 1-3
+            ? Bar
+              Bar
+              Bar
+            - Bar
+            @ Bar 2
+            @-Bar 2
         """
+        text = cleandoc(text)
         errors = []
         platforms = parse_played_games(text, silence=True, errors=errors)
         self.assertEqual(

@@ -5,8 +5,10 @@ __author__ = "ipetrash"
 
 
 import unittest
+
 from inspect import cleandoc
 from unittest import TestCase
+from unittest.mock import patch
 
 import requests
 from requests import Response
@@ -179,9 +181,37 @@ class TestCaseUtils(TestCase):
             @ Spec Ops: Airborne Commando
         """
 
-        original_requests_send = requests.Session.send
+        sort_key_func = lambda obj: (obj.platform, obj.kind, obj.name)
 
-        def patched_requests_send(self, request, **kwargs):
+        expected_games: list[Game] = sorted(
+            [
+                Game(name="Russian Train Trip", platform="PC", kind="FINISHED_GAME"),
+                Game(
+                    name="Russian Train Trip 2",
+                    platform="PC",
+                    kind="FINISHED_WATCHED",
+                ),
+                Game(
+                    name="Russian Train Trip 3",
+                    platform="PC",
+                    kind="NOT_FINISHED_WATCHED",
+                ),
+                Game(name="Hell is Us", platform="PC", kind="NOT_FINISHED_WATCHED"),
+                Game(
+                    name="Spec Ops: Airborne Commando",
+                    platform="PS1",
+                    kind="FINISHED_GAME",
+                ),
+                Game(
+                    name="Spec Ops: Airborne Commando",
+                    platform="PS1",
+                    kind="FINISHED_WATCHED",
+                ),
+            ],
+            key=sort_key_func,
+        )
+
+        def patched_requests_send(request, **kwargs):
             if request.url == "https://gist.github.com/gil9red/2f80a34fb601cd685353":
                 content: bytes = b"""
                     <html>
@@ -202,45 +232,11 @@ class TestCaseUtils(TestCase):
 
             return rs
 
-        try:
-            requests.Session.send = patched_requests_send
+        with patch.object(requests.Session, "send", side_effect=patched_requests_send):
             games = get_games()
-
-            sort_key_func = lambda obj: (obj.platform, obj.kind, obj.name)
             games.sort(key=sort_key_func)
-            expected_games = sorted(
-                [
-                    Game(
-                        name="Russian Train Trip", platform="PC", kind="FINISHED_GAME"
-                    ),
-                    Game(
-                        name="Russian Train Trip 2",
-                        platform="PC",
-                        kind="FINISHED_WATCHED",
-                    ),
-                    Game(
-                        name="Russian Train Trip 3",
-                        platform="PC",
-                        kind="NOT_FINISHED_WATCHED",
-                    ),
-                    Game(name="Hell is Us", platform="PC", kind="NOT_FINISHED_WATCHED"),
-                    Game(
-                        name="Spec Ops: Airborne Commando",
-                        platform="PS1",
-                        kind="FINISHED_GAME",
-                    ),
-                    Game(
-                        name="Spec Ops: Airborne Commando",
-                        platform="PS1",
-                        kind="FINISHED_WATCHED",
-                    ),
-                ],
-                key=sort_key_func,
-            )
-            self.assertEqual(expected_games, games)
 
-        finally:
-            requests.Session.send = original_requests_send
+            self.assertEqual(expected_games, games)
 
 
 class TestCaseThirdParty(TestCase):

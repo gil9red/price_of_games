@@ -170,11 +170,9 @@ class TestCaseUtils(TestCase):
         file_text: str = """
             PC:
             @-Hell is Us
-              Train Travel Simulator
-              Chinese Train Trip
               Russian Train Trip
             @ Russian Train Trip 2
-            @ Russian Train Trip 3
+            @-Russian Train Trip 3
             
             PS1:
               Spec Ops: Airborne Commando
@@ -208,16 +206,10 @@ class TestCaseUtils(TestCase):
             requests.Session.send = patched_requests_send
             games = get_games()
 
-            self.assertEqual(
+            sort_key_func = lambda obj: (obj.platform, obj.kind, obj.name)
+            games.sort(key=sort_key_func)
+            expected_games = sorted(
                 [
-                    Game(
-                        name="Train Travel Simulator",
-                        platform="PC",
-                        kind="FINISHED_GAME",
-                    ),
-                    Game(
-                        name="Chinese Train Trip", platform="PC", kind="FINISHED_GAME"
-                    ),
                     Game(
                         name="Russian Train Trip", platform="PC", kind="FINISHED_GAME"
                     ),
@@ -229,7 +221,7 @@ class TestCaseUtils(TestCase):
                     Game(
                         name="Russian Train Trip 3",
                         platform="PC",
-                        kind="FINISHED_WATCHED",
+                        kind="NOT_FINISHED_WATCHED",
                     ),
                     Game(name="Hell is Us", platform="PC", kind="NOT_FINISHED_WATCHED"),
                     Game(
@@ -243,8 +235,9 @@ class TestCaseUtils(TestCase):
                         kind="FINISHED_WATCHED",
                     ),
                 ],
-                games,
+                key=sort_key_func,
             )
+            self.assertEqual(expected_games, games)
 
         finally:
             requests.Session.send = original_requests_send

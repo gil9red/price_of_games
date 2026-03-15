@@ -6,13 +6,17 @@ __author__ = "ipetrash"
 
 import unittest
 from inspect import cleandoc
+from unittest import TestCase
+
+import requests
+from requests import Response
 
 # TODO: Другие модули
-from app_parser.utils import smart_comparing_names
+from app_parser.utils import Game, smart_comparing_names, get_games
 from third_party.mini_played_games_parser import parse_played_games
 
 
-class TestCaseUtils(unittest.TestCase):
+class TestCaseUtils(TestCase):
     def test_smart_comparing_names(self) -> None:
         for name_1, name_2 in [
             ("Half-Life 2", "Half-Life 2"),
@@ -162,8 +166,91 @@ class TestCaseUtils(unittest.TestCase):
                     f"{name_1!r} != {name_2!r}",
                 )
 
+    def test_get_games(self):
+        file_text: str = """
+            PC:
+            @-Hell is Us
+              Train Travel Simulator
+              Chinese Train Trip
+              Russian Train Trip
+            @ Russian Train Trip 2
+            @ Russian Train Trip 3
+            
+            PS1:
+              Spec Ops: Airborne Commando
+            @ Spec Ops: Airborne Commando
+        """
 
-class TestCaseThirdParty(unittest.TestCase):
+        original_requests_send = requests.Session.send
+
+        def patched_requests_send(self, request, **kwargs):
+            if request.url == "https://gist.github.com/gil9red/2f80a34fb601cd685353":
+                content: bytes = b"""
+                    <html>
+                        <div class="file-actions">
+                            <a href="foo-bar" />
+                        </div> 
+                    </html>
+                """
+            else:
+                content: bytes = cleandoc(file_text).encode("utf-8")
+
+            rs = Response()
+            rs.status_code = 200
+            rs._content = content
+            rs.url = request.url
+            rs.encoding = "utf-8"
+            rs.request = request
+
+            return rs
+
+        try:
+            requests.Session.send = patched_requests_send
+            games = get_games()
+
+            self.assertEqual(
+                [
+                    Game(
+                        name="Train Travel Simulator",
+                        platform="PC",
+                        kind="FINISHED_GAME",
+                    ),
+                    Game(
+                        name="Chinese Train Trip", platform="PC", kind="FINISHED_GAME"
+                    ),
+                    Game(
+                        name="Russian Train Trip", platform="PC", kind="FINISHED_GAME"
+                    ),
+                    Game(
+                        name="Russian Train Trip 2",
+                        platform="PC",
+                        kind="FINISHED_WATCHED",
+                    ),
+                    Game(
+                        name="Russian Train Trip 3",
+                        platform="PC",
+                        kind="FINISHED_WATCHED",
+                    ),
+                    Game(name="Hell is Us", platform="PC", kind="NOT_FINISHED_WATCHED"),
+                    Game(
+                        name="Spec Ops: Airborne Commando",
+                        platform="PS1",
+                        kind="FINISHED_GAME",
+                    ),
+                    Game(
+                        name="Spec Ops: Airborne Commando",
+                        platform="PS1",
+                        kind="FINISHED_WATCHED",
+                    ),
+                ],
+                games,
+            )
+
+        finally:
+            requests.Session.send = original_requests_send
+
+
+class TestCaseThirdParty(TestCase):
     def test_parse_played_games(self):
         text: str = """
             PC:

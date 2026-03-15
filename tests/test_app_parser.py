@@ -8,6 +8,7 @@ import unittest
 
 # TODO: Другие модули
 from app_parser.utils import smart_comparing_names
+from third_party.mini_played_games_parser import parse_played_games
 
 
 class TestCaseUtils(unittest.TestCase):
@@ -159,6 +160,38 @@ class TestCaseUtils(unittest.TestCase):
                     smart_comparing_names(name_1, name_2),
                     f"{name_1!r} != {name_2!r}",
                 )
+
+
+class TestCaseThirdParty(unittest.TestCase):
+    def test_parse_played_games(self):
+        text = """
+PC:
+  Foo 1-3
+? Bar
+  Bar
+  Bar
+- Bar
+@ Bar 2
+@-Bar 2
+        """
+        errors = []
+        platforms = parse_played_games(text, silence=True, errors=errors)
+        self.assertEqual(
+            ["Foo", "Foo 2", "Foo 3", "Bar"],
+            platforms["PC"]["FINISHED_GAME"],
+        )
+        self.assertEqual(["Bar"], platforms["PC"]["NOT_FINISHED_GAME"])
+        self.assertEqual(["Bar 2"], platforms["PC"]["FINISHED_WATCHED"])
+        self.assertEqual(["Bar 2"], platforms["PC"]["NOT_FINISHED_WATCHED"])
+        self.assertEqual(
+            [
+                "Странный формат строки: '? Bar'",
+                'Предотвращено добавление дубликата игры "Bar"',
+                'Игра "Bar" (PC) присутствует и в не пройденных, и в пройденных',
+                'Игра "Bar 2" (PC) присутствует и в не просмотренных, и в просмотренных',
+            ],
+            errors,
+        )
 
 
 if __name__ == "__main__":

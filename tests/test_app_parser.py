@@ -13,9 +13,41 @@ from unittest.mock import patch
 import requests
 from requests import Response
 
-# TODO: Другие модули
+# TODO: Тестирование других модулей из app_parser/
+
 from app_parser.utils import Game, smart_comparing_names, get_games
+from common import (
+    FINISHED_GAME,
+    FINISHED_WATCHED,
+    NOT_FINISHED_GAME,
+    NOT_FINISHED_WATCHED,
+)
 from third_party.mini_played_games_parser import parse_played_games
+
+
+def create_patch_requests_send(file_text: str):
+    def patched_requests_send(request, **kwargs) -> Response:
+        if request.url == "https://gist.github.com/gil9red/2f80a34fb601cd685353":
+            content: bytes = b"""
+                <html>
+                    <div class="file-actions">
+                        <a href="foo-bar" />
+                    </div> 
+                </html>
+            """
+        else:
+            content: bytes = cleandoc(file_text).encode("utf-8")
+
+        rs = Response()
+        rs.status_code = 200
+        rs._content = content
+        rs.url = request.url
+        rs.encoding = "utf-8"
+        rs.request = request
+
+        return rs
+
+    return patched_requests_send
 
 
 class TestCaseUtils(TestCase):
@@ -169,6 +201,8 @@ class TestCaseUtils(TestCase):
                 )
 
     def test_get_games(self):
+        sort_key_func = lambda obj: (obj.platform, obj.kind, obj.name)
+
         file_text: str = """
             PC:
             @-Hell is Us
@@ -180,59 +214,39 @@ class TestCaseUtils(TestCase):
               Spec Ops: Airborne Commando
             @ Spec Ops: Airborne Commando
         """
-
-        sort_key_func = lambda obj: (obj.platform, obj.kind, obj.name)
-
         expected_games: list[Game] = sorted(
             [
-                Game(name="Russian Train Trip", platform="PC", kind="FINISHED_GAME"),
+                Game(name="Russian Train Trip", platform="PC", kind=FINISHED_GAME),
                 Game(
                     name="Russian Train Trip 2",
                     platform="PC",
-                    kind="FINISHED_WATCHED",
+                    kind=FINISHED_WATCHED,
                 ),
                 Game(
                     name="Russian Train Trip 3",
                     platform="PC",
-                    kind="NOT_FINISHED_WATCHED",
+                    kind=NOT_FINISHED_WATCHED,
                 ),
-                Game(name="Hell is Us", platform="PC", kind="NOT_FINISHED_WATCHED"),
+                Game(name="Hell is Us", platform="PC", kind=NOT_FINISHED_WATCHED),
                 Game(
                     name="Spec Ops: Airborne Commando",
                     platform="PS1",
-                    kind="FINISHED_GAME",
+                    kind=FINISHED_GAME,
                 ),
                 Game(
                     name="Spec Ops: Airborne Commando",
                     platform="PS1",
-                    kind="FINISHED_WATCHED",
+                    kind=FINISHED_WATCHED,
                 ),
             ],
             key=sort_key_func,
         )
 
-        def patched_requests_send(request, **kwargs):
-            if request.url == "https://gist.github.com/gil9red/2f80a34fb601cd685353":
-                content: bytes = b"""
-                    <html>
-                        <div class="file-actions">
-                            <a href="foo-bar" />
-                        </div> 
-                    </html>
-                """
-            else:
-                content: bytes = cleandoc(file_text).encode("utf-8")
-
-            rs = Response()
-            rs.status_code = 200
-            rs._content = content
-            rs.url = request.url
-            rs.encoding = "utf-8"
-            rs.request = request
-
-            return rs
-
-        with patch.object(requests.Session, "send", side_effect=patched_requests_send):
+        with patch.object(
+            requests.Session,
+            attribute="send",
+            side_effect=create_patch_requests_send(file_text),
+        ):
             games = get_games()
             games.sort(key=sort_key_func)
 
@@ -256,11 +270,11 @@ class TestCaseThirdParty(TestCase):
         platforms = parse_played_games(text, silence=True, errors=errors)
         self.assertEqual(
             ["Foo", "Foo 2", "Foo 3", "Bar"],
-            platforms["PC"]["FINISHED_GAME"],
+            platforms["PC"][FINISHED_GAME],
         )
-        self.assertEqual(["Bar"], platforms["PC"]["NOT_FINISHED_GAME"])
-        self.assertEqual(["Bar 2"], platforms["PC"]["FINISHED_WATCHED"])
-        self.assertEqual(["Bar 2"], platforms["PC"]["NOT_FINISHED_WATCHED"])
+        self.assertEqual(["Bar"], platforms["PC"][NOT_FINISHED_GAME])
+        self.assertEqual(["Bar 2"], platforms["PC"][FINISHED_WATCHED])
+        self.assertEqual(["Bar 2"], platforms["PC"][NOT_FINISHED_WATCHED])
         self.assertEqual(
             [
                 "Странный формат строки: '? Bar'",

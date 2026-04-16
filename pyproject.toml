@@ -1,0 +1,24 @@
+[project]
+name = "price-of-games"
+version = "2026.4.16"
+description = "Скрипт, имея список игр, ищет для них цену"
+requires-python = ">=3.10"
+dependencies = [
+    "beautifulsoup4==4.11.1",
+    "cachetools==7.0.1",
+    "flask==2.2.5",
+    "flask-httpauth==4.7.0",
+    "peewee==3.15.4",
+    "requests==2.32.0",
+    "simple-wait==1.0.8",
+]
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE.txt"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]

@@ -19,8 +19,10 @@ class WebUserAlertException(Exception):
     """
 
 
-FINISHED_GAME = mini_played_games_parser.FINISHED_GAME
-FINISHED_WATCHED = mini_played_games_parser.FINISHED_WATCHED
+FINISHED_GAME: str = mini_played_games_parser.FINISHED_GAME
+FINISHED_WATCHED: str = mini_played_games_parser.FINISHED_WATCHED
+NOT_FINISHED_GAME: str = mini_played_games_parser.NOT_FINISHED_GAME
+NOT_FINISHED_WATCHED: str = mini_played_games_parser.NOT_FINISHED_WATCHED
 
 
 def get_logger(

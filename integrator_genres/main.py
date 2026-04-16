@@ -17,12 +17,13 @@ import requests
 log = get_logger(Path(__file__).resolve().parent.name)
 
 
-URL_BASE = f"http://127.0.0.1:{PORT_GET_GAME_GENRES}"
-URL_GAME = f"{URL_BASE}/api/game"
-URL_GENRES = f"{URL_BASE}/api/genres"
+URL_BASE: str = f"http://127.0.0.1:{PORT_GET_GAME_GENRES}"
+URL_GAME: str = f"{URL_BASE}/api/game"
+URL_GAMES: str = f"{URL_BASE}/api/games"
+URL_GENRES: str = f"{URL_BASE}/api/genres"
 
 
-def get_result_by_number() -> dict[ResultEnum, int]:
+def get_empty_result_by_number() -> dict[ResultEnum, int]:
     return {result: 0 for result in sorted(ResultEnum, key=lambda x: x.name)}
 
 
@@ -64,10 +65,10 @@ def process_game(game: Game, genres: list[str]) -> list[ResultEnum]:
     return results
 
 
-def fill_genres():
+def fill_genres() -> None:
     log.info("Запуск заполнения жанров")
 
-    result_by_number = get_result_by_number()
+    result_by_number: dict[ResultEnum, int] = get_empty_result_by_number()
 
     rs = requests.get(URL_GENRES)
     for item in rs.json():
@@ -83,7 +84,7 @@ def fill_genres():
 def fill_from_current_games() -> list[int]:
     log.info("Запуск заполнения жанров у игр")
 
-    result_by_number = get_result_by_number()
+    result_by_number: dict[ResultEnum, int] = get_empty_result_by_number()
     ids: list[int] = []
 
     for game in Game.get_games_without_genres():
@@ -112,9 +113,39 @@ def fill_from_current_games() -> list[int]:
     return ids
 
 
-def run():
+def actualize_current_games() -> list[int]:
+    log.info("Запуск заполнения жанров у игр")
+
+    rs = requests.get(URL_GAMES)
+    rs.raise_for_status()
+
+    game_by_genres: dict[str, list[str]] = {
+        obj["name"]: obj["genres"] for obj in rs.json()
+    }
+
+    ids: list[int] = []
+
+    for game in Game.select():
+        old_genres: list[str] = [genre.name for genre in game.get_genres()]
+        new_genres: list[str] = game_by_genres.get(game.name, [])
+        if not new_genres:
+            continue
+
+        result: dict[ResultEnum, int] = game.set_genres(new_genres)
+
+        if result[ResultEnum.ADDED] > 0 or result[ResultEnum.DELETED] > 0:
+            log.info(f"Изменение жанра {game.name!r} с {old_genres} на {new_genres}")
+            ids.append(game.id)
+
+    log.info(f"Изменено: {len(ids)}")
+    log.info("Завершено.\n")
+
+    return ids
+
+
+def run() -> None:
     fill_genres()
-    fill_from_current_games()
+    actualize_current_games()
 
 
 if __name__ == "__main__":

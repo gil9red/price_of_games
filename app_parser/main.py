@@ -13,10 +13,11 @@ __author__ = "ipetrash"
 
 from datetime import datetime
 
-from app_parser.utils import get_games
+from app_parser.utils import Game, get_games
 from app_parser.logic import append_games_to_database, fill_price_of_games
 from common import get_logger, FINISHED_GAME, FINISHED_WATCHED
 from db import Settings, db_create_backup
+from integrity_check import run as run_integrity_check
 from integrator_genres.main import run as fill_genres_of_games
 
 # pip install simple-wait
@@ -32,24 +33,25 @@ def run() -> tuple[list[int], list[int]]:
     Settings.set_value("last_run_date", datetime.now())
 
     # Получение игр из файла gist
-    games = get_games()
-    finished_game_list = [
-        game for game in games if game.kind == FINISHED_GAME
-    ]
-    finished_watched_game_list = [
-        game for game in games if game.kind == FINISHED_WATCHED
-    ]
+    finished_games: list[Game] = []
+    finished_watched_games: list[Game] = []
+    for game in get_games():
+        if game.kind == FINISHED_GAME:
+            finished_games.append(game)
+        elif game.kind == FINISHED_WATCHED:
+            finished_watched_games.append(game)
 
     log.debug(
-        "Пройденных игр %s, просмотренных игр: %s",
-        len(finished_game_list),
-        len(finished_watched_game_list),
+        "Пройденных игр %s, просмотренных игр %s",
+        len(finished_games),
+        len(finished_watched_games),
     )
 
     # Добавление в базу новых игр
+    added_finished_game_ids: list[int]
+    added_watched_game_ids: list[int]
     added_finished_game_ids, added_watched_game_ids = append_games_to_database(
-        finished_game_list,
-        finished_watched_game_list
+        finished_games, finished_watched_games
     )
     if added_finished_game_ids:
         log.debug("Добавлено пройденных игр: %s", added_finished_game_ids)
@@ -63,7 +65,10 @@ def run() -> tuple[list[int], list[int]]:
     # Заполнение жанров игр
     fill_genres_of_games()
 
-    # Создание дубликата базы
+    # Проверка целостности
+    run_integrity_check()
+
+    # Создание бекапа базы
     if added_finished_game_ids or added_watched_game_ids:
         db_create_backup(log)
 

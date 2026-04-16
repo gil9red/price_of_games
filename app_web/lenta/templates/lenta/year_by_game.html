@@ -1,0 +1,22 @@
+{% for day, games in day_by_games.items() %}
+<div class="media border p-1">
+    <div class="media-body">
+        <h4 class="day">{{ day }}</h4>
+        {% for game in games %}
+        <div class="media game p-1" data-platform="{{ game.platform.name }}" data-category="{{ game.kind }}">
+            {% if game.kind == 'FINISHED_GAME' %}
+            <img src="{{ url_for('lenta.static', filename='images/video-game.png') }}" class="category" alt="video-game">
+            {% elif game.kind == 'FINISHED_WATCHED' %}
+            <img src="{{ url_for('lenta.static', filename='images/television.png') }}" class="category" alt="television">
+            {% endif %}
+            <div class="media-body">
+                <h5 class="mt-0 mb-0">
+                    <div class="name d-inline-block">{{ game.name }}</div> (<div class="platform d-inline-block">{{ game.platform.name }}</div>)
+                </h5>
+                <div class="time">{{ game.append_date.strftime("%H:%M:%S") }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}

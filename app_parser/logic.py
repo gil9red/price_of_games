@@ -6,6 +6,8 @@ __author__ = "ipetrash"
 
 import time
 
+from cachetools.func import ttl_cache
+
 from common import (
     FINISHED_GAME,
     FINISHED_WATCHED,
@@ -16,7 +18,7 @@ from common import (
 from db import ResultEnum, Game, Platform
 
 from app_parser import models
-from app_parser.utils import get_price as get_price_game
+from app_parser.utils import get_price as get_price_game, smart_comparing_names
 
 
 def get_game_info(game: int | Game) -> models.GameInfo:
@@ -29,7 +31,7 @@ def get_game_info(game: int | Game) -> models.GameInfo:
         kind=game.kind,
         platform=game.platform.name,
         price=game.price,
-        append_date=game.append_date.strftime("%d/%m/%Y %H:%M:%S"),
+        append_date=game.append_date.strftime("%d.%m.%Y %H:%M:%S"),
         append_date_timestamp=int(game.append_date.timestamp()),
         genres=[genre.name for genre in game.get_genres()],
     )
@@ -39,6 +41,7 @@ def get_games_info(games: list[int | Game]) -> list[models.GameInfo]:
     return [get_game_info(game) for game in games]
 
 
+@ttl_cache(maxsize=1, ttl=30)  # Кэш 30 секунд
 def get_games() -> list[models.GameInfo]:
     """
     Функция возвращает список игр
@@ -46,12 +49,20 @@ def get_games() -> list[models.GameInfo]:
     """
 
     query = (
-        Game
-        .select()
+        Game.select()
         .where(Game.kind.in_([FINISHED_GAME, FINISHED_WATCHED]))
         .order_by(Game.append_date.desc())
     )
     return [get_game_info(game) for game in query]
+
+
+def search(text: str) -> list[models.GameInfo]:
+    """
+    Функция возвращает список игр
+
+    """
+
+    return [game for game in get_games() if smart_comparing_names(game.name, text)]
 
 
 def get_price(game_name: str) -> int | None:
@@ -192,7 +203,7 @@ def delete_game(game: Game):
         raise WebUserAlertException(error_text)
 
 
-def set_checked_price_of_game(game_name: str, check=True):
+def set_checked_price_of_game(game_name: str, check: bool = True) -> None:
     game_name = game_name.strip()
 
     for game in Game.select().where(Game.name == game_name):
@@ -283,6 +294,37 @@ def get_game_list_with_price(game_name: str) -> list[Game]:
     return list(query)
 
 
+def check_and_fill_price_of_game_from_cache(
+    game_name: str,
+) -> models.PriceUpdateResult | None:
+    game_list: list[Game] = get_game_list_with_price(game_name)
+    if not game_list:
+        return
+
+    log_common.debug(f"get_game_list_with_price(game={game_name!r}): {game_list}")
+
+    # Вытащим id, kind и price найденной игры
+    game: Game = game_list[0]
+    other_id, other_kind, other_price = game.id, game.kind, game.price
+
+    log_common.info(
+        f"Для игры {game_name!r} удалось найти цену {other_price!r} "
+        f"из базы, взяв ее из аналога c id={other_id} в категории {other_kind!r}"
+    )
+
+    # Отметим, что игра искалась (чтобы она не искалась в нем, если будет вызвана проверка)
+    set_checked_price_of_game(game_name, check=True)
+
+    log_common.info(f"Нашли игру: {game_name!r} -> {other_price}")
+    log_append_game.info(f"Нашли игру: {game_name!r} -> {other_price}")
+
+    return models.PriceUpdateResult(
+        game_ids=set_price_game(game_name, other_price),
+        game_name=game_name,
+        price=other_price,
+    )
+
+
 def check_and_fill_price_of_game(
     game_name: str,
     cache: bool = True,
@@ -304,40 +346,19 @@ def check_and_fill_price_of_game(
             price=other_price,
         )
 
-    # Попробуем найти цену игры в базе -- возможно игра уже есть, но в другой категории
+    # Попробуем найти цену игры в базе - возможно игра уже есть, но в другой категории
     if cache:
-        game_list = get_game_list_with_price(game_name)
-        if game_list:
-            log_common.debug(
-                f"get_game_list_with_price(game={game_name!r}): {game_list}"
-            )
-
-            # Вытащим id, kind и price найденной игры
-            game = game_list[0]
-            other_id, other_kind, other_price = game.id, game.kind, game.price
-
-            log_common.info(
-                f"Для игры {game_name!r} удалось найти цену {other_price!r} "
-                f"из базы, взяв ее из аналога c id={other_id} в категории {other_kind!r}"
-            )
-
-            # Отметим что игра искалась в стиме (чтобы она не искалась в нем, если будет вызвана проверка)
-            set_checked_price_of_game(game_name)
-
-            log_common.info(f"Нашли игру: {game_name!r} -> {other_price}")
-            log_append_game.info(f"Нашли игру: {game_name!r} -> {other_price}")
-
-            return models.PriceUpdateResult(
-                game_ids=set_price_game(game_name, other_price),
-                game_name=game_name,
-                price=other_price,
-            )
+        result: models.PriceUpdateResult | None = (
+            check_and_fill_price_of_game_from_cache(game_name)
+        )
+        if result is not None:
+            return result
 
     # Поищем игру и ее цену в стиме/gog
     other_price = get_price_game(game_name, log_common, log_append_game)
 
-    # Отметим что игра искалась
-    set_checked_price_of_game(game_name)
+    # Отметим, что игра искалась
+    set_checked_price_of_game(game_name, check=True)
 
     if other_price is None:
         log_common.info(
@@ -356,11 +377,9 @@ def check_and_fill_price_of_game(
     )
 
 
-def fill_price_of_games():
+def fill_price_of_games() -> None:
     """
     Функция проходит по играм в базе без указанной цены, пытается найти цены и если удачно, обновляет значение.
-
-    Сайтом для поиска цен является стим.
 
     """
 
@@ -388,8 +407,8 @@ def fill_price_of_games():
             check_and_fill_price_of_game(game.name)
             time.sleep(3)
         else:
-            # Отмечаем, что игру искать не нужно
-            set_checked_price_of_game(game.name)
+            # Попробуем найти цену игры в базе - возможно игра уже есть, но в другой категории
+            check_and_fill_price_of_game_from_cache(game.name)
 
 
 if __name__ == "__main__":

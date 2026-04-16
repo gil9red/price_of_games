@@ -108,7 +108,9 @@ docs/_build/
 target/
 
 # For the current project
+.gigaide/
 backup/
 logs/
 database/
 users.json
+SECRET_KEY.txt

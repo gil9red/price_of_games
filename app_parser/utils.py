@@ -6,6 +6,7 @@ __author__ = "ipetrash"
 
 import time
 import re
+import unicodedata
 
 from logging import Logger
 from dataclasses import dataclass
@@ -19,6 +20,7 @@ import requests
 from app_parser.models import Game
 from config import BACKUP_DIR_LIST
 from common import log_common
+from third_party.add_notify_telegram import add_notify
 from third_party.mini_played_games_parser import parse_played_games
 from third_party.get_price_game.from_gog_v2 import get_games as get_games_from_gog
 
@@ -62,13 +64,18 @@ def get_games() -> list[Game]:
         except Exception:
             log_common.exception("Error:")
 
-    platforms = parse_played_games(content_gist)
+    errors: list[str] = []
+    platforms = parse_played_games(content_gist, errors=errors)
+    for error_text in errors:
+        log_common.info(f"Отправка уведомления: {error_text!r}")
+        add_notify(name="Цены игр", message=error_text)
 
-    items = []
+    items: list[Game] = []
     for platform, categories in platforms.items():
         for category, games in categories.items():
-            for game in games:
-                items.append(Game(name=game, platform=platform, kind=category))
+            for name in games:
+                game = Game(name=name, platform=platform, kind=category)
+                items.append(game)
 
     return items
 
@@ -85,7 +92,7 @@ def get_prepared_price(price: str) -> int:
 
 def steam_search_game_price_list(
     name: str,
-    log_common: Logger = None,
+    log_common: Logger | None = None,
 ) -> list[SearchResult]:
     """
     Функция принимает название игры, после ищет его в стиме и возвращает результат как список
@@ -117,10 +124,12 @@ def steam_search_game_price_list(
     game_price_list = []
 
     for div in root.select(".search_result_row"):
-        name = div.select_one(".title").text.strip()
+        game: str = div.select_one(".title").text.strip()
 
         # Ищем тег скидки, чтобы вытащить оригинальную цену, а не ту, что получилась со скидкой
-        price_el = div.select_one(".discount_original_price") or div.select_one(".discount_final_price")
+        price_el = div.select_one(".discount_original_price") or div.select_one(
+            ".discount_final_price"
+        )
 
         # Если цены нет (например, игра еще не продается)
         if not price_el:
@@ -137,7 +146,7 @@ def steam_search_game_price_list(
 
         game_price_list.append(
             SearchResult(
-                name=name,
+                name=game,
                 price=price,
             )
         )
@@ -153,7 +162,7 @@ def steam_search_game_price_list(
 
 def gog_search_game_price_list(
     name: str,
-    log_common: Logger = None
+    log_common: Logger | None = None,
 ) -> list[SearchResult]:
     """
     Функция принимает название игры, после ищет его в gog и возвращает результат как список
@@ -168,7 +177,7 @@ def gog_search_game_price_list(
     for game, price in get_games_from_gog(name):
         game_price_list.append(
             SearchResult(
-                name=name,
+                name=game,
                 price=get_prepared_price(price),
             )
         )
@@ -185,31 +194,94 @@ def gog_search_game_price_list(
 def smart_comparing_names(name_1: str, name_2: str) -> bool:
     """
     Функция для сравнивания двух названий игр.
-    Возвращает True, если совпадают, иначе -- False.
+    Возвращает True, если совпадают, иначе - False.
 
     """
 
-    # Приведение строк к одному регистру
-    name_1 = name_1.lower()
-    name_2 = name_2.lower()
+    # SOURCE: https://stackoverflow.com/a/518232/5909792
+    def strip_accents(s: str) -> str:
+        return "".join(
+            c
+            for c in unicodedata.normalize("NFD", s)
+            if unicodedata.category(c) != "Mn"
+        )
 
-    def remove_postfix(text: str) -> str:
-        for postfix in ("dlc", "expansion"):
-            if text.endswith(postfix):
-                return text[: -len(postfix)]
-        return text
+    def to_roman(n: int) -> str:
+        # Диапазон чисел от 1..4999
+        if not (0 < n < 5000):
+            # NOTE: Не валидная ситуация, но для текущего сценария это нормально
+            return str(n)
 
-    # Удаление символов кроме буквенных, цифр и _: "the witcher®3:___ вася! wild hunt" -> "thewitcher3___васяwildhunt"
-    def clear_name(name: str) -> str:
-        return re.sub(r"\W", "", name)
+        result: str = ""
+        for numeral, integer in (
+            ("M", 1000),
+            ("CM", 900),
+            ("D", 500),
+            ("CD", 400),
+            ("C", 100),
+            ("XC", 90),
+            ("L", 50),
+            ("XL", 40),
+            ("X", 10),
+            ("IX", 9),
+            ("V", 5),
+            ("IV", 4),
+            ("I", 1),
+        ):
+            while n >= integer:
+                result += numeral
+                n -= integer
+        return result
 
-    name_1 = clear_name(name_1)
-    name_1 = remove_postfix(name_1)
+    def process_name(name: str) -> str:
+        # Замена & на and
+        name = name.replace("&", "and")
 
-    name_2 = clear_name(name_2)
-    name_2 = remove_postfix(name_2)
+        # Приведение к одному регистру
+        name = name.lower()
 
-    return name_1 == name_2
+        name = name.removesuffix(" dlc")
+
+        # Удаление всех символов, кроме буквенных, цифр, круглых скобок, пробелов, табуляций и переводов строк
+        name = re.sub(r"[^\w\s()]+", "", name)
+
+        # Удаление скобок и их содержимого:
+        # "XXX (Full Edition)" -> "XXX"
+        # "XXX (DLC)" -> "XXX"
+        # "XXX (2015)" -> "XXX"
+        name = re.sub(r"\(.+?\)", "", name)
+
+        # Удаление The
+        name = re.sub(r"\bThe\b", "", name, flags=re.IGNORECASE)
+
+        # Удаление постфиксов "XXX Edition" и "XXX Издание"
+        name = re.sub(r"\w+\s*(Edition|Издание)", "", name, flags=re.IGNORECASE)
+
+        # Удаление символов кроме буквенных, цифр и _:
+        # "the witcher®3:___ вася! wild hunt" -> "thewitcher3___васяwildhunt"
+        name = re.sub(r"\W+", "", name)
+
+        # Удаление версии
+        name = re.sub(r"v\d+", "", name)
+
+        # Замена арабских цифр на римские для более точного сравнения
+        name = re.sub(r"\d+", lambda m: to_roman(int(m.group())), name)
+
+        name = strip_accents(name)
+
+        return name.lower()
+
+    if "/" in name_1 or "/" in name_2:
+
+        def _get_names(name: str) -> list[str]:
+            return name.strip("/").split("/")
+
+        for part_name_1 in _get_names(name_1):
+            for part_name_2 in _get_names(name_2):
+                if process_name(part_name_1) == process_name(part_name_2):
+                    return True
+
+    return process_name(name_1) == process_name(name_2)
 
 
 def _search_price_from_game_price_list(
@@ -233,13 +305,13 @@ def _search_price_from_game_price_list(
 
 def get_price(
     game_name: str,
-    log_common: Logger = None,
-    log_append_game: Logger = None,
+    log_common: Logger | None = None,
+    log_append_game: Logger | None = None,
 ) -> int | None:
     def _log_on_found_price(
         game_name: str,
         result: SearchResult,
-    ):
+    ) -> None:
         log_common and log_common.info(
             f"Нашли игру: {game_name!r} ({result.name}) -> {result.price}"
         )
@@ -272,14 +344,16 @@ def get_price(
 
 
 if __name__ == "__main__":
-    game_name = "Prodeus"
-    print("steam:", steam_search_game_price_list(game_name))
-    print("gog:", gog_search_game_price_list(game_name))
-    print(get_price(game_name))
+    pass
 
-    print()
-
-    game_name = "Alone in the Dark: Illumination"
-    print("steam:", steam_search_game_price_list(game_name))
-    print("gog:", gog_search_game_price_list(game_name))
-    print(get_price(game_name))
+    # game_name = "Prodeus"
+    # print("steam:", steam_search_game_price_list(game_name))
+    # print("gog:", gog_search_game_price_list(game_name))
+    # print(get_price(game_name))
+    #
+    # print()
+    #
+    # game_name = "Alone in the Dark: Illumination"
+    # print("steam:", steam_search_game_price_list(game_name))
+    # print("gog:", gog_search_game_price_list(game_name))
+    # print(get_price(game_name))

@@ -1,0 +1,52 @@
+.year {
+    font-size: 1.4rem;
+}
+.day {
+    font-size: 1.3rem;
+}
+.game, .name {
+    font-size: 1.15rem;
+}
+.platform {
+    font-size: 1.2rem;
+    font-weight: bolder;
+    color: #17a2b8; /* color of .text-info */
+}
+.time {
+    font-weight: lighter;
+    font-size: 0.9rem;
+}
+img.category {
+    margin-right: 0.5rem;
+
+    width: 32px;
+    height: 32px;
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255,255,255, 0.5%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+.not_found {
+    display: none;
+}
+
+.no_results {
+    color: darkGray;
+}
+.hide {
+    display: none;
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Opera and Firefox */
+}
+
+.progress {
+    height: 0.5rem;
+}

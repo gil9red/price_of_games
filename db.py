@@ -10,7 +10,7 @@ import time
 import shutil
 
 from datetime import datetime
-from typing import Any, Callable, Type, Iterable, Optional, TypeVar
+from typing import Any, Callable, Type, Optional, TypeVar
 
 # pip install peewee
 from peewee import (
@@ -19,19 +19,18 @@ from peewee import (
     ForeignKeyField,
     DateTimeField,
     BooleanField,
-    CharField,
     IntegerField,
     fn,
 )
-from playhouse.shortcuts import model_to_dict
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from config import BACKUP_DIR_LIST, DB_FILE_NAME, DB_DIR_NAME
-from third_party.shorten import shorten
+from third_party.db_peewee_meta_model import MetaModel
+from third_party.ttl_cache import ttl_cache
 
 
 class NotDefinedParameterException(Exception):
-    def __init__(self, parameter_name: str):
+    def __init__(self, parameter_name: str) -> None:
         self.parameter_name = parameter_name
         text = f'Parameter "{self.parameter_name}" must be defined!'
 
@@ -45,7 +44,7 @@ class ResultEnum(enum.Enum):
     DELETED = enum.auto()
 
 
-def db_create_backup(log: logging.Logger):
+def db_create_backup(log: logging.Logger) -> None:
     for path in BACKUP_DIR_LIST:
         zip_name = path / f"{datetime.today().date()}.sqlite"
 
@@ -73,8 +72,8 @@ def create_trigger_before_delete(
     in_table: Type[Model],
     for_table_column_name: str,
     delete_from_table: Type[Model],
-    delete_from_table_column_name: str
-):
+    delete_from_table_column_name: str,
+) -> None:
     def get_table_db_name(model: Type[Model]) -> str:
         return model._meta.name
 
@@ -98,62 +97,9 @@ def create_trigger_before_delete(
 ChildModel = TypeVar("ChildModel", bound="BaseModel")
 
 
-class BaseModel(Model):
+class BaseModel(MetaModel):
     class Meta:
         database = db
-
-    def get_new(self) -> ChildModel:
-        return type(self).get(self._pk_expr())
-
-    @classmethod
-    def get_first(cls) -> ChildModel:
-        return cls.select().first()
-
-    @classmethod
-    def get_last(cls) -> ChildModel:
-        return cls.select().order_by(cls.id.desc()).first()
-
-    @classmethod
-    def get_inherited_models(cls) -> list[Type["BaseModel"]]:
-        return sorted(cls.__subclasses__(), key=lambda x: x.__name__)
-
-    @classmethod
-    def print_count_of_tables(cls):
-        items = []
-        for sub_cls in cls.get_inherited_models():
-            name = sub_cls.__name__
-            count = sub_cls.select().count()
-            items.append(f"{name}: {count}")
-
-        print(", ".join(items))
-
-    @classmethod
-    def count(cls, filters: Iterable = None) -> int:
-        query = cls.select()
-        if filters:
-            query = query.filter(*filters)
-        return query.count()
-
-    def to_dict(self) -> dict:
-        return model_to_dict(self)
-
-    def __str__(self):
-        fields = []
-        for k, field in self._meta.fields.items():
-            v = getattr(self, k)
-
-            if isinstance(field, (TextField, CharField)):
-                if v:
-                    v = repr(shorten(v))
-
-            elif isinstance(field, ForeignKeyField):
-                k = f"{k}_id"
-                if v:
-                    v = v.id
-
-            fields.append(f"{k}={v}")
-
-        return self.__class__.__name__ + "(" + ", ".join(fields) + ")"
 
 
 class Platform(BaseModel):
@@ -171,6 +117,14 @@ class Genre(BaseModel):
     name = TextField(unique=True)
     description = TextField()
     aliases = TextField(default="")
+
+    # TODO: Немного неэффективно, но пока так
+    # TODO: Можно попробовать в BaseModel перекрыть методы типа get_by_id и get_or_none, добавив кэширование
+    #       Возможно, peewee внутри по другому работает с методами
+    @classmethod
+    @ttl_cache(ttl_seconds=5 * 60)
+    def get_from_cache(cls, genre_id: int) -> "Genre":
+        return cls.get_by_id(genre_id)
 
     @classmethod
     def get_by(cls, name: str) -> Optional["Genre"]:
@@ -249,7 +203,7 @@ class Game(BaseModel):
 
         return obj
 
-    def set_price(self, value: int):
+    def set_price(self, value: int) -> None:
         self.price = value
         self.modify_price_date = datetime.now()
         self.save()
@@ -267,7 +221,10 @@ class Game(BaseModel):
         return ResultEnum.ADDED, genre
 
     def get_genres(self) -> list[Genre]:
-        items: list[Genre] = [link.genre for link in self.links_to_genres]
+        items: list[Genre] = [
+            Genre.get_from_cache(link.genre_id)
+            for link in self.links_to_genres.select(Game2Genre.genre_id)
+        ]
         items.sort(key=lambda x: x.name)
         return items
 
@@ -324,7 +281,7 @@ class Settings(BaseModel):
     value = TextField()
 
     @classmethod
-    def set_value(cls, key: str, value: Any):
+    def set_value(cls, key: str, value: Any) -> None:
         obj = cls.get_or_none(key=key)
         if obj:
             if cls.get_value(key) != value:
@@ -351,7 +308,7 @@ class Settings(BaseModel):
         return value
 
     @classmethod
-    def remove_value(cls, key: str):
+    def remove_value(cls, key: str) -> None:
         obj = cls.get_or_none(key=key)
         if obj:
             obj.delete_instance()

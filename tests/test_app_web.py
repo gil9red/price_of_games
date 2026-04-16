@@ -21,23 +21,30 @@ from db import (
     Settings,
     db,
 )
+from app_web.lenta import (
+    get_games,
+    get_games_by_year,
+    get_day_by_games,
+    get_year_by_number,
+    get_platforms,
+)
 
 
 # NOTE: https://docs.peewee-orm.com/en/latest/peewee/database.html#testing-peewee-applications
-class TestCaseDB(unittest.TestCase):
-    def setUp(self):
+class ATestCaseDb(unittest.TestCase):
+    def setUp(self) -> None:
         self.models = BaseModel.get_inherited_models()
         self.test_db = SqliteDatabase(":memory:")
         self.test_db.bind(self.models, bind_refs=False, bind_backrefs=False)
         self.test_db.connect()
         self.test_db.create_tables(self.models)
 
-    def tearDown(self):
-        # Нужно вернуть маппинг к текущей базе данных, иначе следующие тесты, использующие базу данных, типа
-        # рисования графиков будут проваливаться
+    def tearDown(self) -> None:
         db.bind(self.models, bind_refs=False, bind_backrefs=False)
 
-    def test_platform(self):
+
+class TestCaseDb(ATestCaseDb):
+    def test_platform(self) -> None:
         with self.subTest("cls.count"):
             self.assertEqual(0, Platform.count())
 
@@ -58,7 +65,7 @@ class TestCaseDB(unittest.TestCase):
 
             self.assertEqual(len(names), Platform.count())
 
-    def test_game(self):
+    def test_game(self) -> None:
         with self.subTest("cls.count"):
             self.assertEqual(0, Game.count())
 
@@ -215,7 +222,7 @@ class TestCaseDB(unittest.TestCase):
 
             self.assertEqual(len(items), len(Game.get_games_without_genres()))
 
-    def test_genre(self):
+    def test_genre(self) -> None:
         with self.subTest("cls.count"):
             self.assertEqual(0, Genre.count())
 
@@ -254,7 +261,7 @@ class TestCaseDB(unittest.TestCase):
                 self.assertIsNotNone(Genre.get_by(name=name))
                 self.assertEqual(name, Genre.get_by(name=name).name)
 
-    def test_game2genre(self):
+    def test_game2genre(self) -> None:
         with self.subTest("cls.count"):
             self.assertEqual(0, Game2Genre.count())
 
@@ -285,7 +292,7 @@ class TestCaseDB(unittest.TestCase):
             self.assertEqual(len(games), len(genre_games))
             self.assertEqual(games, genre_games)
 
-    def test_settings(self):
+    def test_settings(self) -> None:
         with self.subTest("cls.count"):
             self.assertEqual(0, Settings.count())
 
@@ -308,6 +315,68 @@ class TestCaseDB(unittest.TestCase):
             Settings.set_value("abc456", 456)
             self.assertEqual(2, Settings.count())
             self.assertEqual("456", Settings.get_value("abc456"))
+
+
+class TestCaseDbLenta(ATestCaseDb):
+    @staticmethod
+    def create_games() -> list[Game]:
+        kind = FINISHED_GAME
+        platform = Platform.add("PC")
+        games: list[Game] = [Game.add(f"game_{i}", platform, kind) for i in range(5)]
+        games.sort(key=lambda obj: obj.append_date, reverse=True)
+
+        return games
+
+    def test_get_games(self) -> None:
+        self.assertEqual(0, len(get_games()))
+
+        games: list[Game] = self.create_games()
+        actual: list[Game] = get_games()
+        self.assertEqual(len(games), len(actual))
+        self.assertEqual(games, actual)
+
+    def test_get_games_by_year(self) -> None:
+        year = datetime.now().year
+
+        self.assertEqual(0, len(get_games_by_year(year)))
+
+        games: list[Game] = self.create_games()
+        actual: list[Game] = get_games_by_year(year)
+        self.assertEqual(len(games), len(actual))
+        self.assertEqual(games, actual)
+
+        self.assertEqual(0, len(get_games_by_year(year - 1)))
+
+    def test_get_day_by_games(self) -> None:
+        now = datetime.now()
+        year: int = now.year
+        day: str = now.strftime("%d.%m.%Y")
+
+        self.assertEqual(0, len(get_day_by_games(year)))
+
+        games: list[Game] = self.create_games()
+        actual: dict[str, list[Game]] = get_day_by_games(year)
+        self.assertEqual({day: games}, actual)
+
+    def test_get_year_by_number(self) -> None:
+        year = datetime.now().year
+
+        self.assertEqual(0, len(get_year_by_number()))
+
+        games: list[Game] = self.create_games()
+        actual: list[tuple[int, int]] = get_year_by_number()
+        self.assertEqual([(year, len(games))], actual)
+
+    def test_get_platforms(self) -> None:
+        self.assertEqual(0, len(get_platforms()))
+
+        items: list[str] = ["PS1", "PS2", "Android", "PC"]
+        items.sort()
+
+        for name in items:
+            Platform.add(name)
+
+        self.assertEqual(items, get_platforms())
 
 
 if __name__ == "__main__":

@@ -35,6 +35,11 @@
     padding-left: 2px;
 }
 
+.dataTables_wrapper tbody > tr ::selection {
+    color: var(--light);
+    background: var(--indigo);
+}
+
 .dataTables_length > label,
 .dataTables_length > label > select {
     width: 100% !important;
@@ -199,4 +204,10 @@ table.dataTable tr.dt-hasChild td.dt-control::before {
 
 .column-kind {
     max-width: 30px;
+}
+
+/* Уменьшение отступа слева и справа в элементах выпадающего списка */
+.dropdown-item {
+    padding-left: 0.7rem;
+    padding-right: 0.7rem;
 }

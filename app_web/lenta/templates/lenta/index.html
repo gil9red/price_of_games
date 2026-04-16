@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type'/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#333" />
+    <title>{{ title }}</title>
+
+    <script src="{{ url_for('static', filename='js/jquery-3.1.1.min.js') }}"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-4.4.1/bootstrap.css') }}">
+    <script src="{{ url_for('static', filename='bootstrap-4.4.1/bootstrap.bundle.js') }}"></script>
+
+    <script src="{{ url_for('lenta.static', filename='bootstrap-select-1.13.14/bootstrap-select.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('lenta.static', filename='bootstrap-select-1.13.14/bootstrap-select.css') }}">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-dark.min_3.0.0.css') }}" />
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='glyphicon/glyphicon.css') }}">
+
+    <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('lenta.static', filename='images/favicon.png') }}">
+
+    <!-- noty -->
+    <script src="{{ url_for('static', filename='js/jquery.noty.packaged.min.js') }}"></script>
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('lenta.static', filename='index.css') }}">
+</head>
+<body class="noselect">
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <img src="{{ url_for('lenta.static', filename='images/favicon.png') }}" width="30" height="30" class="d-inline-block align-top" alt="" loading="lazy">
+            {{ title }}
+        </div>
+        <a class="ml-auto" href="{{ url_for('index') }}" title="Цены игр">
+            <img src="{{ url_for('static', filename='images/favicon.png') }}" width="25" height="25">
+        </a>
+        <button class="navbar-toggler pr-0" type="button" data-toggle="collapse" data-target="#navbar_menu" aria-controls="navbar_menu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbar_menu">
+            <div class="navbar-nav">
+                <button class="btn btn-outline-success mb-1" type="button" onclick="$('.collapse.multi-collapse').collapse('show'); $('#navbar_menu').collapse('hide')">
+                    Развернуть всё
+                </button>
+                <button class="btn btn-outline-info" type="button" onclick="$('.collapse.multi-collapse').collapse('hide'); $('#navbar_menu').collapse('hide')">
+                    Свернуть всё
+                </button>
+                <table class="table">
+                    <tr><td>Всего:</td><td>{{ total_finished_game + total_finished_watched }}</td></tr>
+                    <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Пройдено:</td><td>{{ total_finished_game }}</td></tr>
+                    <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;Просмотрено:</td><td>{{ total_finished_watched }}</td></tr>
+                    <tr><td>Платформ:</td><td>{{ all_platforms|length }}</td></tr>
+                    <tr class="hide"><td>Найдено игр:</td><td id="stats_found_game">-</td></tr>
+                </table>
+            </div>
+        </div>
+    </nav>
+
+    <div id="modalFilters" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Фильтрация</h5>
+                    <button type="button"
+                            class="close glyphicon glyphicon-remove top-0"
+                            data-dismiss="modal"
+                            aria-label="Close"
+                    ></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="filter-by-platform-select">Выбор платформ:</label>
+                        <select
+                                id="filter-by-platform-select"
+                                class="selectpicker form-control"
+                                multiple
+                                title="<все платформы>"
+                                data-actions-box="true"
+                                data-select-all-text="Выбрать все"
+                                data-deselect-all-text="Убрать все"
+                        >
+                            {% for name in all_platforms %}
+                            <option value="{{ name }}">{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filter-by-category-select">Выбор категорий:</label>
+                        <select
+                                id="filter-by-category-select"
+                                class="selectpicker form-control"
+                                title="<все категории>"
+                                multiple
+                                data-max-options="1"
+                        >
+                            <option value="{{ finished_game }}">{{ finished_game_title }}</option>
+                            <option value="{{ finished_watched }}">{{ finished_watched_title }}</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button
+                                type="button"
+                                class="btn btn-warning form-control"
+                                onclick="$('#modalFilters .selectpicker').selectpicker('val', [])"
+                        >
+                            Очистить всё
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-dismiss="modal" onclick="search()">Принять</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="input-group mb-2">
+            <input type="text" class="form-control" id="search" placeholder="Введите для поиска...">
+            <div class="input-group-append">
+                <button
+                        id="button-filter"
+                        class="btn btn-primary top-0"
+                        type="button"
+                        data-dismiss="modal"
+                        data-toggle="modal" data-target="#modalFilters"
+                >
+                    <div class="icon glyphicon glyphicon-filter"></div>
+                    <div class="value" style="display: none;"></div>
+                </button>
+                <button class="btn btn-danger glyphicon glyphicon-remove" id="clear_search" type="button"></button>
+            </div>
+        </div>
+
+        <div>
+            {% for year, number in year_by_number %}
+            <div class="card">
+                <div class="card-header p-1" id="heading_{{ year }}">
+                    <button class="btn btn-link w-100 p-0 mb-0" type="button" data-toggle="collapse" data-target="#collapse_{{ year }}" aria-expanded="true" aria-controls="collapse_{{ year }}">
+                        <h3 class="year">Год {{ year }} (<span class="filtered hide"><span class="number">-1</span> из </span><span>{{ number }}</span> игр)</h3>
+                    </button>
+                </div>
+                {% if loop.index > 1 %}
+                <div class="progress hide">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-info w-100" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                {% endif %}
+                <div id="collapse_{{ year }}" class="collapse multi-collapse show" aria-labelledby="heading_{{ year }}" data-year="{{ year }}">
+                    <div class="no_results hide text-center">Ничего не найдено</div>
+                    <div class="card-body p-0 {{'not-loaded' if loop.index > 1 else ''}}">
+                    {% if loop.index == 1 %}
+                        {# day_by_games будет обработан шаблоном year_by_game.html #}
+                        {% include 'lenta/year_by_game.html' %}
+                    {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <script src="{{ url_for('lenta.static', filename='js/index.js') }}"></script>
+</body>
+</html>

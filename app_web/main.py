@@ -6,9 +6,9 @@ __author__ = "ipetrash"
 
 import json
 import re
-import os.path
 
 from enum import Enum
+from pathlib import Path
 
 from flask import render_template, request, jsonify, send_from_directory
 
@@ -17,7 +17,10 @@ import config
 from app_parser import logic
 from app_parser import models
 from app_parser.main import run as run_check_of_price
+
 from app_web.app import app, log
+from app_web.auth import auth
+
 from common import WebUserAlertException, FINISHED_GAME, FINISHED_WATCHED
 from db import Game, Genre, Settings
 from integrator_genres.main import fill_from_current_games as run_check_of_genres
@@ -35,19 +38,16 @@ def check_form_params(form: dict, *args):
             raise WebUserAlertException(text)
 
 
-TITLE_FINISHED_GAME = "Пройденные игры"
-TITLE_FINISHED_WATCHED = "Просмотренные игры"
-
-KIND_BY_TITLE = {
-    FINISHED_GAME: TITLE_FINISHED_GAME,
-    FINISHED_WATCHED: TITLE_FINISHED_WATCHED,
+KIND_BY_TITLE: dict[str, str] = {
+    FINISHED_GAME: "Пройденные игры",
+    FINISHED_WATCHED: "Просмотренные игры",
 }
 
 
 def prepare_response(
     status: StatusEnum,
     text: str,
-    result: None | list[models.GameInfo]
+    result: None | list[models.GameInfo],
 ) -> dict:
     return {
         "status": status,
@@ -57,12 +57,12 @@ def prepare_response(
 
 
 @app.route("/")
+@auth.login_required
 def index():
     log.debug("Call index")
 
     return render_template(
         "index.html",
-
         # Parameters to template
         last_run_date=Settings.get_value("last_run_date"),
         db_file_name=config.DB_FILE_NAME,
@@ -431,6 +431,21 @@ def get_games():
     return jsonify(data)
 
 
+@app.route("/api/search/<path:text>")
+def get_api_search(text: str):
+    """
+    Функция для возврата списка игр по названию.
+
+    """
+
+    log.debug(f"Call get_api_search(text={text!r})")
+
+    items = logic.search(text)
+    log.debug(f"Found: {len(items)}")
+
+    return jsonify(items)
+
+
 @app.route("/api/delete_game", methods=["POST"])
 def delete_game():
     """
@@ -474,14 +489,12 @@ def delete_game():
 @app.route("/favicon.ico")
 def favicon():
     return send_from_directory(
-        os.path.join(app.root_path, "static/images"), "favicon.png"
+        directory=Path(app.root_path) / "static/images",
+        path="favicon.png",
     )
 
 
 if __name__ == "__main__":
     # app.debug = True
 
-    app.run(port=config.PORT_WEB)
-
-    # # Public IP
-    # app.run(host='0.0.0.0')
+    app.run(host="0.0.0.0", port=config.PORT_WEB)

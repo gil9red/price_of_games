@@ -85,10 +85,20 @@
             <div id="left-side" class="col">
                 <nav>
                     <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                        <a class="nav-item nav-link active" id="nav-stats-tab" data-toggle="tab" href="#nav-stats" role="tab" aria-controls="nav-stats" aria-selected="true">Статистика</a>
-                        <a class="nav-item nav-link" id="nav-settings-tab" data-toggle="tab" href="#nav-settings" role="tab" aria-controls="nav-settings" aria-selected="false">Настройки</a>
-                        <a class="nav-item nav-link" id="nav-debug-tab" data-toggle="tab" href="#nav-debug" role="tab" aria-controls="nav-debug" aria-selected="false">Отладка</a>
-                        <a class="ml-auto collapsed glyphicon-eye-close p-0" data-toggle="collapse" href="#fixed_right_panel" role="button" aria-expanded="false" aria-controls="fixed_right_panel"></a>
+                        <a class="nav-item nav-link active" id="nav-stats-tab" data-toggle="tab" href="#nav-stats" role="tab" aria-controls="nav-stats" aria-selected="true">
+                            <span class="glyphicon glyphicon-dashboard"></span> Статистика
+                        </a>
+                        <a class="nav-item nav-link" id="nav-settings-tab" data-toggle="tab" href="#nav-settings" role="tab" aria-controls="nav-settings" aria-selected="false">
+                            <span class="glyphicon glyphicon-cog"></span> Настройки
+                        </a>
+                        <a class="nav-item nav-link" id="nav-debug-tab" data-toggle="tab" href="#nav-debug" role="tab" aria-controls="nav-debug" aria-selected="false">
+                            <span class="glyphicon glyphicon-wrench"></span> Отладка
+                        </a>
+
+                        <a class="ml-auto mr-2" href="{{ url_for('lenta.index') }}" title="Лента игр">
+                            <img class="mt-1" src="{{ url_for('lenta.static', filename='images/favicon.png') }}" width="25" height="25">
+                        </a>
+                        <a class="collapsed glyphicon-eye-close" data-toggle="collapse" href="#fixed_right_panel" role="button" aria-expanded="false" aria-controls="fixed_right_panel"></a>
                     </div>
                 </nav>
                 <div class="tab-content" id="nav-tabContent">
@@ -97,7 +107,7 @@
                             <tr>
                                 <td class="pr-2">Пройденных игр:</td>
                                 <td>
-                                    <span class="number_finished_games"></span>&nbsp;<span class="finished_game_statistic"></span>
+                                    <span class="number_finished_games"></span><span> <span class="finished_game_statistic"></span></span>
                                 </td>
                                 <td class="pl-5"></td>
                                 <td class="pr-2">Итого по пройденным играм:</td>
@@ -106,7 +116,7 @@
                             <tr>
                                 <td class="pr-2">Просмотренных игр:</td>
                                 <td>
-                                    <span class="number_finished_watched_games"></span>&nbsp;<span class="finished_watched_game_statistic"></span>
+                                    <span class="number_finished_watched_games"></span> <span class="finished_watched_game_statistic"></span>
                                 </td>
                                 <td></td>
                                 <td class="pr-2">Итого по просмотренным играм:</td>
@@ -115,7 +125,7 @@
                             <tr>
                                 <td class="pr-2">Всего игр:</td>
                                 <td>
-                                    <span class="sum_number_games"></span>&nbsp;<span class="games_statistic"></span>
+                                    <span class="sum_number_games"></span> <span class="games_statistic"></span>
                                 </td>
                                 <td></td>
                                 <td class="pr-2">Общая сумма:</td>
@@ -195,16 +205,22 @@
                             <th>Тип</th>
                             <th>Название</th>
                             <th>Платформа</th>
-                            <th>Дата добавления</th>
-                            <th>Цена (руб.)</th>
+                            <th>Добавлено</th>
+                            <th>Цена</th>
                         </tr>
                     </thead>
                     <tfoot>
                         <tr>
                             <th></th> <!-- Колонка для кнопки раскрытия деталей -->
-                            <th class="p-0 column-kind"></th>
-                            <th class="p-0"></th>
-                            <th class="p-0"></th>
+                            <th class="p-0 column-kind">
+                                <input placeholder="..." />
+                            </th>
+                            <th class="p-0 column-name">
+                                <input placeholder="Жанры..." />
+                            </th>
+                            <th class="p-0 column-platform">
+                                <input placeholder="..." />
+                            </th>
                             <th class="text-right">Итого:</th>
                             <th></th>
                         </tr>
@@ -248,7 +264,7 @@
                                                     data-game-platform=""
                                                 >
                                                     <img src="{{ url_for('static', filename='images/search/google_favicon.ico') }}" alt="google" title="Поиск игры в гугле">
-                                                    Поиск игры в гугле
+                                                    Поиск в гугле
                                                 </a>
                                                 <a
                                                     class="dropdown-item"
@@ -258,7 +274,7 @@
                                                     data-game-platform=""
                                                 >
                                                     <img src="{{ url_for('static', filename='images/search/english-icon.svg') }}" alt="google en" title="Поиск игры в гугле на английском">
-                                                    Поиск игры в гугле на английском
+                                                    Поиск в гугле (en)
                                                 </a>
                                             </div>
                                         </div>
@@ -275,7 +291,7 @@
                                                     data-game-platform=""
                                                 >
                                                     <img src="{{ url_for('static', filename='images/search/google_favicon.ico') }}" alt="google" title="Поиск игры в гугле">
-                                                    Поиск игры в гугле
+                                                    Поиск в гугле
                                                 </a>
                                                 <a
                                                     class="dropdown-item"
@@ -285,7 +301,7 @@
                                                     data-game-platform=""
                                                 >
                                                     <img src="{{ url_for('static', filename='images/search/english-icon.svg') }}" alt="google en" title="Поиск игры в гугле на английском">
-                                                    Поиск игры в гугле на английском
+                                                    Поиск в гугле (en)
                                                 </a>
                                                 <a
                                                     class="dropdown-item steam"
@@ -306,7 +322,7 @@
                     </div>
                     <hr/>
                     <div class="container p-0">
-                        <div class="card-header">
+                        <div class="card-header pl-2 pr-2">
                             <button class="btn w-100 collapsed"
                                     data-toggle="collapse" data-target="#more_actions"
                                     aria-expanded="false" aria-controls="more_actions"
@@ -340,7 +356,7 @@
                                                     data-game-name=""
                                                 >
                                                     <img src="{{ url_for('static', filename='images/search/google_favicon.ico') }}" alt="google" title="Поиск игры в гугле">
-                                                    Поиск игры в гугле
+                                                    Поиск в гугле
                                                 </a>
                                                 <a
                                                     class="dropdown-item"
@@ -349,7 +365,7 @@
                                                     data-game-name=""
                                                 >
                                                     <img src="{{ url_for('static', filename='images/search/english-icon.svg') }}" alt="google en" title="Поиск игры в гугле на английском">
-                                                    Поиск игры в гугле на английском
+                                                    Поиск в гугле (en)
                                                 </a>
                                                 <a
                                                     class="dropdown-item"
@@ -358,7 +374,7 @@
                                                     data-game-name=""
                                                 >
                                                     <img src="{{ url_for('static', filename='images/search/gamefaqs_gamespot_favicon.ico') }}" alt="gamefaqs" title="Поиск игры в gamefaqs">
-                                                    Поиск игры в gamefaqs
+                                                    Поиск в gamefaqs
                                                 </a>
                                             </div>
                                         </div>
@@ -374,7 +390,7 @@
                                                     data-game-name=""
                                                 >
                                                     <img src="{{ url_for('static', filename='images/search/google_favicon.ico') }}" alt="google" title="Поиск игры в гугле">
-                                                    Поиск игры в гугле
+                                                    Поиск в гугле
                                                 </a>
                                                 <a
                                                     class="dropdown-item"
@@ -383,7 +399,7 @@
                                                     data-game-name=""
                                                 >
                                                     <img src="{{ url_for('static', filename='images/search/english-icon.svg') }}" alt="google en" title="Поиск игры в гугле на английском">
-                                                    Поиск игры в гугле на английском
+                                                    Поиск в гугле (en)
                                                 </a>
                                                 <a
                                                     class="dropdown-item"
@@ -392,7 +408,7 @@
                                                     data-game-name=""
                                                 >
                                                     <img src="{{ url_for('static', filename='images/search/gamefaqs_gamespot_favicon.ico') }}" alt="gamefaqs" title="Поиск игры в gamefaqs">
-                                                    Поиск игры в gamefaqs
+                                                    Поиск в gamefaqs
                                                 </a>
                                             </div>
                                         </div>

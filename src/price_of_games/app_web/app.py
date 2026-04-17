@@ -9,6 +9,7 @@ import sys
 
 from datetime import timedelta
 from logging.handlers import RotatingFileHandler
+from pathlib import Path
 
 from flask import Flask
 
@@ -16,7 +17,10 @@ from price_of_games.app_web.lenta import bp as lenta_bp
 from price_of_games.config import DIR_LOGS, SECRET_KEY
 
 
-app = Flask("web__price_of_games")
+app = Flask(
+    __name__,
+    root_path=str(Path(__file__).resolve().parent),
+)
 app.json.sort_keys = False
 app.permanent_session_lifetime = timedelta(days=365)
 app.secret_key = SECRET_KEY

@@ -7,9 +7,9 @@ __author__ = "ipetrash"
 from pathlib import Path
 from urllib.parse import quote
 
-from config import PORT_GET_GAME_GENRES
-from common import get_logger
-from db import Game, Genre, ResultEnum
+from price_of_games.config import PORT_GET_GAME_GENRES
+from price_of_games.common import get_logger
+from price_of_games.db import Game, Genre, ResultEnum
 
 import requests
 

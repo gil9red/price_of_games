@@ -9,8 +9,8 @@ from datetime import datetime
 
 from peewee import SqliteDatabase
 
-from common import FINISHED_GAME
-from db import (
+from price_of_games.common import FINISHED_GAME
+from price_of_games.db import (
     NotDefinedParameterException,
     ResultEnum,
     BaseModel,
@@ -21,7 +21,7 @@ from db import (
     Settings,
     db,
 )
-from app_web.lenta import (
+from price_of_games.app_web.lenta import (
     get_games,
     get_games_by_year,
     get_day_by_games,

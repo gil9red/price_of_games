@@ -9,11 +9,11 @@ from unittest.mock import patch
 
 import requests
 
-import db
+from price_of_games import db
 
-from app_parser.models import Game
-from common import FINISHED_GAME, FINISHED_WATCHED
-from integrity_check import CheckInfo, integrity_check
+from price_of_games.app_parser.models import Game
+from price_of_games.common import FINISHED_GAME, FINISHED_WATCHED
+from price_of_games.integrity_check import CheckInfo, integrity_check
 
 from tests.test_app_web import ATestCaseDb
 from tests.test_app_parser import create_patch_requests_send

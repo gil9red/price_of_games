@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import requests
-from db import Game, Platform
+from price_of_games.db import Game, Platform
 
 
 rs = requests.get("http://127.0.0.1:10015/api/get_all_finished")

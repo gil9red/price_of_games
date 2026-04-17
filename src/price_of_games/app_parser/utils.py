@@ -17,12 +17,12 @@ from typing import Callable
 from bs4 import BeautifulSoup
 import requests
 
-from app_parser.models import Game
-from config import BACKUP_DIR_LIST
-from common import log_common
-from third_party.add_notify_telegram import add_notify
-from third_party.mini_played_games_parser import parse_played_games
-from third_party.get_price_game.from_gog_v2 import get_games as get_games_from_gog
+from price_of_games.app_parser.models import Game
+from price_of_games.config import BACKUP_DIR_LIST
+from price_of_games.common import log_common
+from price_of_games.third_party.add_notify_telegram import add_notify
+from price_of_games.third_party.mini_played_games_parser import parse_played_games
+from price_of_games.third_party.get_price_game.from_gog_v2 import get_games as get_games_from_gog
 
 
 @dataclass

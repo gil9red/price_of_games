@@ -12,18 +12,18 @@ from pathlib import Path
 
 from flask import render_template, request, jsonify, send_from_directory
 
-import config
+from price_of_games import config
 
-from app_parser import logic
-from app_parser import models
-from app_parser.main import run as run_check_of_price
+from price_of_games.app_parser import logic
+from price_of_games.app_parser import models
+from price_of_games.app_parser.main import run as run_check_of_price
 
-from app_web.app import app, log
-from app_web.auth import auth
+from price_of_games.app_web.app import app, log
+from price_of_games.app_web.auth import auth
 
-from common import WebUserAlertException, FINISHED_GAME, FINISHED_WATCHED
-from db import Game, Genre, Settings
-from integrator_genres.main import fill_from_current_games as run_check_of_genres
+from price_of_games.common import WebUserAlertException, FINISHED_GAME, FINISHED_WATCHED
+from price_of_games.db import Game, Genre, Settings
+from price_of_games.integrator_genres.main import fill_from_current_games as run_check_of_genres
 
 
 class StatusEnum(str, Enum):

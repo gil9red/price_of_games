@@ -12,8 +12,8 @@ from logging.handlers import RotatingFileHandler
 
 from flask import Flask
 
-from app_web.lenta import bp as lenta_bp
-from config import DIR_LOGS, SECRET_KEY
+from price_of_games.app_web.lenta import bp as lenta_bp
+from price_of_games.config import DIR_LOGS, SECRET_KEY
 
 
 app = Flask("web__price_of_games")

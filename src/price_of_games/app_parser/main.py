@@ -13,12 +13,12 @@ __author__ = "ipetrash"
 
 from datetime import datetime
 
-from app_parser.utils import Game, get_games
-from app_parser.logic import append_games_to_database, fill_price_of_games
-from common import get_logger, FINISHED_GAME, FINISHED_WATCHED
-from db import Settings, db_create_backup
-from integrity_check import run as run_integrity_check
-from integrator_genres.main import run as fill_genres_of_games
+from price_of_games.app_parser.utils import Game, get_games
+from price_of_games.app_parser.logic import append_games_to_database, fill_price_of_games
+from price_of_games.common import get_logger, FINISHED_GAME, FINISHED_WATCHED
+from price_of_games.db import Settings, db_create_backup
+from price_of_games.integrity_check import run as run_integrity_check
+from price_of_games.integrator_genres.main import run as fill_genres_of_games
 
 # pip install simple-wait
 from simple_wait import wait

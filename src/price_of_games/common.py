@@ -9,8 +9,8 @@ import sys
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
-from config import DIR_LOGS
-from third_party import mini_played_games_parser
+from price_of_games.config import DIR_LOGS
+from price_of_games.third_party import mini_played_games_parser
 
 
 class WebUserAlertException(Exception):

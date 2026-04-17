@@ -8,8 +8,7 @@ from flask import session, request
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
 
-import config
-
+from price_of_games import config
 
 auth = HTTPBasicAuth()
 

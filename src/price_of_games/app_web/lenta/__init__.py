@@ -10,9 +10,9 @@ from pathlib import Path
 
 from flask import Blueprint, render_template, send_from_directory
 
-from app_web.auth import auth
-from db import Game, Platform
-from third_party.mini_played_games_parser import FINISHED_GAME, FINISHED_WATCHED
+from price_of_games.app_web.auth import auth
+from price_of_games.db import Game, Platform
+from price_of_games.third_party.mini_played_games_parser import FINISHED_GAME, FINISHED_WATCHED
 
 
 DIR: Path = Path(__file__).resolve().parent

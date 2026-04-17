@@ -4,7 +4,7 @@
 __author__ = "ipetrash"
 
 
-from db import Game
+from price_of_games.db import Game
 
 
 hour_by_number: dict[int, int] = {i: 0 for i in range(24)}

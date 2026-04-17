@@ -15,14 +15,14 @@ from requests import Response
 
 # TODO: Тестирование других модулей из app_parser/
 
-from app_parser.utils import Game, smart_comparing_names, get_games
-from common import (
+from price_of_games.app_parser.utils import Game, smart_comparing_names, get_games
+from price_of_games.common import (
     FINISHED_GAME,
     FINISHED_WATCHED,
     NOT_FINISHED_GAME,
     NOT_FINISHED_WATCHED,
 )
-from third_party.mini_played_games_parser import parse_played_games
+from price_of_games.third_party.mini_played_games_parser import parse_played_games
 
 
 def create_patch_requests_send(file_text: str):

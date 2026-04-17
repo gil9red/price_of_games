@@ -8,17 +8,17 @@ import time
 
 from cachetools.func import ttl_cache
 
-from common import (
+from price_of_games.common import (
     FINISHED_GAME,
     FINISHED_WATCHED,
     WebUserAlertException,
     log_common,
     log_append_game,
 )
-from db import ResultEnum, Game, Platform
+from price_of_games.db import ResultEnum, Game, Platform
 
-from app_parser import models
-from app_parser.utils import get_price as get_price_game, smart_comparing_names
+from price_of_games.app_parser import models
+from price_of_games.app_parser.utils import get_price as get_price_game, smart_comparing_names
 
 
 def get_game_info(game: int | Game) -> models.GameInfo:

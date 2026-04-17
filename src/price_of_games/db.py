@@ -24,9 +24,9 @@ from peewee import (
 )
 from playhouse.sqliteq import SqliteQueueDatabase
 
-from config import BACKUP_DIR_LIST, DB_FILE_NAME, DB_DIR_NAME
-from third_party.db_peewee_meta_model import MetaModel
-from third_party.ttl_cache import ttl_cache
+from price_of_games.config import BACKUP_DIR_LIST, DB_FILE_NAME, DB_DIR_NAME
+from price_of_games.third_party.db_peewee_meta_model import MetaModel
+from price_of_games.third_party.ttl_cache import ttl_cache
 
 
 class NotDefinedParameterException(Exception):

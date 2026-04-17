@@ -7,8 +7,8 @@ __author__ = "ipetrash"
 from datetime import datetime
 from pathlib import Path
 
-from common import get_logger
-from db import Game
+from price_of_games.common import get_logger
+from price_of_games.db import Game
 
 
 log = get_logger(Path(__file__).resolve().stem)

@@ -8,7 +8,7 @@ __author__ = "ipetrash"
 
 
 from playhouse.migrate import SqliteDatabase, SqliteMigrator, TextField, migrate
-from config import DB_FILE_NAME
+from price_of_games.config import DB_FILE_NAME
 
 
 db = SqliteDatabase(DB_FILE_NAME)

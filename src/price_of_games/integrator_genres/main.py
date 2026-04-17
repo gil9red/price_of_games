@@ -4,15 +4,18 @@
 __author__ = "ipetrash"
 
 
+import time
+
 from pathlib import Path
 from urllib.parse import quote
 
 from price_of_games.config import PORT_GET_GAME_GENRES
 from price_of_games.common import get_logger
 from price_of_games.db import Game, Genre, ResultEnum
+from price_of_games.third_party.add_notify_telegram import add_notify
 
 import requests
-
+from requests.exceptions import ConnectionError
 
 log = get_logger(Path(__file__).resolve().parent.name)
 
@@ -144,8 +147,26 @@ def actualize_current_games() -> list[int]:
 
 
 def run() -> None:
-    fill_genres()
-    actualize_current_games()
+    last_error_text: str | None = None
+    for _ in range(3):
+        try:
+            fill_genres()
+            actualize_current_games()
+            return
+        except Exception as e:
+            if isinstance(e, ConnectionError):
+                last_error_text = f"Сервер недоступен: {e.request.url}"
+            else:
+                last_error_text = str(e)
+
+            log.exception("Ошибка:")
+            log.debug("Через 20 секунд попробую снова...")
+            time.sleep(20)
+
+    if last_error_text:
+        text: str = last_error_text
+        log.info(f"Отправка уведомления:\n{text}")
+        add_notify(name="Цены игр [Интегратор жанров]", message=text)
 
 
 if __name__ == "__main__":

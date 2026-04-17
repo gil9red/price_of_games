@@ -83,7 +83,7 @@ def run() -> tuple[list[int], list[int]]:
     return added_finished_game_ids, added_watched_game_ids
 
 
-def run_loop():
+def run_loop() -> None:
     while True:
         try:
             run()
@@ -99,7 +99,7 @@ def run_loop():
             wait(minutes=5)
 
 
-def main():
+def main() -> None:
     if IS_LOOP:
         run_loop()
         return

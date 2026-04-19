@@ -425,6 +425,7 @@ def get_games():
 
     log.debug("Call get_games")
 
+    logic.get_games.cache_clear()  # NOTE: Чтобы сбросить кэш для GUI
     data = logic.get_games()
     log.debug(f"Total games: {len(data)}")
 

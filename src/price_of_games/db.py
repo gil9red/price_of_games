@@ -24,9 +24,10 @@ from peewee import (
 )
 from playhouse.sqliteq import SqliteQueueDatabase
 
+from cachetools.func import ttl_cache
+
 from price_of_games.config import BACKUP_DIR_LIST, DB_FILE_NAME, DB_DIR_NAME
 from price_of_games.third_party.db_peewee_meta_model import MetaModel
-from price_of_games.third_party.ttl_cache import ttl_cache
 
 
 class NotDefinedParameterException(Exception):
@@ -118,13 +119,18 @@ class Genre(BaseModel):
     description = TextField()
     aliases = TextField(default="")
 
-    # TODO: Немного неэффективно, но пока так
-    # TODO: Можно попробовать в BaseModel перекрыть методы типа get_by_id и get_or_none, добавив кэширование
-    #       Возможно, peewee внутри по другому работает с методами
     @classmethod
-    @ttl_cache(ttl_seconds=5 * 60)
+    @ttl_cache(ttl=5 * 60)
     def get_from_cache(cls, genre_id: int) -> "Genre":
         return cls.get_by_id(genre_id)
+
+    def save(self, *args, **kwargs):
+        Genre.get_from_cache.cache_clear()
+        return super().save(*args, **kwargs)
+
+    def delete_instance(self, *args, **kwargs):
+        Genre.get_from_cache.cache_clear()
+        return super().delete_instance(*args, **kwargs)
 
     @classmethod
     def get_by(cls, name: str) -> Optional["Genre"]:

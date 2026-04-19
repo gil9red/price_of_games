@@ -139,27 +139,34 @@ class TestCaseDb(ATestCaseDb):
                 isinstance(game.modify_price_date, datetime),
             )
 
-        genres = ["RPG", "Action", "Spy"]
-        for name in genres:
-            Genre.add_or_update(name=name, description="")
+        genres: list[Genre] = []
+        for name in ["RPG", "Action", "Spy"]:
+            result, genre = Genre.add_or_update(name=name, description="")
+            self.assertEqual(ResultEnum.ADDED, result)
+            genres.append(genre)
+        genres.sort(key=lambda item: item.name)
 
         with self.subTest("self.add_genre / self.get_genres"):
             self.assertEqual(0, len(game.get_genres()))
-            for name in genres:
-                game.add_genre(name)
+            for genre in genres:
+                game.add_genre(genre)
             self.assertEqual(len(genres), len(game.get_genres()))
+            self.assertEqual(genres, game.get_genres())
 
             # Несуществующий жанр
             with self.assertRaises(Exception):
-                game.add_genre(genres[0] * 2)
+                game.add_genre(genres[0].name + "!!!")
 
             # Проверяем, что дубликаты не появятся
-            for name in genres:
-                game.add_genre(name)
+            for genre in genres:
+                result, _ = game.add_genre(genre)
+                self.assertEqual(ResultEnum.NOTHING, result)
 
-            game.add_genre(Genre.get_by(genres[0]))
+                result, _ = game.add_genre(genre.name)
+                self.assertEqual(ResultEnum.NOTHING, result)
 
             self.assertEqual(len(genres), len(game.get_genres()))
+            self.assertEqual(genres, game.get_genres())
 
         with self.subTest("self.set_genres"):
             game = Game.add(name="set_genres", platform=platform, kind=kind)
@@ -178,24 +185,24 @@ class TestCaseDb(ATestCaseDb):
             result = game.set_genres(genres)
             self.assertEqual(
                 {
-                    ResultEnum.ADDED: 3,
+                    ResultEnum.ADDED: len(genres),
                     ResultEnum.DELETED: 0,
                     ResultEnum.NOTHING: 0,
                 },
                 result,
             )
-            self.assertEqual(3, len(game.get_genres()))
+            self.assertEqual(len(genres), len(game.get_genres()))
 
             result = game.set_genres(genres)
             self.assertEqual(
                 {
                     ResultEnum.ADDED: 0,
                     ResultEnum.DELETED: 0,
-                    ResultEnum.NOTHING: 3,
+                    ResultEnum.NOTHING: len(genres),
                 },
                 result,
             )
-            self.assertEqual(3, len(game.get_genres()))
+            self.assertEqual(len(genres), len(game.get_genres()))
 
             result = game.set_genres(
                 [genres[0], Genre.add_or_update(name="1234", description="")[1].name]
@@ -226,7 +233,7 @@ class TestCaseDb(ATestCaseDb):
         with self.subTest("cls.count"):
             self.assertEqual(0, Genre.count())
 
-        genres = ["RPG", "Action", "Spy"]
+        genres: list[str] = ["RPG", "Action", "Spy"]
 
         with self.subTest("cls.get_by"):
             self.assertIsNone(Genre.get_by(name=genres[0]))
@@ -265,10 +272,11 @@ class TestCaseDb(ATestCaseDb):
         with self.subTest("cls.count"):
             self.assertEqual(0, Game2Genre.count())
 
-        genres = []
+        genres: list[Genre] = []
         for name in ["RPG", "Action", "Spy"]:
             _, genre = Genre.add_or_update(name=name, description="")
             genres.append(genre)
+        genres.sort(key=lambda item: item.name)
 
         kind = FINISHED_GAME
         platform = Platform.add("PC")
@@ -281,8 +289,10 @@ class TestCaseDb(ATestCaseDb):
         self.assertEqual(len(genres) * len(games), Game2Genre.count())
 
         with self.subTest("self.links_to_genres"):
-            game = games[0]
-            game_genres = [link.genre for link in game.links_to_genres]
+            game: Game = games[0]
+            game_genres: list[Genre] = [link.genre for link in game.links_to_genres]
+            game_genres.sort(key=lambda item: item.name)
+
             self.assertEqual(len(genres), len(game_genres))
             self.assertEqual(genres, game_genres)
 

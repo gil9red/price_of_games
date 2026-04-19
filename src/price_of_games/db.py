@@ -234,14 +234,16 @@ class Game(BaseModel):
         items.sort(key=lambda x: x.name)
         return items
 
-    def set_genres(self, genres: list[str]) -> dict[ResultEnum, int]:
+    def set_genres(self, genres: list[str] | list[Genre]) -> dict[ResultEnum, int]:
         result = {
             ResultEnum.ADDED: 0,
             ResultEnum.DELETED: 0,
             ResultEnum.NOTHING: 0,
         }
 
-        genres: list[Genre] = [Genre.get_by(name) for name in genres]
+        if genres and isinstance(genres[0], str):
+            genres: list[Genre] = [Genre.get_by(name) for name in genres]
+
         current_genres: list[Genre] = [link.genre for link in self.links_to_genres]
 
         # Если игры есть жанры, которых нет среди тех, что были переданы

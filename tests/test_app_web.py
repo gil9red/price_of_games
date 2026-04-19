@@ -204,6 +204,17 @@ class TestCaseDb(ATestCaseDb):
             )
             self.assertEqual(len(genres), len(game.get_genres()))
 
+            result = game.set_genres([genre.name for genre in genres])
+            self.assertEqual(
+                {
+                    ResultEnum.ADDED: 0,
+                    ResultEnum.DELETED: 0,
+                    ResultEnum.NOTHING: len(genres),
+                },
+                result,
+            )
+            self.assertEqual(len(genres), len(game.get_genres()))
+
             result = game.set_genres(
                 [genres[0], Genre.add_or_update(name="1234", description="")[1].name]
             )

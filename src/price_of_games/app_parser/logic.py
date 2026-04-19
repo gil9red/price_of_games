@@ -18,7 +18,10 @@ from price_of_games.common import (
 from price_of_games.db import ResultEnum, Game, Platform
 
 from price_of_games.app_parser import models
-from price_of_games.app_parser.utils import get_price as get_price_game, smart_comparing_names
+from price_of_games.app_parser.utils import (
+    get_price as get_price_game,
+    smart_comparing_names,
+)
 
 
 def get_game_info(game: int | Game) -> models.GameInfo:
@@ -48,12 +51,7 @@ def get_games() -> list[models.GameInfo]:
 
     """
 
-    query = (
-        Game.select()
-        .where(Game.kind.in_([FINISHED_GAME, FINISHED_WATCHED]))
-        .order_by(Game.append_date.desc())
-    )
-    return [get_game_info(game) for game in query]
+    return [get_game_info(game) for game in Game.get_games()]
 
 
 def search(text: str) -> list[models.GameInfo]:

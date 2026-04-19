@@ -72,6 +72,21 @@ class TestCaseDb(ATestCaseDb):
         kind = FINISHED_GAME
         platform = Platform.add("PC")
 
+        with self.subTest("cls.get_games"):
+            key_sort = lambda item: item.id
+
+            games: list[Game] = []
+            for i in range(10):
+                game = Game.add(f"get_games-name-{i+1}", platform, kind)
+                games.append(game)
+            games.sort(key=key_sort)
+
+            self.assertEqual(games, sorted(Game.get_games(), key=key_sort))
+            self.assertEqual(games, sorted(Game.select(), key=key_sort))
+
+            for game in games:
+                game.delete_instance()
+
         with self.subTest("cls.add"):
             name = "game1"
 

@@ -21,12 +21,12 @@ from peewee import (
     BooleanField,
     IntegerField,
     fn,
+    prefetch,
 )
 from playhouse.sqliteq import SqliteQueueDatabase
 
-from cachetools.func import ttl_cache
-
 from price_of_games.config import BACKUP_DIR_LIST, DB_FILE_NAME, DB_DIR_NAME
+from price_of_games.common import FINISHED_GAME, FINISHED_WATCHED
 from price_of_games.third_party.db_peewee_meta_model import MetaModel
 
 
@@ -120,19 +120,6 @@ class Genre(BaseModel):
     aliases = TextField(default="")
 
     @classmethod
-    @ttl_cache(ttl=5 * 60)
-    def get_from_cache(cls, genre_id: int) -> "Genre":
-        return cls.get_by_id(genre_id)
-
-    def save(self, *args, **kwargs):
-        Genre.get_from_cache.cache_clear()
-        return super().save(*args, **kwargs)
-
-    def delete_instance(self, *args, **kwargs):
-        Genre.get_from_cache.cache_clear()
-        return super().delete_instance(*args, **kwargs)
-
-    @classmethod
     def get_by(cls, name: str) -> Optional["Genre"]:
         if not name or not name.strip():
             raise NotDefinedParameterException(parameter_name="name")
@@ -185,6 +172,19 @@ class Game(BaseModel):
         )
 
     @classmethod
+    def get_games(cls) -> list["Game"]:
+        games_query = (
+            # NOTE: Добавление Join Platform убирает подзапрос к Platform в get_game_info, что ускоряет выборку
+            cls.select(cls, Platform).join(Platform)
+            .where(cls.kind.in_([FINISHED_GAME, FINISHED_WATCHED]))
+            .order_by(cls.append_date.desc())
+        )
+        # Для заполнения поля Game.links_to_genres, чтобы не делать подзапросы для каждого объекта
+        genres_query = Game2Genre.select(Game2Genre, Genre).join(Genre)
+
+        return prefetch(games_query, genres_query)
+
+    @classmethod
     def get_by(cls, name: str, platform: Platform, kind: str) -> Optional["Game"]:
         if not name or not name.strip():
             raise NotDefinedParameterException(parameter_name="name")
@@ -227,10 +227,7 @@ class Game(BaseModel):
         return ResultEnum.ADDED, genre
 
     def get_genres(self) -> list[Genre]:
-        items: list[Genre] = [
-            Genre.get_from_cache(link.genre_id)
-            for link in self.links_to_genres.select(Game2Genre.genre_id)
-        ]
+        items: list[Genre] = [link.genre for link in self.links_to_genres]
         items.sort(key=lambda x: x.name)
         return items
 

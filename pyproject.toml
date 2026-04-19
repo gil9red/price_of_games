@@ -1,6 +1,6 @@
 [project]
 name = "price-of-games"
-version = "2026.4.16"
+version = "2026.4.19"
 description = "Скрипт, имея список игр, ищет для них цену"
 requires-python = ">=3.10"
 dependencies = [

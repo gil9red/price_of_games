@@ -167,15 +167,16 @@ class Game(BaseModel):
     has_checked_price = BooleanField(default=False)
 
     class Meta:
-        indexes = (
+        indexes = [
             (("name", "platform", "kind"), True),
-        )
+        ]
 
     @classmethod
     def get_games(cls) -> list["Game"]:
         games_query = (
             # NOTE: Добавление Join Platform убирает подзапрос к Platform в get_game_info, что ускоряет выборку
-            cls.select(cls, Platform).join(Platform)
+            cls.select(cls, Platform)
+            .join(Platform)
             .where(cls.kind.in_([FINISHED_GAME, FINISHED_WATCHED]))
             .order_by(cls.append_date.desc())
         )
@@ -276,9 +277,9 @@ class Game2Genre(BaseModel):
     genre = ForeignKeyField(Genre, backref="links_to_games")
 
     class Meta:
-        indexes = (
+        indexes = [
             (("game", "genre"), True),
-        )
+        ]
 
 
 class Settings(BaseModel):

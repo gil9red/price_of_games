@@ -26,6 +26,8 @@ BACKUP_DIR_LIST: list[Path] = [
 if additional_backup_dir := os.getenv("ADDITIONAL_BACKUP_DIR"):
     BACKUP_DIR_LIST.append(Path(additional_backup_dir))
 
+LOG_FORMATTER: str = "[%(asctime)s] %(name)s:%(lineno)d %(levelname)-8s %(message)s"
+
 PORT_WEB: int = int(
     os.environ.get("PORT_WEB", 5500)
 )

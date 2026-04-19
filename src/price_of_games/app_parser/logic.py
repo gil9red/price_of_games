@@ -12,12 +12,10 @@ from price_of_games.common import (
     FINISHED_GAME,
     FINISHED_WATCHED,
     WebUserAlertException,
-    log_common,
-    log_append_game,
 )
 from price_of_games.db import ResultEnum, Game, Platform
 
-from price_of_games.app_parser import models
+from price_of_games.app_parser import models, log
 from price_of_games.app_parser.utils import (
     get_price as get_price_game,
     smart_comparing_names,
@@ -93,7 +91,7 @@ def set_price_game(game_name: str, price: int | None) -> list[int]:
 
     if not game_name or price == "" or price is None:
         error_text = f"Не указано game ( = {game_name!r}) или price ( = {price!r})"
-        log_common.error(error_text)
+        log.error(error_text)
         raise WebUserAlertException(error_text)
 
     if price is not None and not isinstance(price, int):
@@ -118,7 +116,7 @@ def set_genres(game_name: str, genres: list[str]) -> list[int]:
 
     if not game_name:
         error_text = f"Не указано название игры ( = {game_name!r})"
-        log_common.error(error_text)
+        log.error(error_text)
         raise WebUserAlertException(error_text)
 
     ids = []
@@ -146,19 +144,19 @@ def rename_game(old_name: str, new_name: str) -> models.RenameGameResult:
         error_text = (
             f"Не указано old_name ( = {old_name!r}) или new_name ( = {new_name!r})"
         )
-        log_common.error(error_text)
+        log.error(error_text)
         raise WebUserAlertException(error_text)
 
     if not has_game(old_name):
         error_text = f"Игры с названием {old_name!r} не существует"
-        log_common.error(error_text)
+        log.error(error_text)
         raise WebUserAlertException(error_text)
 
     if has_game(new_name):
         error_text = (
             f"Нельзя переименовать {old_name!r}, т.к. имя {new_name!r} уже занято"
         )
-        log_common.error(error_text)
+        log.error(error_text)
         raise WebUserAlertException(error_text)
 
     id_games_with_changed_name = []
@@ -197,7 +195,7 @@ def delete_game(game: Game):
 
     except Exception as e:
         error_text = f"При удалении игры {game.name!r} ({game.platform!r}, {game.kind!r}) произошла ошибка: {e}"
-        log_common.error(error_text)
+        log.error(error_text)
         raise WebUserAlertException(error_text)
 
 
@@ -221,7 +219,7 @@ def check_price_all_non_price_games() -> list[models.PriceUpdateResult]:
 
     query = Game.select().where(Game.price.is_null())
     games = list(query)
-    log_common.debug(f"Игр без цены: {len(games)}")
+    log.debug(f"Игр без цены: {len(games)}")
 
     for game in games:
         result = check_and_fill_price_of_game(game.name)
@@ -260,10 +258,7 @@ def append_games_to_database(
         if has:
             return
 
-        log_common.info(f"Добавляю новую игру {name!r} ({game.platform}, {game.kind})")
-        log_append_game.info(
-            f"Добавляю новую игру {name!r} ({game.platform}, {game.kind})"
-        )
+        log.info(f"Добавляю новую игру {name!r} ({game.platform}, {game.kind})")
 
         return Game.add(name, platform, game.kind).id
 
@@ -299,13 +294,13 @@ def check_and_fill_price_of_game_from_cache(
     if not game_list:
         return
 
-    log_common.debug(f"get_game_list_with_price(game={game_name!r}): {game_list}")
+    log.debug(f"get_game_list_with_price(game={game_name!r}): {game_list}")
 
     # Вытащим id, kind и price найденной игры
     game: Game = game_list[0]
     other_id, other_kind, other_price = game.id, game.kind, game.price
 
-    log_common.info(
+    log.info(
         f"Для игры {game_name!r} удалось найти цену {other_price!r} "
         f"из базы, взяв ее из аналога c id={other_id} в категории {other_kind!r}"
     )
@@ -313,8 +308,7 @@ def check_and_fill_price_of_game_from_cache(
     # Отметим, что игра искалась (чтобы она не искалась в нем, если будет вызвана проверка)
     set_checked_price_of_game(game_name, check=True)
 
-    log_common.info(f"Нашли игру: {game_name!r} -> {other_price}")
-    log_append_game.info(f"Нашли игру: {game_name!r} -> {other_price}")
+    log.info(f"Нашли игру: {game_name!r} -> {other_price}")
 
     return models.PriceUpdateResult(
         game_ids=set_price_game(game_name, other_price),
@@ -337,7 +331,7 @@ def check_and_fill_price_of_game(
 
     game_name = game_name.strip()
     if not game_name:
-        log_common.warn(f"Не указано game ( = {game_name!r})")
+        log.warn(f"Не указано game ( = {game_name!r})")
         return models.PriceUpdateResult(
             game_ids=[],
             game_name=game_name,
@@ -353,15 +347,13 @@ def check_and_fill_price_of_game(
             return result
 
     # Поищем игру и ее цену в стиме/gog
-    other_price = get_price_game(game_name, log_common, log_append_game)
+    other_price = get_price_game(game_name)
 
     # Отметим, что игра искалась
     set_checked_price_of_game(game_name, check=True)
 
     if other_price is None:
-        log_common.info(
-            f"Не получилось найти цену игры {game_name!r}, price is {other_price}"
-        )
+        log.info(f"Не получилось найти цену игры {game_name!r}, price is {other_price}")
         return models.PriceUpdateResult(
             game_ids=[],
             game_name=game_name,
@@ -392,10 +384,10 @@ def fill_price_of_games() -> None:
     )
     games_list = list(query)
     if not games_list:
-        log_common.info("Искать цены играм не нужно")
+        log.info("Искать цены играм не нужно")
         return
 
-    log_common.info(f"Нужно найти цену {len(games_list)} играм")
+    log.info(f"Нужно найти цену {len(games_list)} играм")
 
     platform_pc = Platform.get(Platform.name == "PC")
 

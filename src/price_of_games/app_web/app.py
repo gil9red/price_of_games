@@ -14,8 +14,7 @@ from pathlib import Path
 from flask import Flask
 
 from price_of_games.app_web.lenta import bp as lenta_bp
-from price_of_games.config import DIR_LOGS, SECRET_KEY
-
+from price_of_games.config import DIR_LOGS, SECRET_KEY, LOG_FORMATTER
 
 app = Flask(
     __name__,
@@ -25,17 +24,18 @@ app.json.sort_keys = False
 app.permanent_session_lifetime = timedelta(days=365)
 app.secret_key = SECRET_KEY
 
-app.register_blueprint(lenta_bp, url_prefix='/lenta')
+app.register_blueprint(lenta_bp, url_prefix="/lenta")
 
 log: logging.Logger = app.logger
 log.handlers.clear()
 
-formatter = logging.Formatter(
-    "[%(asctime)s] %(filename)s:%(lineno)d %(levelname)-8s %(message)s"
-)
+formatter = logging.Formatter(LOG_FORMATTER)
 
 file_handler = RotatingFileHandler(
-    DIR_LOGS / "web.log", maxBytes=10_000_000, backupCount=5, encoding="utf-8"
+    DIR_LOGS / f"{__name__}.log",
+    maxBytes=10_000_000,
+    backupCount=5,
+    encoding="utf-8",
 )
 file_handler.setLevel(logging.DEBUG)
 file_handler.setFormatter(formatter)

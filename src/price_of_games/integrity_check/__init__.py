@@ -5,18 +5,15 @@ __author__ = "ipetrash"
 
 
 from dataclasses import dataclass, field
-from pathlib import Path
 
 from price_of_games import db
-
 from price_of_games.app_parser.utils import get_games
 from price_of_games.app_parser.models import Game
-
 from price_of_games.common import FINISHED_GAME, FINISHED_WATCHED, get_logger
 from price_of_games.third_party.add_notify_telegram import add_notify
 
 
-log = get_logger(Path(__file__).resolve().parent.name)
+log = get_logger(__name__)
 
 
 @dataclass

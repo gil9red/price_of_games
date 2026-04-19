@@ -15,12 +15,13 @@ import time
 import sys
 from datetime import datetime
 
+from price_of_games.app_parser import log
 from price_of_games.app_parser.utils import Game, get_games
 from price_of_games.app_parser.logic import (
     append_games_to_database,
     fill_price_of_games,
 )
-from price_of_games.common import get_logger, FINISHED_GAME, FINISHED_WATCHED
+from price_of_games.common import FINISHED_GAME, FINISHED_WATCHED
 from price_of_games.db import Settings, db_create_backup
 from price_of_games.integrity_check import run as run_integrity_check
 from price_of_games.integrator_genres.main import run as fill_genres_of_games
@@ -29,8 +30,6 @@ from price_of_games.integrator_genres.main import run as fill_genres_of_games
 from simple_wait import wait
 
 IS_LOOP: bool = "--loop" in sys.argv
-
-log = get_logger("main")
 
 
 def run() -> tuple[list[int], list[int]]:

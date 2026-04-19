@@ -8,7 +8,6 @@ import time
 import re
 import unicodedata
 
-from logging import Logger
 from dataclasses import dataclass
 from datetime import datetime
 from urllib.parse import urljoin
@@ -19,10 +18,12 @@ import requests
 
 from price_of_games.app_parser.models import Game
 from price_of_games.config import BACKUP_DIR_LIST
-from price_of_games.common import log_common
+from price_of_games.app_parser import log
 from price_of_games.third_party.add_notify_telegram import add_notify
 from price_of_games.third_party.mini_played_games_parser import parse_played_games
-from price_of_games.third_party.get_price_game.from_gog_v2 import get_games as get_games_from_gog
+from price_of_games.third_party.get_price_game.from_gog_v2 import (
+    get_games as get_games_from_gog,
+)
 
 
 @dataclass
@@ -32,9 +33,9 @@ class SearchResult:
 
 
 session = requests.Session()
-session.headers[
-    "User-Agent"
-] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101 Firefox/91.0"
+session.headers["User-Agent"] = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101 Firefox/91.0"
+)
 
 # Думаю, это станет дополнительной гарантией получения русскоязычной версии сайта
 session.headers["Accept-Language"] = "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3"
@@ -62,12 +63,12 @@ def get_games() -> list[Game]:
             file_name.write_text(content_gist, "utf-8")
 
         except Exception:
-            log_common.exception("Error:")
+            log.exception("Error:")
 
     errors: list[str] = []
     platforms = parse_played_games(content_gist, errors=errors)
     for error_text in errors:
-        log_common.info(f"Отправка уведомления: {error_text!r}")
+        log.info(f"Отправка уведомления: {error_text!r}")
         add_notify(name="Цены игр", message=error_text)
 
     items: list[Game] = []
@@ -90,17 +91,14 @@ def get_prepared_price(price: str) -> int:
     return price
 
 
-def steam_search_game_price_list(
-    name: str,
-    log_common: Logger | None = None,
-) -> list[SearchResult]:
+def steam_search_game_price_list(name: str) -> list[SearchResult]:
     """
     Функция принимает название игры, после ищет его в стиме и возвращает результат как список
     кортежей из (название игры, цена).
 
     """
 
-    log_common and log_common.debug(f'Поиск в стиме "{name}"')
+    log.debug(f'Поиск в стиме "{name}"')
 
     # Дополнения с категорией Game не ищутся, например: "Pillars of Eternity: The White March Part I", поэтому url
     # был упрощен для поиска всего
@@ -114,9 +112,7 @@ def steam_search_game_price_list(
             break
 
         except Exception:
-            log_common and log_common.exception(
-                "При поиске в стиме что-то пошло не так:"
-            )
+            log.exception("При поиске в стиме что-то пошло не так:")
 
             # Если произошла какая-то ошибка попытаемся через 5 минут попробовать снова
             time.sleep(5 * 60)
@@ -151,7 +147,7 @@ def steam_search_game_price_list(
             )
         )
 
-    log_common and log_common.debug(
+    log.debug(
         f"game_price_list ({len(game_price_list)}): {game_price_list}"
     )
 
@@ -160,17 +156,14 @@ def steam_search_game_price_list(
     return game_price_list
 
 
-def gog_search_game_price_list(
-    name: str,
-    log_common: Logger | None = None,
-) -> list[SearchResult]:
+def gog_search_game_price_list(name: str) -> list[SearchResult]:
     """
     Функция принимает название игры, после ищет его в gog и возвращает результат как список
     кортежей из (название игры, цена).
 
     """
 
-    log_common and log_common.debug(f'Поиск в gog "{name}"')
+    log.debug(f'Поиск в gog "{name}"')
 
     game_price_list = []
 
@@ -182,7 +175,7 @@ def gog_search_game_price_list(
             )
         )
 
-    log_common and log_common.debug(
+    log.debug(
         f"game_price_list ({len(game_price_list)}): {game_price_list}"
     )
 
@@ -305,19 +298,12 @@ def _search_price_from_game_price_list(
             return result.price
 
 
-def get_price(
-    game_name: str,
-    log_common: Logger | None = None,
-    log_append_game: Logger | None = None,
-) -> int | None:
+def get_price(game_name: str) -> int | None:
     def _log_on_found_price(
         game_name: str,
         result: SearchResult,
     ) -> None:
-        log_common and log_common.info(
-            f"Нашли игру: {game_name!r} ({result.name}) -> {result.price}"
-        )
-        log_append_game and log_append_game.info(
+        log.info(
             f"Нашли игру: {game_name!r} ({result.name}) -> {result.price}"
         )
 
@@ -325,7 +311,7 @@ def get_price(
     game_name = game_name.replace(" (DLC)", "")
 
     # Поищем игру и ее цену в стиме
-    game_price_list = steam_search_game_price_list(game_name, log_common)
+    game_price_list = steam_search_game_price_list(game_name)
     price = _search_price_from_game_price_list(
         game_name,
         game_price_list,
@@ -334,10 +320,10 @@ def get_price(
     if price is not None:
         return price
 
-    log_common and log_common.info("Не удалось найти в стиме, поиск в GOG")
+    log.info("Не удалось найти в стиме, поиск в GOG")
 
     # Поищем игру и ее цену в gog
-    game_price_list = gog_search_game_price_list(game_name, log_common)
+    game_price_list = gog_search_game_price_list(game_name)
     return _search_price_from_game_price_list(
         game_name,
         game_price_list,

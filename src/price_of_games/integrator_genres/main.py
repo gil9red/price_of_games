@@ -5,8 +5,6 @@ __author__ = "ipetrash"
 
 
 import time
-
-from pathlib import Path
 from urllib.parse import quote
 
 from price_of_games.config import PORT_GET_GAME_GENRES
@@ -17,7 +15,7 @@ from price_of_games.third_party.add_notify_telegram import add_notify
 import requests
 from requests.exceptions import ConnectionError
 
-log = get_logger(Path(__file__).resolve().parent.name)
+log = get_logger(__name__)
 
 
 URL_BASE: str = f"http://127.0.0.1:{PORT_GET_GAME_GENRES}"

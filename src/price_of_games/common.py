@@ -9,7 +9,7 @@ import sys
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
-from price_of_games.config import DIR_LOGS
+from price_of_games.config import DIR_LOGS, LOG_FORMATTER
 from price_of_games.third_party import mini_played_games_parser
 
 
@@ -34,9 +34,7 @@ def get_logger(
     log = logging.getLogger(logger_name)
     log.setLevel(logging.DEBUG)
 
-    formatter = logging.Formatter(
-        "[%(asctime)s] %(filename)s[LINE:%(lineno)d] %(levelname)-8s %(message)s"
-    )
+    formatter = logging.Formatter(LOG_FORMATTER)
 
     if log_file:
         dir_name.mkdir(parents=True, exist_ok=True)
@@ -56,7 +54,3 @@ def get_logger(
         log.addHandler(ch)
 
     return log
-
-
-log_common = get_logger("common")
-log_append_game = get_logger("append_game", log_stdout=False)

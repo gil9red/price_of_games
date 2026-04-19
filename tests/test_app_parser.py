@@ -181,6 +181,10 @@ class TestCaseUtils(TestCase):
                 "Outlast: Whistleblower (DLC)",
                 "Outlast: Whistleblower DLC",
             ),
+            (
+                "Scratches - Director's Cut",
+                "Scratches",
+            )
         ]:
             with self.subTest(name_1=name_1, name_2=name_2):
                 self.assertTrue(

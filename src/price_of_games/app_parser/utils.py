@@ -261,6 +261,8 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
         # "the witcher®3:___ вася! wild hunt" -> "thewitcher3___васяwildhunt"
         name = re.sub(r"\W+", "", name)
 
+        name = name.removesuffix("directorscut")  # Удаление "Director's Cut"
+
         # Удаление версии
         name = re.sub(r"v\d+", "", name)
 

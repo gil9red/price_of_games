@@ -180,6 +180,21 @@ def gog_search_game_price_list(name: str) -> list[SearchResult]:
     return game_price_list
 
 
+def clear_user_postfix(name: str) -> str:
+    name = re.sub(r"\[Co-Op]", "", name, flags=re.IGNORECASE)
+
+    # Удаление скобок и их содержимого:
+    # "XXX (Full Edition)" -> "XXX"
+    # "XXX (DLC)" -> "XXX"
+    # "XXX (2015)" -> "XXX"
+    name = re.sub(r"\(.+?\)", "", name)
+
+    # Удаление версии
+    name = re.sub(r"v[\d.]+", "", name, flags=re.IGNORECASE)
+
+    return name.strip()
+
+
 def smart_comparing_names(name_1: str, name_2: str) -> bool:
     """
     Функция для сравнивания двух названий игр.
@@ -228,34 +243,26 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
         # Замена & на and
         name = name.replace("&", "and")
 
-        # Удаление The
-        name = re.sub(r"\bThe\b", "", name, flags=re.IGNORECASE)
-
-        name = re.sub(r"\[Co-Op]", "", name, flags=re.IGNORECASE)
+        name = clear_user_postfix(name)
 
         # Сторонние игры с собственным названием с DLC
         name = re.sub(r"\bDLC\b", "", name, flags=re.IGNORECASE)
+
+        # Удаление The
+        name = re.sub(r"\bThe\b", "", name, flags=re.IGNORECASE)
 
         name = re.sub(r"\bDirector'?s\s*Cut\b", "", name, flags=re.IGNORECASE)
 
         # Удаление всех символов, кроме буквенных, цифр, круглых скобок, пробелов, табуляций и переводов строк
         name = re.sub(r"[^\w\s()]+", "", name)
 
-        # Удаление скобок и их содержимого:
-        # "XXX (Full Edition)" -> "XXX"
-        # "XXX (DLC)" -> "XXX"
-        # "XXX (2015)" -> "XXX"
-        name = re.sub(r"\(.+?\)", "", name)
-
         # Удаление постфиксов "XXX Edition" и "XXX Издание"
         name = re.sub(r"\w+\s*(Edition|Издание)", "", name, flags=re.IGNORECASE)
-
-        # Удаление версии
-        name = re.sub(r"v(\d+\.\d+|\d+)", "", name, flags=re.IGNORECASE)
 
         # Замена арабских цифр на римские для более точного сравнения
         name = re.sub(r"\d+", lambda m: to_roman(int(m.group())), name)
 
+        # "Abzû" -> "Abzu"
         name = strip_accents(name)
 
         # Удаление символов кроме буквенных, цифр и _:
@@ -305,17 +312,7 @@ def get_price(game_name: str) -> int | None:
     ) -> None:
         log.info(f"Нашли игру: {game_name!r} ({result.name}) -> {result.price}")
 
-    # Префикс может мешать в поиске, т.к. в названиях магазинов его не включают
-    game_name = game_name.replace(" (DLC)", "")
-    # TODO: Дублирует часть логики process_name. Имеет смысл вынести в отдельный метод
-    # Постфикс может мешать в поиске, т.к. в названиях магазинов его не включают
-    game_name = re.sub(r"\(DLC\)", "", game_name, flags=re.IGNORECASE)
-    game_name = re.sub(r"\(MOD\)", "", game_name, flags=re.IGNORECASE)
-    game_name = re.sub(r"\(DEMO\)", "", game_name, flags=re.IGNORECASE)
-    game_name = re.sub(r"\[Co-Op]", "", game_name, flags=re.IGNORECASE)
-    game_name = re.sub(r"\bDLC\b", "", game_name, flags=re.IGNORECASE)
-    game_name = re.sub(r"v(\d+\.\d+|\d+)", "", game_name, flags=re.IGNORECASE)
-    game_name = game_name.strip()
+    game_name = clear_user_postfix(game_name)
 
     # Поищем игру и ее цену в стиме
     game_price_list = steam_search_game_price_list(game_name)

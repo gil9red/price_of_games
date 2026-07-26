@@ -147,9 +147,7 @@ def steam_search_game_price_list(name: str) -> list[SearchResult]:
             )
         )
 
-    log.debug(
-        f"game_price_list ({len(game_price_list)}): {game_price_list}"
-    )
+    log.debug(f"game_price_list ({len(game_price_list)}): {game_price_list}")
 
     time.sleep(0.5)
 
@@ -175,9 +173,7 @@ def gog_search_game_price_list(name: str) -> list[SearchResult]:
             )
         )
 
-    log.debug(
-        f"game_price_list ({len(game_price_list)}): {game_price_list}"
-    )
+    log.debug(f"game_price_list ({len(game_price_list)}): {game_price_list}")
 
     time.sleep(0.5)
 
@@ -307,9 +303,7 @@ def get_price(game_name: str) -> int | None:
         game_name: str,
         result: SearchResult,
     ) -> None:
-        log.info(
-            f"Нашли игру: {game_name!r} ({result.name}) -> {result.price}"
-        )
+        log.info(f"Нашли игру: {game_name!r} ({result.name}) -> {result.price}")
 
     # Префикс может мешать в поиске, т.к. в названиях магазинов его не включают
     game_name = game_name.replace(" (DLC)", "")

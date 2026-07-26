@@ -227,13 +227,20 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
         return result
 
     def process_name(name: str) -> str:
+        name = name.strip()
+
         # Замена & на and
         name = name.replace("&", "and")
 
-        # Приведение к одному регистру
-        name = name.lower()
+        # Удаление The
+        name = re.sub(r"\bThe\b", "", name, flags=re.IGNORECASE)
 
-        name = name.removesuffix(" dlc")
+        name = re.sub(r"\[Co-Op]", "", name, flags=re.IGNORECASE)
+
+        # Сторонние игры с собственным названием с DLC
+        name = re.sub(r"\bDLC\b", "", name, flags=re.IGNORECASE)
+
+        name = re.sub(r"\bDirector'?s\s*Cut\b", "", name, flags=re.IGNORECASE)
 
         # Удаление всех символов, кроме буквенных, цифр, круглых скобок, пробелов, табуляций и переводов строк
         name = re.sub(r"[^\w\s()]+", "", name)
@@ -244,25 +251,22 @@ def smart_comparing_names(name_1: str, name_2: str) -> bool:
         # "XXX (2015)" -> "XXX"
         name = re.sub(r"\(.+?\)", "", name)
 
-        # Удаление The
-        name = re.sub(r"\bThe\b", "", name, flags=re.IGNORECASE)
-
         # Удаление постфиксов "XXX Edition" и "XXX Издание"
         name = re.sub(r"\w+\s*(Edition|Издание)", "", name, flags=re.IGNORECASE)
 
-        # Удаление символов кроме буквенных, цифр и _:
-        # "the witcher®3:___ вася! wild hunt" -> "thewitcher3___васяwildhunt"
-        name = re.sub(r"\W+", "", name)
-
-        name = name.removesuffix("directorscut")  # Удаление "Director's Cut"
-
         # Удаление версии
-        name = re.sub(r"v\d+", "", name)
+        name = re.sub(r"v(\d+\.\d+|\d+)", "", name, flags=re.IGNORECASE)
 
         # Замена арабских цифр на римские для более точного сравнения
         name = re.sub(r"\d+", lambda m: to_roman(int(m.group())), name)
 
         name = strip_accents(name)
+
+        # Удаление символов кроме буквенных, цифр и _:
+        # "the witcher®3:___ вася! wild hunt" -> "thewitcher3___васяwildhunt"
+        name = re.sub(r"\W+", "", name)
+
+        name = name.strip()
 
         return name.lower()
 
@@ -309,6 +313,15 @@ def get_price(game_name: str) -> int | None:
 
     # Префикс может мешать в поиске, т.к. в названиях магазинов его не включают
     game_name = game_name.replace(" (DLC)", "")
+    # TODO: Дублирует часть логики process_name. Имеет смысл вынести в отдельный метод
+    # Постфикс может мешать в поиске, т.к. в названиях магазинов его не включают
+    game_name = re.sub(r"\(DLC\)", "", game_name, flags=re.IGNORECASE)
+    game_name = re.sub(r"\(MOD\)", "", game_name, flags=re.IGNORECASE)
+    game_name = re.sub(r"\(DEMO\)", "", game_name, flags=re.IGNORECASE)
+    game_name = re.sub(r"\[Co-Op]", "", game_name, flags=re.IGNORECASE)
+    game_name = re.sub(r"\bDLC\b", "", game_name, flags=re.IGNORECASE)
+    game_name = re.sub(r"v(\d+\.\d+|\d+)", "", game_name, flags=re.IGNORECASE)
+    game_name = game_name.strip()
 
     # Поищем игру и ее цену в стиме
     game_price_list = steam_search_game_price_list(game_name)

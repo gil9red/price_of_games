@@ -184,7 +184,23 @@ class TestCaseUtils(TestCase):
             (
                 "Scratches - Director's Cut",
                 "Scratches",
-            )
+            ),
+            (
+                "Resident Evil 5 [Co-Op]",
+                "Resident Evil 5",
+            ),
+            (
+                "Resident Evil 5: Lost in Nightmares (DLC) [Co-Op]",
+                "Resident Evil 5: Lost in Nightmares (DLC)",
+            ),
+            (
+                "Resident Evil 5: Lost in Nightmares(DLC)[Co-Op]",
+                "Resident Evil 5: Lost in Nightmares (DLC)",
+            ),
+            (
+                "Resident Evil 5: Lost in Nightmares(DLC)[Co-Op]",
+                "Resident Evil 5: Lost in Nightmares",
+            ),
         ]:
             with self.subTest(name_1=name_1, name_2=name_2):
                 self.assertTrue(

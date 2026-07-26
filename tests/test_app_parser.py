@@ -60,6 +60,7 @@ class TestCaseUtils(TestCase):
             ("Magic Rune Stone v0.9.20", "Magic Rune Stone"),
             ("Final Fantasy XV: Ardyn (DLC)", "Final Fantasy XV: Ardyn"),
             ("Silent Hill: Alchemilla (MOD)", "Silent Hill: Alchemilla"),
+            ("One Hand Clapping (DEMO)", "One Hand Clapping"),
             ("Final Fantasy III (Remake)", "Final Fantasy III (Pixel Remaster)"),
             ("Final Fantasy III (Remake)", "Final Fantasy III"),
             ("Final Fantasy III (Pixel Remaster)", "Final Fantasy III"),

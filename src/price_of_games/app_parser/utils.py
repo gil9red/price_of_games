@@ -98,6 +98,8 @@ def steam_search_game_price_list(name: str) -> list[SearchResult]:
 
     """
 
+    name = clear_user_postfix(name)
+
     log.debug(f'Поиск в стиме "{name}"')
 
     # Дополнения с категорией Game не ищутся, например: "Pillars of Eternity: The White March Part I", поэтому url
@@ -160,6 +162,8 @@ def gog_search_game_price_list(name: str) -> list[SearchResult]:
     кортежей из (название игры, цена).
 
     """
+
+    name = clear_user_postfix(name)
 
     log.debug(f'Поиск в gog "{name}"')
 
@@ -311,8 +315,6 @@ def get_price(game_name: str) -> int | None:
         result: SearchResult,
     ) -> None:
         log.info(f"Нашли игру: {game_name!r} ({result.name}) -> {result.price}")
-
-    game_name = clear_user_postfix(game_name)
 
     # Поищем игру и ее цену в стиме
     game_price_list = steam_search_game_price_list(game_name)

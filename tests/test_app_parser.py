@@ -15,7 +15,12 @@ from requests import Response
 
 # TODO: Тестирование других модулей из app_parser/
 
-from price_of_games.app_parser.utils import Game, smart_comparing_names, get_games
+from price_of_games.app_parser.utils import (
+    Game,
+    clear_user_postfix,
+    smart_comparing_names,
+    get_games,
+)
 from price_of_games.common import (
     FINISHED_GAME,
     FINISHED_WATCHED,
@@ -51,6 +56,45 @@ def create_patch_requests_send(file_text: str):
 
 
 class TestCaseUtils(TestCase):
+    def test_clear_user_postfix(self) -> None:
+        for name_1, name_2 in [
+            ("Half-Life 2", "Half-Life 2"),
+            ("Death Must Die v0.7", "Death Must Die"),
+            ("Magic Rune Stone v0.9.20", "Magic Rune Stone"),
+            ("Final Fantasy XV: Ardyn (DLC)", "Final Fantasy XV: Ardyn"),
+            ("Silent Hill: Alchemilla (MOD)", "Silent Hill: Alchemilla"),
+            ("One Hand Clapping (DEMO)", "One Hand Clapping"),
+            ("Final Fantasy III (Remake)", "Final Fantasy III"),
+            ("Final Fantasy III (Pixel Remaster)", "Final Fantasy III"),
+            ("Alone in the Dark (2008)", "Alone in the Dark"),
+            (
+                "Nightmares from the Deep: The Cursed Heart (Collector's Edition)",
+                "Nightmares from the Deep: The Cursed Heart",
+            ),
+            (
+                "Nightmares from the Deep: The Cursed Heart (Коллекционное издание)",
+                "Nightmares from the Deep: The Cursed Heart",
+            ),
+            (
+                "Resident Evil 5 [Co-Op]",
+                "Resident Evil 5",
+            ),
+            (
+                "Resident Evil 5: Lost in Nightmares (DLC) [Co-Op]",
+                "Resident Evil 5: Lost in Nightmares",
+            ),
+            (
+                "Resident Evil 5: Lost in Nightmares(DLC)[Co-Op]",
+                "Resident Evil 5: Lost in Nightmares",
+            ),
+            (
+                "Resident Evil 5: Lost in Nightmares(DLC)[Co-Op] v1.2.3",
+                "Resident Evil 5: Lost in Nightmares",
+            ),
+        ]:
+            with self.subTest(name_1=name_1, name_2=name_2):
+                self.assertEqual(clear_user_postfix(name_1), name_2)
+
     def test_smart_comparing_names(self) -> None:
         for name_1, name_2 in [
             ("Half-Life 2", "Half-Life 2"),

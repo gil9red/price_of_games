@@ -110,6 +110,8 @@ def steam_search_game_price_list(name: str) -> list[SearchResult]:
     while True:
         try:
             rs = session.get(url, params=dict(term=name, ndl=1))
+            rs.raise_for_status()
+
             root = BeautifulSoup(rs.content, "html.parser")
             break
 

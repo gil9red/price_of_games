@@ -27,6 +27,12 @@ class CheckInfo:
     is_consistent: bool = field(init=False)
 
     def __post_init__(self) -> None:
+        if not self.games_from_web:
+            raise Exception(f"Список игр из сайта пустой!")
+
+        if not self.games_from_db:
+            raise Exception(f"Список игр из БД пустой!")
+
         self.missing_locally = [
             game for game in self.games_from_web if game not in self.games_from_db
         ]
@@ -52,6 +58,7 @@ def integrity_check() -> CheckInfo:
         game for game in get_games() if game.kind in [FINISHED_GAME, FINISHED_WATCHED]
     ]
     games_from_web.sort(key=game_sort_key_func)
+    log.debug(f"Игр из сайта: {len(games_from_web)}")
 
     games_from_db: list[Game] = [
         Game(name=game.name, kind=game.kind, platform=game.platform.name)
@@ -60,6 +67,7 @@ def integrity_check() -> CheckInfo:
         )
     ]
     games_from_db.sort(key=game_sort_key_func)
+    log.debug(f"Игр из БД: {len(games_from_db)}")
 
     return CheckInfo(games_from_web=games_from_web, games_from_db=games_from_db)
 

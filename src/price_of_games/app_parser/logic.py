@@ -71,6 +71,7 @@ def get_price(game_name: str) -> int | None:
     game = Game.select(Game.price).where(Game.name == game_name).first()
     if game:
         return game.price
+    return None
 
 
 def has_game(game_name: str) -> bool:
@@ -256,7 +257,7 @@ def append_games_to_database(
             .exists()
         )
         if has:
-            return
+            return None
 
         log.info(f"Добавляю новую игру {name!r} ({game.platform}, {game.kind})")
 
@@ -292,7 +293,7 @@ def check_and_fill_price_of_game_from_cache(
 ) -> models.PriceUpdateResult | None:
     game_list: list[Game] = get_game_list_with_price(game_name)
     if not game_list:
-        return
+        return None
 
     log.debug(f"get_game_list_with_price(game={game_name!r}): {game_list}")
 

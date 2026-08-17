@@ -43,6 +43,7 @@ session.headers["Accept-Language"] = "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3"
 
 def get_games() -> list[Game]:
     rs = session.get("https://gist.github.com/gil9red/2f80a34fb601cd685353")
+    rs.raise_for_status()
 
     root = BeautifulSoup(rs.content, "html.parser")
     href = root.select_one(".file-actions > a")["href"]

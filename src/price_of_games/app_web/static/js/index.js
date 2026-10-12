@@ -8,6 +8,18 @@ const COLUMN_PRICE = 5;
 const DEFAULT_SORT_COL = COLUMN_APPEND_DATE;
 const DEFAULT_SORT_DIR = "desc";
 
+const DEFAULT_PAGE = 1;
+const DEFAULT_PAGE_LENGTH = 5;
+
+const SEARCH_NAME_LENGTH = "length";
+const SEARCH_NAME_PAGE = "page";
+const SEARCH_NAME_SEARCH = "search";
+const SEARCH_NAME_SORT_COL = "sort_col";
+const SEARCH_NAME_SORT_DIR = "sort_dir";
+const SEARCH_NAME_KIND = "kind";
+const SEARCH_NAME_GENRES = "genres";
+const SEARCH_NAME_PLATFORMS = "platforms";
+
 const TABLE_ID = "#games";
 
 
@@ -541,9 +553,9 @@ function createFilterOfKinds(table, tableEl) {
                     query,
                     true,  // regexp
                     false  // smart
-                ).draw();
+                ).draw("full-hold"); // full-hold сохраняет пагинацию
             } else {
-                column.search("").draw();
+                column.search("").draw("full-hold"); // full-hold сохраняет пагинацию
             }
         })
     ;
@@ -594,9 +606,9 @@ function createFilterOfPlatforms(table, tableEl) {
                     query,
                     true,  // regexp
                     false  // smart
-                ).draw();
+                ).draw("full-hold"); // full-hold сохраняет пагинацию
             } else {
-                columnPlatform.search("").draw();
+                columnPlatform.search("").draw("full-hold"); // full-hold сохраняет пагинацию
             }
         })
     ;
@@ -640,9 +652,9 @@ function createFilterOfGenres(table, tableEl) {
                     query,
                     false, // regexp
                     true   // smart
-                ).draw();
+                ).draw("full-hold"); // full-hold сохраняет пагинацию
             } else {
-                columnDetail.search("").draw();
+                columnDetail.search("").draw("full-hold"); // full-hold сохраняет пагинацию
             }
         })
     ;
@@ -700,6 +712,8 @@ function fill_table(table_selector, items) {
              "<'row'<'col-sm-12'tr>>" +
              "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
         data: items,
+        displayStart: Math.max(0, DEFAULT_PAGE - 1) * DEFAULT_PAGE_LENGTH,
+        pageLength: DEFAULT_PAGE_LENGTH,
         lengthMenu: [
             [5, 10, 25, 50, -1],
             ["5 записей", "10 записей", "25 записей", "50 записей", "Все записи"]
@@ -729,72 +743,144 @@ function fill_table(table_selector, items) {
         select: {
             toggleable: false,  // Нельзя убирать выделение повторным кликом
         },
+
         stateSave: true,
-        stateDuration: 0, // Без ограничения срока хранения
+
+        // Отключение стандартного LocalStorage, чтобы данные были только в URL
+        stateSaveCallback: function(settings, data) {},
+        stateLoadCallback: function(settings) {
+            return {
+                time: Date.now(), // Передача текущего времени, чтобы состояние считалось валидным
+                start: (DEFAULT_PAGE - 1) * DEFAULT_PAGE_LENGTH,
+                length: DEFAULT_PAGE_LENGTH,
+                search: { search: "" },
+                order: [[ DEFAULT_SORT_COL, DEFAULT_SORT_DIR ]],
+            };
+        },
+
         stateSaveParams: function (settings, data) {
             // Убрана фильтрация по столбцам, чтобы ее делать
-            // из тегов после их загрузки из data.custom_filters
+            // из тегов после их загрузки из kind, genres, platforms
             for (let column of data.columns) {
                 column.search.search = "";
             }
 
-            if (data.custom_filters == null) {
-                data.custom_filters = {
-                    kinds: [],
-                    genres: [],
-                    platforms: [],
-                };
+            const url = new URL(window.location.href);
+
+            // Количество строк на странице
+            if (data.length != DEFAULT_PAGE_LENGTH) {
+                url.searchParams.set(SEARCH_NAME_LENGTH, data.length);
+            } else {
+                url.searchParams.delete(SEARCH_NAME_LENGTH);
+            }
+
+            // Текущая страница (на основе актуального data.length)
+            const currentPage = Math.floor(data.start / data.length) + 1;
+            if (currentPage != DEFAULT_PAGE) {
+                url.searchParams.set(SEARCH_NAME_PAGE, currentPage);
+            } else {
+                url.searchParams.delete(SEARCH_NAME_PAGE);
+            }
+
+            // Поиск
+            if (data.search && data.search.search) {
+                url.searchParams.set(SEARCH_NAME_SEARCH, data.search.search);
+            } else {
+                url.searchParams.delete(SEARCH_NAME_SEARCH);
+            }
+
+            // Сортировка
+            let sort_col= null;
+            let sort_dir= null;
+            if (data.order && data.order.length > 0) {
+                sort_col = data.order[0][0];
+                sort_dir = data.order[0][1];
+            }
+            if (sort_col && sort_col != DEFAULT_SORT_COL) {
+                url.searchParams.set(SEARCH_NAME_SORT_COL, sort_col);
+            } else {
+                url.searchParams.delete(SEARCH_NAME_SORT_COL);
+            }
+            if (sort_dir && sort_dir != DEFAULT_SORT_DIR) {
+                url.searchParams.set(SEARCH_NAME_SORT_DIR, sort_dir);
+            } else {
+                url.searchParams.delete(SEARCH_NAME_SORT_DIR);
             }
 
             function get_tagify_items(tagify_el) {
-                return tagify_el.__tagify.value.map((obj) => obj.value);
+                return tagify_el?.__tagify?.value?.map((obj) => obj.value) ?? [];
             }
 
-            // Под колонку типа добавлен фильтр
-            let columnKind = this.api().column(COLUMN_KIND);
-            let inputKind = $(columnKind.footer()).find("input")[0];
-            if (inputKind != null && inputKind.__tagify != null) {
-                data.custom_filters.kinds = get_tagify_items(inputKind);
+            // Под колонку типа добавлен фильтр по типам
+            const columnKind = this.api().column(COLUMN_KIND);
+            const inputKind = $(columnKind.footer()).find("input")[0];
+            const kind = get_tagify_items(inputKind);
+            if (kind.length > 0) {
+                url.searchParams.set(SEARCH_NAME_KIND, kind);
             } else {
-                data.custom_filters.kinds = [];
+                url.searchParams.delete(SEARCH_NAME_KIND);
             }
 
             // Под колонку названия добавлен фильтр по жанрам
-            let columnName = this.api().column(COLUMN_NAME);
-            let inputName = $(columnName.footer()).find("input")[0];
-            if (inputName != null && inputName.__tagify != null) {
-                data.custom_filters.genres = get_tagify_items(inputName);
+            const columnName = this.api().column(COLUMN_NAME);
+            const inputGenre = $(columnName.footer()).find("input")[0];
+            const genres = get_tagify_items(inputGenre);
+            if (genres.length > 0) {
+                url.searchParams.set(SEARCH_NAME_GENRES, genres);
             } else {
-                data.custom_filters.genres = [];
+                url.searchParams.delete(SEARCH_NAME_GENRES);
             }
 
-            // Под колонку платформы добавлен фильтр
-            let columnPlatform = this.api().column(COLUMN_PLATFORM);
-            let inputPlatform = $(columnPlatform.footer()).find("input")[0];
-            if (inputPlatform != null && inputPlatform.__tagify != null) {
-                data.custom_filters.platforms = get_tagify_items(inputPlatform);
+            // Под колонку платформы добавлен фильтр по платформам
+            const columnPlatform = this.api().column(COLUMN_PLATFORM);
+            const inputPlatform = $(columnPlatform.footer()).find("input")[0];
+            const platforms = get_tagify_items(inputPlatform);
+            if (platforms.length > 0) {
+                url.searchParams.set(SEARCH_NAME_PLATFORMS, platforms);
             } else {
-                data.custom_filters.platforms = [];
+                url.searchParams.delete(SEARCH_NAME_PLATFORMS);
+            }
+
+            if (window.location.search !== url.search) {
+                window.history.replaceState(null, '', url.toString());
             }
         },
         stateLoadParams: function (settings, data) {
-            // NOTE: childRows и пагинация не восстанавливаются. Возможно, из-за последующих .draw()
+            const urlParams = new URLSearchParams(window.location.search);
 
-            function set_tagify_items($tagify_el, items) {
-                let value = items.length > 0
+            if (urlParams.has(SEARCH_NAME_LENGTH)) {
+                data.length = parseInt(urlParams.get(SEARCH_NAME_LENGTH));
+            }
+
+            if (urlParams.has(SEARCH_NAME_PAGE)) {
+                const page = parseInt(urlParams.get(SEARCH_NAME_PAGE)) - 1;
+                const targetPage = Math.max(0, page);
+
+                // data.start — это индекс первой строки на странице (например, для 3-й страницы при length=25 это будет 50)
+                data.start = targetPage * data.length;
+            }
+
+            if (urlParams.has(SEARCH_NAME_SEARCH)) {
+                data.search.search = urlParams.get(SEARCH_NAME_SEARCH);
+            }
+
+            const sort_col = parseInt(urlParams.get(SEARCH_NAME_SORT_COL) || DEFAULT_SORT_COL);
+            const sort_dir = urlParams.get(SEARCH_NAME_SORT_DIR) || DEFAULT_SORT_DIR;
+            data.order = [[ sort_col, sort_dir ]];
+
+            function set_tagify_items($tagify_el, value) {
+                value = value
                     ? JSON.stringify(
-                        items.map(x => ({value: x}))
+                        value.split(",").map(x => ({"value": x}))
                     )
                     : ""
                 ;
                 $tagify_el.attr("value", value);
             }
 
-            if (data != null && data.custom_filters != null) {
-                set_tagify_items($(".column-kind > input"), data.custom_filters.kinds);
-                set_tagify_items($(".column-name > input"), data.custom_filters.genres);
-                set_tagify_items($(".column-platform > input"), data.custom_filters.platforms);
-            }
+            set_tagify_items($(".column-kind > input"), urlParams.get(SEARCH_NAME_KIND));
+            set_tagify_items($(".column-name > input"), urlParams.get(SEARCH_NAME_GENRES));
+            set_tagify_items($(".column-platform > input"), urlParams.get(SEARCH_NAME_PLATFORMS));
         },
         language: {
             // NOTE: https://datatables.net/plug-ins/i18n/Russian.html
@@ -853,7 +939,7 @@ function fill_table(table_selector, items) {
             createFilterOfGenres(this, tableEl);
 
             tableEl.show();
-            this.api().columns.adjust().draw();
+            this.api().columns.adjust().draw("full-hold"); // full-hold сохраняет пагинацию
         },
     });
 

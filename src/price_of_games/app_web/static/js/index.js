@@ -5,6 +5,9 @@ const COLUMN_PLATFORM = 3;
 const COLUMN_APPEND_DATE = 4;
 const COLUMN_PRICE = 5;
 
+const DEFAULT_SORT_COL = COLUMN_APPEND_DATE;
+const DEFAULT_SORT_DIR = "desc";
+
 const TABLE_ID = "#games";
 
 
@@ -704,21 +707,21 @@ function fill_table(table_selector, items) {
         rowId: "id",  // Заполняет в строках id из поля id в data
         columns: [
             {
-                class: 'dt-control',
+                class: "dt-control",
                 orderable: false,
                 data: null,
-                defaultContent: '',
+                defaultContent: "",
                 render: for_filter_render,
             },
             { data: "kind", render: kind_render, orderable: false },
             { data: "name" },
-            { data: 'platform', render: platform_render },
-            { data: 'append_date', render: append_date_render },
-            { data: 'price', type: 'num', render: price_render },
+            { data: "platform", render: platform_render },
+            { data: "append_date", render: append_date_render },
+            { data: "price", type: "num", render: price_render },
         ],
         order: [
             // Сортировка по убыванию даты добавления
-            [ COLUMN_APPEND_DATE, "desc" ]
+            [ DEFAULT_SORT_COL, DEFAULT_SORT_DIR ],
         ],
         search: {
             smart: false,
@@ -1412,7 +1415,6 @@ $(document).ready(function() {
         return false;
     });
 
-
     // Обработка проверки цены игры
     $("#form__check_price").submit(function() {
         let thisForm = this;
@@ -1442,7 +1444,6 @@ $(document).ready(function() {
 
         return false;
     });
-
 
     // Проверка всех цен игр без цены
     $("#form__check_price_all_non_price_games").submit(function() {

@@ -86,7 +86,7 @@ def get_prepared_price(price: str) -> int:
     # "799,99" -> "799.99"
     price = price.replace(",", ".")
 
-    price = re.sub(r"[^\d.]", "", price)
+    price = re.sub(r"[^\d.]", "", price).strip(".")
     price = int(float(price))  # Всегда храним как целые числа
 
     return price

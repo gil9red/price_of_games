@@ -5,6 +5,8 @@ const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.use
 const $filterPlatform = $('#filter-by-platform-select');
 const $filterCategory = $('#filter-by-category-select');
 
+const SEARCH_NAME_SEARCH = "search";
+
 
 function search(init=false, search_from_id=null) {
     let search_text = $('#search').val().toLowerCase();
@@ -116,7 +118,7 @@ function search(init=false, search_from_id=null) {
     $stats_found_game.parent().toggleClass('hide', is_empty);
 }
 
-$(function() {
+$(document).ready(function() {
     // Использование нативного меню для выбора элементов
     if (isMobile) {
         $('.selectpicker').selectpicker('mobile');
@@ -148,15 +150,32 @@ $(function() {
         );
     });
 
+    const $searchEl = $('#search');
+
     $('#clear_search').click(function() {
-        $('#search').val('');
-        search();
+        $searchEl.val('').trigger('input');
     });
 
     let typingTimer = null; // Timer identifier
     const doneTypingInterval = 300; // Time in ms
 
-    $('#search').on('input', function() {
+    const url = new URL(window.location.href);
+    if (url.searchParams.has(SEARCH_NAME_SEARCH)) {
+        const search = url.searchParams.get(SEARCH_NAME_SEARCH);
+        $searchEl.val(search);
+    }
+
+    $searchEl.on('input', function() {
+        const text = this.value;
+        if (text) {
+            url.searchParams.set(SEARCH_NAME_SEARCH, text);
+        } else {
+            url.searchParams.delete(SEARCH_NAME_SEARCH);
+        }
+        if (window.location.search !== url.search) {
+            window.history.replaceState(null, '', url.toString());
+        }
+
         clearTimeout(typingTimer);
         typingTimer = setTimeout(search, doneTypingInterval);
     });
